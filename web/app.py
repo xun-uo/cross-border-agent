@@ -18,8 +18,16 @@ sys.path.insert(0, str(ROOT))
 from app import agent, compliance  # noqa: E402
 
 # ---------------- 配置 ----------------
-PASSWORD = os.environ.get("DEMO_PASSWORD", "xinghe2026")
-DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT", "300"))
+def _st_secret(name, default):
+    """Streamlit Cloud 的 Secrets 优先于环境变量。"""
+    try:
+        return st.secrets.get(name, default)
+    except Exception:
+        return default
+
+
+PASSWORD = str(os.environ.get("DEMO_PASSWORD") or _st_secret("DEMO_PASSWORD", "xinghe2026"))
+DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT") or _st_secret("DAILY_LIMIT", 300))
 USAGE_FILE = ROOT / "data" / "_usage.json"
 
 st.set_page_config(page_title="跨境智服 Agent", page_icon="🛒", layout="wide")
