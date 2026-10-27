@@ -26,6 +26,7 @@ def _st_secret(name, default):
         return default
 
 
+ACCOUNT = str(os.environ.get("DEMO_ACCOUNT") or _st_secret("DEMO_ACCOUNT", "judge"))
 PASSWORD = str(os.environ.get("DEMO_PASSWORD") or _st_secret("DEMO_PASSWORD", "xinghe2026"))
 DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT") or _st_secret("DAILY_LIMIT", 300))
 USAGE_FILE = ROOT / "data" / "_usage.json"
@@ -84,17 +85,19 @@ def login_gate():
         st.markdown("## 跨境智服 Agent")
         st.caption("多语言客服 · 合规自检 · 演示环境")
         with st.form("login_form"):
-            pwd = st.text_input("访问口令", type="password", placeholder="请输入演示口令")
+            acct = st.text_input("账号", placeholder="演示账号")
+            pwd = st.text_input("密码", type="password", placeholder="演示密码")
             ok = st.form_submit_button("进入", use_container_width=True)
         if ok:
-            if pwd == PASSWORD:
+            if acct.strip().lower() == ACCOUNT.lower() and pwd == PASSWORD:
                 st.session_state.authed = True
                 st.session_state.history = []
                 st.session_state.last_trace = None
                 st.rerun()
             else:
-                st.error("口令错误")
-        st.caption("演示账号由参赛团队提供，仅用于作品体验。")
+                st.error("账号或密码错误")
+        st.caption("演示账号请使用参赛团队提供的凭证。")
+        st.caption("首次打开需要唤醒实例，约 30–60 秒；唤醒后访问很快，请耐心等待。")
     return False
 
 
