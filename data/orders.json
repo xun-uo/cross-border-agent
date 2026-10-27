@@ -1,0 +1,760 @@
+[
+  {
+    "order_no": "ORDER20261021001",
+    "market": "US",
+    "language": "en",
+    "customer": "John Smith",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 2,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "在途",
+    "tracking_no": "CN20261021001",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-21",
+    "eta_from": "2026-11-01",
+    "eta_to": "2026-11-03",
+    "nodes": [
+      {
+        "time": "2026-10-21 09:12",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-21 18:40",
+        "desc": "Picked up by carrier"
+      },
+      {
+        "time": "2026-10-23 07:20",
+        "desc": "Departed origin facility"
+      },
+      {
+        "time": "2026-10-25 11:05",
+        "desc": "Arrived at US sorting center"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021002",
+    "market": "US",
+    "language": "en",
+    "customer": "Emily Johnson",
+    "items": [
+      {
+        "sku": "SKU-SUP-01",
+        "name": "Calm Sleep Supplement",
+        "qty": 1,
+        "category": "supplement"
+      }
+    ],
+    "status": "delivered",
+    "status_cn": "已签收",
+    "tracking_no": "CN20261021002",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-05",
+    "eta_from": "2026-10-18",
+    "eta_to": "2026-10-20",
+    "nodes": [
+      {
+        "time": "2026-10-05 10:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-18 09:30",
+        "desc": "Out for delivery"
+      },
+      {
+        "time": "2026-10-18 16:12",
+        "desc": "Delivered, signed by E.J."
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021003",
+    "market": "EU",
+    "language": "de",
+    "customer": "Anna Schmidt",
+    "items": [
+      {
+        "sku": "SKU-SKIN-02",
+        "name": "Gentle Cleanser",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "exception",
+    "status_cn": "物流异常（滞留）",
+    "tracking_no": "CN20261021003",
+    "carrier": "DHL eCommerce",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-10",
+    "eta_from": "2026-10-22",
+    "eta_to": "2026-10-25",
+    "nodes": [
+      {
+        "time": "2026-10-10 12:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-11 08:15",
+        "desc": "Departed China"
+      },
+      {
+        "time": "2026-10-14 22:40",
+        "desc": "Customs clearance in progress"
+      },
+      {
+        "time": "2026-10-18 03:10",
+        "desc": "Shipment delayed at customs"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021004",
+    "market": "US",
+    "language": "en",
+    "customer": "Michael Brown",
+    "items": [
+      {
+        "sku": "SKU-SKIN-03",
+        "name": "Vitamin C Serum",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "pending",
+    "status_cn": "待发货",
+    "tracking_no": "",
+    "carrier": "",
+    "warehouse": "Guangxi",
+    "shipped_at": "",
+    "eta_from": "",
+    "eta_to": "",
+    "nodes": [
+      {
+        "time": "2026-10-21 21:30",
+        "desc": "Order placed, awaiting fulfillment"
+      }
+    ],
+    "cancellable": true,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021005",
+    "market": "US",
+    "language": "en",
+    "customer": "Sarah Davis",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 1,
+        "category": "cosmetic"
+      },
+      {
+        "sku": "SKU-SUP-01",
+        "name": "Calm Sleep Supplement",
+        "qty": 2,
+        "category": "supplement"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "部分发货",
+    "tracking_no": "CN20261021005A",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-20",
+    "eta_from": "2026-10-30",
+    "eta_to": "2026-11-02",
+    "nodes": [
+      {
+        "time": "2026-10-20 08:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-20 19:20",
+        "desc": "1 of 2 items shipped (Hydra Repair Cream)"
+      },
+      {
+        "time": "2026-10-21 10:00",
+        "desc": "Remaining item pending stock"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": true,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021006",
+    "market": "EU",
+    "language": "fr",
+    "customer": "Luc Martin",
+    "items": [
+      {
+        "sku": "SKU-SKIN-02",
+        "name": "Gentle Cleanser",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "cancelled",
+    "status_cn": "已取消",
+    "tracking_no": "",
+    "carrier": "",
+    "warehouse": "Guangxi",
+    "shipped_at": "",
+    "eta_from": "",
+    "eta_to": "",
+    "nodes": [
+      {
+        "time": "2026-10-16 14:00",
+        "desc": "Order cancelled by request"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021007",
+    "market": "US",
+    "language": "en",
+    "customer": "Jessica Wilson",
+    "items": [
+      {
+        "sku": "SKU-SKIN-03",
+        "name": "Vitamin C Serum",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "return_in_progress",
+    "status_cn": "退换处理中",
+    "tracking_no": "CN20261021007",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-09-28",
+    "eta_from": "2026-10-10",
+    "eta_to": "2026-10-12",
+    "nodes": [
+      {
+        "time": "2026-10-12 15:00",
+        "desc": "Delivered"
+      },
+      {
+        "time": "2026-10-15 09:00",
+        "desc": "Return request received"
+      },
+      {
+        "time": "2026-10-17 11:30",
+        "desc": "Awaiting buyer photos"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "pending"
+  },
+  {
+    "order_no": "ORDER20261021008",
+    "market": "EU",
+    "language": "es",
+    "customer": "Carlos Ruiz",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "在途",
+    "tracking_no": "CN20261021008",
+    "carrier": "Correos",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-19",
+    "eta_from": "2026-10-29",
+    "eta_to": "2026-11-01",
+    "nodes": [
+      {
+        "time": "2026-10-19 09:00",
+        "desc": "Pedido confirmado"
+      },
+      {
+        "time": "2026-10-20 07:30",
+        "desc": "Salida del almacén"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021009",
+    "market": "LATAM",
+    "language": "es",
+    "customer": "María González",
+    "items": [
+      {
+        "sku": "SKU-SUP-01",
+        "name": "Calm Sleep Supplement",
+        "qty": 1,
+        "category": "supplement"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "在途",
+    "tracking_no": "CN20261021009",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-18",
+    "eta_from": "2026-11-05",
+    "eta_to": "2026-11-10",
+    "nodes": [
+      {
+        "time": "2026-10-18 10:00",
+        "desc": "Pedido confirmado"
+      },
+      {
+        "time": "2026-10-19 08:00",
+        "desc": "En tránsito"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021010",
+    "market": "EU",
+    "language": "de",
+    "customer": "Thomas Müller",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 3,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "delivered",
+    "status_cn": "已签收",
+    "tracking_no": "CN20261021010",
+    "carrier": "DHL eCommerce",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-02",
+    "eta_from": "2026-10-15",
+    "eta_to": "2026-10-17",
+    "nodes": [
+      {
+        "time": "2026-10-02 11:00",
+        "desc": "Bestellung bestätigt"
+      },
+      {
+        "time": "2026-10-15 14:00",
+        "desc": "Zugestellt"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021011",
+    "market": "US",
+    "language": "en",
+    "customer": "David Lee",
+    "items": [
+      {
+        "sku": "SKU-SKIN-03",
+        "name": "Vitamin C Serum",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "lost",
+    "status_cn": "物流丢失",
+    "tracking_no": "CN20261021011",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-08",
+    "eta_from": "2026-10-20",
+    "eta_to": "2026-10-23",
+    "nodes": [
+      {
+        "time": "2026-10-08 09:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-12 10:00",
+        "desc": "In transit"
+      },
+      {
+        "time": "2026-10-20 17:00",
+        "desc": "Shipment reported lost by carrier"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021012",
+    "market": "US",
+    "language": "en",
+    "customer": "Linda Martinez",
+    "items": [
+      {
+        "sku": "SKU-SUP-01",
+        "name": "Calm Sleep Supplement",
+        "qty": 1,
+        "category": "supplement"
+      }
+    ],
+    "status": "processing",
+    "status_cn": "打包中",
+    "tracking_no": "",
+    "carrier": "",
+    "warehouse": "Guangxi",
+    "shipped_at": "",
+    "eta_from": "2026-10-28",
+    "eta_to": "2026-10-30",
+    "nodes": [
+      {
+        "time": "2026-10-21 16:00",
+        "desc": "Order confirmed, packing"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021013",
+    "market": "EU",
+    "language": "fr",
+    "customer": "Sophie Bernard",
+    "items": [
+      {
+        "sku": "SKU-SKIN-02",
+        "name": "Gentle Cleanser",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "refunded",
+    "status_cn": "已退款",
+    "tracking_no": "CN20261021013",
+    "carrier": "Colissimo",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-09-20",
+    "eta_from": "2026-10-02",
+    "eta_to": "2026-10-04",
+    "nodes": [
+      {
+        "time": "2026-09-20 10:00",
+        "desc": "Commande confirmée"
+      },
+      {
+        "time": "2026-10-04 12:00",
+        "desc": "Livrée"
+      },
+      {
+        "time": "2026-10-10 09:00",
+        "desc": "Remboursement effectué"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "done"
+  },
+  {
+    "order_no": "ORDER20261021014",
+    "market": "US",
+    "language": "en",
+    "customer": "Robert Taylor",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "在途",
+    "tracking_no": "CN20261021014",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-22",
+    "eta_from": "2026-11-02",
+    "eta_to": "2026-11-05",
+    "nodes": [
+      {
+        "time": "2026-10-22 08:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-22 20:00",
+        "desc": "Departed Guangxi warehouse"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021015",
+    "market": "US",
+    "language": "en",
+    "customer": "Karen White",
+    "items": [
+      {
+        "sku": "SKU-SKIN-02",
+        "name": "Gentle Cleanser",
+        "qty": 2,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "delivered",
+    "status_cn": "已签收",
+    "tracking_no": "CN20261021015",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-01",
+    "eta_from": "2026-10-14",
+    "eta_to": "2026-10-16",
+    "nodes": [
+      {
+        "time": "2026-10-16 13:00",
+        "desc": "Delivered"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021016",
+    "market": "EU",
+    "language": "de",
+    "customer": "Julia Wagner",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 1,
+        "category": "cosmetic"
+      },
+      {
+        "sku": "SKU-SKIN-02",
+        "name": "Gentle Cleanser",
+        "qty": 1,
+        "category": "cosmetic"
+      },
+      {
+        "sku": "SKU-SKIN-03",
+        "name": "Vitamin C Serum",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "部分发货",
+    "tracking_no": "CN20261021016A",
+    "carrier": "DHL eCommerce",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-21",
+    "eta_from": "2026-11-01",
+    "eta_to": "2026-11-04",
+    "nodes": [
+      {
+        "time": "2026-10-21 09:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-21 22:00",
+        "desc": "2 of 3 items shipped"
+      },
+      {
+        "time": "2026-10-22 08:00",
+        "desc": "1 item awaiting restock"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": true,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021017",
+    "market": "EU",
+    "language": "es",
+    "customer": "Ana López",
+    "items": [
+      {
+        "sku": "SKU-SUP-01",
+        "name": "Calm Sleep Supplement",
+        "qty": 2,
+        "category": "supplement"
+      }
+    ],
+    "status": "customs_hold",
+    "status_cn": "清关扣留",
+    "tracking_no": "CN20261021017",
+    "carrier": "Correos",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-09",
+    "eta_from": "2026-10-24",
+    "eta_to": "2026-10-27",
+    "nodes": [
+      {
+        "time": "2026-10-09 10:00",
+        "desc": "Pedido confirmado"
+      },
+      {
+        "time": "2026-10-15 08:00",
+        "desc": "Retenido en aduana"
+      },
+      {
+        "time": "2026-10-18 09:00",
+        "desc": "Documentos requeridos por aduana"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021018",
+    "market": "US",
+    "language": "en",
+    "customer": "James Anderson",
+    "items": [
+      {
+        "sku": "SKU-SKIN-03",
+        "name": "Vitamin C Serum",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "in_transit",
+    "status_cn": "在途",
+    "tracking_no": "CN20261021018",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-10-20",
+    "eta_from": "2026-11-01",
+    "eta_to": "2026-11-04",
+    "nodes": [
+      {
+        "time": "2026-10-20 09:00",
+        "desc": "Order confirmed"
+      },
+      {
+        "time": "2026-10-21 10:00",
+        "desc": "In transit"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021019",
+    "market": "LATAM",
+    "language": "es",
+    "customer": "Luis Fernández",
+    "items": [
+      {
+        "sku": "SKU-SKIN-01",
+        "name": "Hydra Repair Cream",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "delivered",
+    "status_cn": "已签收",
+    "tracking_no": "CN20261021019",
+    "carrier": "YunExpress",
+    "warehouse": "Guangxi",
+    "shipped_at": "2026-09-30",
+    "eta_from": "2026-10-16",
+    "eta_to": "2026-10-18",
+    "nodes": [
+      {
+        "time": "2026-10-18 11:00",
+        "desc": "Entregado"
+      }
+    ],
+    "cancellable": false,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  },
+  {
+    "order_no": "ORDER20261021020",
+    "market": "EU",
+    "language": "fr",
+    "customer": "Nathalie Roux",
+    "items": [
+      {
+        "sku": "SKU-SKIN-02",
+        "name": "Gentle Cleanser",
+        "qty": 1,
+        "category": "cosmetic"
+      }
+    ],
+    "status": "pending",
+    "status_cn": "待发货",
+    "tracking_no": "",
+    "carrier": "",
+    "warehouse": "Guangxi",
+    "shipped_at": "",
+    "eta_from": "",
+    "eta_to": "",
+    "nodes": [
+      {
+        "time": "2026-10-22 06:30",
+        "desc": "Commande reçue"
+      }
+    ],
+    "cancellable": true,
+    "returnable": true,
+    "partial": false,
+    "refund_status": "none"
+  }
+]
