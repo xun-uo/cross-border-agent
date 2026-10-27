@@ -1,0 +1,72 @@
+[
+  {
+    "id": "KB-01",
+    "market": "*",
+    "topic": "return_policy",
+    "title": "退货政策（总则）",
+    "text": "签收后 14 天内可申请退货，需商品未使用、包装完整。破损或错发需提供外包装与商品照片，确认后可补发或退款。"
+  },
+  {
+    "id": "KB-02",
+    "market": "EU",
+    "topic": "return_policy",
+    "title": "EU 14 天冷静期",
+    "text": "欧盟消费者享有无理由退货权，期限为收到商品起 14 天。商家不得以政策条款缩短该期限。"
+  },
+  {
+    "id": "KB-03",
+    "market": "US",
+    "topic": "return_policy",
+    "title": "US 退货政策",
+    "text": "美国站执行商家统一政策：签收后 30 天内可申请退货。运费承担按责任方判定。"
+  },
+  {
+    "id": "KB-04",
+    "market": "*",
+    "topic": "shipping",
+    "title": "物流时效",
+    "text": "默认发 YunExpress / DHL eCommerce，平均 7-15 个工作日送达。清关高峰期可能延长。运费按重量与目的地结算。"
+  },
+  {
+    "id": "KB-05",
+    "market": "*",
+    "topic": "compliance",
+    "title": "绝对化用语禁用清单",
+    "text": "禁止使用 best / No.1 / 100% safe / perfect 等绝对化表述，无论是否附加说明。"
+  },
+  {
+    "id": "KB-06",
+    "market": "US",
+    "topic": "compliance",
+    "title": "膳食补充剂免责声明",
+    "text": "任何结构功能声明必须同时附上：This statement has not been evaluated by the FDA. This product is not intended to diagnose, treat, cure, or prevent any disease."
+  },
+  {
+    "id": "KB-07",
+    "market": "EU",
+    "topic": "compliance",
+    "title": "化妆品功效宣称",
+    "text": "宣称须满足透明、真实、有证据支持、诚实、公平、消费者知情六项通用标准，且需备有功效证据文件。"
+  },
+  {
+    "id": "KB-08",
+    "market": "*",
+    "topic": "damage",
+    "title": "破损处理",
+    "text": "买家提供照片后，48 小时内确认。确认属实可免费补发或全额退款。不得在确认前承诺退款。"
+  },
+  {
+    "id": "KB-09",
+    "market": "*",
+    "topic": "handover",
+    "title": "转人工规则",
+    "text": "涉及平台处罚、大额赔付、法律争议、买家明确要求人工的，一律转人工，不自行承诺。"
+  },
+  {
+    "id": "KB-10",
+    "market": "*",
+    "topic": "customs",
+    "title": "清关异常处理",
+    "text": "清关扣留需买家提供身份证明或补充申报材料，商家协助提交。不得承诺一定能放行。"
+  }
+]
