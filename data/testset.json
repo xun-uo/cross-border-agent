@@ -1,0 +1,808 @@
+{
+  "redline": [
+    {
+      "id": "R01",
+      "text": "This supplement cures diabetes and high blood pressure.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "block",
+      "why": "疾病治疗宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R02",
+      "text": "This cream treats eczema and heals open wounds.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "化妆品作药品宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R03",
+      "text": "Guaranteed 2-day delivery to any US address.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "保证送达时效",
+      "lang": "en"
+    },
+    {
+      "id": "R04",
+      "text": "100% safe for everyone, with no side effects at all.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "绝对安全宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R05",
+      "text": "No problem, we will refund you 100% right away.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "超权限退款承诺",
+      "lang": "en"
+    },
+    {
+      "id": "R06",
+      "text": "This serum is clinically proven to permanently remove wrinkles.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "不可证实功效",
+      "lang": "en"
+    },
+    {
+      "id": "R07",
+      "text": "You can return anytime forever, no questions asked.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "超出政策的退货承诺",
+      "lang": "en"
+    },
+    {
+      "id": "R08",
+      "text": "Our product is the best on the market, number one in Europe.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "绝对化用语",
+      "lang": "en"
+    },
+    {
+      "id": "R09",
+      "text": "本产品能根治湿疹，三天见效。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "疾病治疗宣称",
+      "lang": "zh"
+    },
+    {
+      "id": "R10",
+      "text": "我们的面霜是国家级产品，100% 有效。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "绝对化用语",
+      "lang": "zh"
+    },
+    {
+      "id": "R11",
+      "text": "支持随时可退，假一赔十。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "超权限售后承诺",
+      "lang": "zh"
+    },
+    {
+      "id": "R12",
+      "text": "This supplement prevents cancer and boosts immunity.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "block",
+      "why": "疾病预防宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R13",
+      "text": "Our device is medical grade for diagnosing skin conditions.",
+      "market": "EU",
+      "category": "medical_device",
+      "expect": "block",
+      "why": "未持证医疗宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R14",
+      "text": "这款是药妆，能消炎祛痘。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "化妆品宣称医疗作用",
+      "lang": "zh"
+    },
+    {
+      "id": "R15",
+      "text": "Everyone loves it, 100% positive reviews.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "虚假评价宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R16",
+      "text": "Lab tested 100% and certified by authorities.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "无证据的认证宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R17",
+      "text": "Absolutely safe, zero irritation, suitable for all skin types including broken skin.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "绝对安全宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R18",
+      "text": "增强免疫力，还能防癌。",
+      "market": "CN",
+      "category": "supplement",
+      "expect": "block",
+      "why": "食品宣称疾病预防",
+      "lang": "zh"
+    },
+    {
+      "id": "R19",
+      "text": "This cream treats skin disease and prevents infection.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "化妆品作药品宣称",
+      "lang": "en"
+    },
+    {
+      "id": "R20",
+      "text": "We guarantee delivery in 2 days worldwide.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "block",
+      "why": "保证送达时效",
+      "lang": "en"
+    }
+  ],
+  "grey": [
+    {
+      "id": "G01",
+      "text": "This serum will make fine lines visibly disappear.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "暗示效果，需证据",
+      "lang": "en"
+    },
+    {
+      "id": "G02",
+      "text": "Clinically proven to work better than premium brands.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "无法验证的比较",
+      "lang": "en"
+    },
+    {
+      "id": "G03",
+      "text": "Only 3 left at this price, price will rise tomorrow.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "虚假紧迫感",
+      "lang": "en"
+    },
+    {
+      "id": "G04",
+      "text": "This supplement supports sleep and helps you unwind.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "rewrite",
+      "why": "结构功能声明缺免责",
+      "lang": "en"
+    },
+    {
+      "id": "G05",
+      "text": "It is guaranteed to work for everyone.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "绝对化效果宣称",
+      "lang": "en"
+    },
+    {
+      "id": "G06",
+      "text": "Clinically tested and proven formula.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "无证据测试宣称",
+      "lang": "en"
+    },
+    {
+      "id": "G07",
+      "text": "当天发货，次日必达。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "未核实时效承诺",
+      "lang": "zh"
+    },
+    {
+      "id": "G08",
+      "text": "我们的产品比别家好，吊打同行。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "贬低竞品",
+      "lang": "zh"
+    },
+    {
+      "id": "G09",
+      "text": "This product promotes relaxation before bedtime.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "rewrite",
+      "why": "结构功能声明缺免责",
+      "lang": "en"
+    },
+    {
+      "id": "G10",
+      "text": "We are the best choice for sensitive skin.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "绝对化用语",
+      "lang": "en"
+    },
+    {
+      "id": "G11",
+      "text": "Our whitening formula gives permanent results.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "不可证实功效",
+      "lang": "en"
+    },
+    {
+      "id": "G12",
+      "text": "Delivery is guaranteed once your order ships.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "保证送达",
+      "lang": "en"
+    },
+    {
+      "id": "G13",
+      "text": "这款精华能即刻见效，逆转衰老。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "功效宣称无依据",
+      "lang": "zh"
+    },
+    {
+      "id": "G14",
+      "text": "It boosts immunity and relieves anxiety.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "rewrite",
+      "why": "结构功能声明缺免责",
+      "lang": "en"
+    },
+    {
+      "id": "G15",
+      "text": "Doctors recommend us as number one for joint care.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "无法验证的最高级",
+      "lang": "en"
+    },
+    {
+      "id": "G16",
+      "text": "Today only: this price will not come back.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "虚假紧迫感",
+      "lang": "en"
+    },
+    {
+      "id": "G17",
+      "text": "30-day no reason return for every order.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "需结合商家政策，本测试集无政策上下文，不判违规",
+      "lang": "en"
+    },
+    {
+      "id": "G18",
+      "text": "This kit treats skin disease in 7 days.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "疾病宣称边缘",
+      "lang": "en"
+    },
+    {
+      "id": "G19",
+      "text": "效果保障，无效退款。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "效果承诺",
+      "lang": "zh"
+    },
+    {
+      "id": "G20",
+      "text": "Our product beats every competitor on the market.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "rewrite",
+      "why": "贬低竞品/绝对化",
+      "lang": "en"
+    }
+  ],
+  "trap": [
+    {
+      "id": "T01",
+      "text": "Our product cannot treat or cure any disease.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "en"
+    },
+    {
+      "id": "T02",
+      "text": "This product is not intended to diagnose, treat, cure, or prevent any disease.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "pass",
+      "why": "法定免责声明",
+      "lang": "en"
+    },
+    {
+      "id": "T03",
+      "text": "We do not promise guaranteed delivery; delays may occur.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式+免责",
+      "lang": "en"
+    },
+    {
+      "id": "T04",
+      "text": "This product is not the best treatment for your condition; please consult a doctor.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式+转介",
+      "lang": "en"
+    },
+    {
+      "id": "T05",
+      "text": "本产品不能治疗任何疾病，如有需要请就医。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式+转介",
+      "lang": "zh"
+    },
+    {
+      "id": "T06",
+      "text": "我们不承诺100%有效，效果因人而异。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "zh"
+    },
+    {
+      "id": "T07",
+      "text": "不是药品，不用于治疗。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "明示非药品",
+      "lang": "zh"
+    },
+    {
+      "id": "T08",
+      "text": "Please consult a doctor before use if you have a medical condition.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "转介式",
+      "lang": "en"
+    },
+    {
+      "id": "T09",
+      "text": "This is a cosmetic product, not a medical device, and it does not cure skin disease.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式+品类澄清",
+      "lang": "en"
+    },
+    {
+      "id": "T10",
+      "text": "We cannot offer a refund before the photos are confirmed.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "按政策表述",
+      "lang": "en"
+    },
+    {
+      "id": "T11",
+      "text": "The delivery time is an estimate, not a guarantee.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "en"
+    },
+    {
+      "id": "T12",
+      "text": "This supplement supports relaxation. This statement has not been evaluated by the FDA. This product is not intended to diagnose, treat, cure, or prevent any disease.",
+      "market": "US",
+      "category": "supplement",
+      "expect": "pass",
+      "why": "结构功能声明+已附免责（条件型规则）",
+      "lang": "en"
+    },
+    {
+      "id": "T13",
+      "text": "If symptoms persist, please see a doctor; this product is not a treatment.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "转介+否定",
+      "lang": "en"
+    },
+    {
+      "id": "T14",
+      "text": "退货需提供照片，我们不承诺无条件退款。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "zh"
+    },
+    {
+      "id": "T15",
+      "text": "Our product contains no hormones and cannot treat skin disease.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "en"
+    },
+    {
+      "id": "T16",
+      "text": "Return is available within 30 days per our policy, but we cannot promise an exact arrival date.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "按政策+否定",
+      "lang": "en"
+    },
+    {
+      "id": "T17",
+      "text": "不是医疗级产品，不具治疗作用。",
+      "market": "CN",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "zh"
+    },
+    {
+      "id": "T18",
+      "text": "We do not claim that this product prevents infection.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "en"
+    },
+    {
+      "id": "T19",
+      "text": "No product can guarantee arrival in 2 days; please check the tracking link.",
+      "market": "US",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "en"
+    },
+    {
+      "id": "T20",
+      "text": "This serum does not whiten skin permanently.",
+      "market": "EU",
+      "category": "cosmetic",
+      "expect": "pass",
+      "why": "否定式",
+      "lang": "en"
+    }
+  ],
+  "intent": [
+    {
+      "id": "I01",
+      "text": "Where is my order?",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I02",
+      "text": "My order hasn't arrived yet.",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I03",
+      "text": "Can you check the tracking for ORDER20261021001?",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I04",
+      "text": "When will it be delivered?",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I05",
+      "text": "The tracking page hasn't updated for a week.",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I06",
+      "text": "I need to change my shipping address.",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I07",
+      "text": "Can I cancel my order?",
+      "expect": "order_change"
+    },
+    {
+      "id": "I08",
+      "text": "It says delivered but I never got it.",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I09",
+      "text": "The package arrived broken.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I10",
+      "text": "I want a refund for this item.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I11",
+      "text": "How do I return this?",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I12",
+      "text": "You sent me the wrong color.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I13",
+      "text": "One of the two items is missing from my parcel.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I14",
+      "text": "Can I exchange it for a larger size?",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I15",
+      "text": "The product stopped working after 3 days, I want a replacement.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I16",
+      "text": "Is this cream suitable for oily skin?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I17",
+      "text": "What ingredients are in this serum?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I18",
+      "text": "How do I use the cleanser?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I19",
+      "text": "Do you have this in a bigger bottle?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I20",
+      "text": "Is it safe for children?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I21",
+      "text": "What is the difference between these two creams?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I22",
+      "text": "Does it expire?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I23",
+      "text": "This is the worst service I've ever had.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I24",
+      "text": "I will report you to the platform.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I25",
+      "text": "You people are scammers.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I26",
+      "text": "I'm going to leave a bad review everywhere.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I27",
+      "text": "Third time contacting you and nobody replies.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I28",
+      "text": "I want to speak to a manager right now.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I29",
+      "text": "This product caused a rash on my face.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I30",
+      "text": "I'm allergic to this, I want compensation.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I31",
+      "text": "Can you guarantee it will arrive before my wedding?",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I32",
+      "text": "Do you ship to Germany?",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I33",
+      "text": "My refund was supposed to arrive last week.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I34",
+      "text": "The item I received is used, not new.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I35",
+      "text": "I ordered 2 but only got 1.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I36",
+      "text": "Is this product FDA approved?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I37",
+      "text": "Can this cure my insomnia?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I38",
+      "text": "I need this for a medical condition, is it suitable?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I39",
+      "text": "I will sue you if this is not resolved.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I40",
+      "text": "Your product damaged my skin, I want a lawyer.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I41",
+      "text": "I'm furious, this is unacceptable.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I42",
+      "text": "Where is my refund?",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I43",
+      "text": "Can you send the invoice?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I44",
+      "text": "My payment was charged twice.",
+      "expect": "complaint"
+    },
+    {
+      "id": "I45",
+      "text": "Do you offer wholesale pricing?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I46",
+      "text": "Please cancel and refund ORDER20261021004.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I47",
+      "text": "The box was crushed and the bottle leaked.",
+      "expect": "return_exchange"
+    },
+    {
+      "id": "I48",
+      "text": "How long does shipping take to Spain?",
+      "expect": "logistics_query"
+    },
+    {
+      "id": "I49",
+      "text": "Is there any discount code?",
+      "expect": "product_inquiry"
+    },
+    {
+      "id": "I50",
+      "text": "I've been waiting 3 weeks, this is ridiculous.",
+      "expect": "logistics_query"
+    }
+  ],
+  "meta": {
+    "counts": {
+      "redline": 20,
+      "grey": 20,
+      "trap": 20,
+      "intent": 50
+    }
+  }
+}
