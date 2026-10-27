@@ -1,0 +1,85 @@
+[
+  {
+    "sku": "SKU-SKIN-01",
+    "name": "Hydra Repair Cream",
+    "category": "cosmetic",
+    "market": [
+      "US",
+      "EU"
+    ],
+    "desc": "Moisturizing face cream with ceramides and hyaluronic acid.",
+    "claims_allowed": [
+      "moisturizes",
+      "supports the skin barrier",
+      "suitable for dry skin"
+    ],
+    "claims_forbidden": [
+      "cure eczema",
+      "treat skin disease",
+      "heal wounds"
+    ],
+    "note": "彩妆/护肤类，不得作疾病宣称。"
+  },
+  {
+    "sku": "SKU-SKIN-02",
+    "name": "Gentle Cleanser",
+    "category": "cosmetic",
+    "market": [
+      "US",
+      "EU"
+    ],
+    "desc": "Fragrance-free daily cleanser for sensitive skin.",
+    "claims_allowed": [
+      "gentle cleansing",
+      "fragrance-free",
+      "for sensitive skin"
+    ],
+    "claims_forbidden": [
+      "anti-allergy",
+      "medical grade",
+      "treat acne"
+    ],
+    "note": "敏感肌可用，但不得称抗敏/医用级。"
+  },
+  {
+    "sku": "SKU-SKIN-03",
+    "name": "Vitamin C Serum",
+    "category": "cosmetic",
+    "market": [
+      "US",
+      "EU"
+    ],
+    "desc": "Brightening serum with 10% vitamin C.",
+    "claims_allowed": [
+      "brightens the look of skin",
+      "antioxidant support"
+    ],
+    "claims_forbidden": [
+      "whitening",
+      "permanent removal of spots",
+      "reverse aging"
+    ],
+    "note": "美国可做结构功能声明；欧盟须有功效证据。"
+  },
+  {
+    "sku": "SKU-SUP-01",
+    "name": "Calm Sleep Supplement",
+    "category": "supplement",
+    "market": [
+      "US",
+      "EU",
+      "LATAM"
+    ],
+    "desc": "Melatonin-free sleep support supplement with L-theanine.",
+    "claims_allowed": [
+      "supports relaxation",
+      "helps you unwind"
+    ],
+    "claims_forbidden": [
+      "cure insomnia",
+      "treat anxiety",
+      "cure any disease"
+    ],
+    "note": "美国须附 DSHEA 免责声明：not intended to diagnose, treat, cure, or prevent any disease."
+  }
+]
