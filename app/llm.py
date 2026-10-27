@@ -20,8 +20,11 @@ def usage_snapshot():
 
 
 def chat(messages, *, json_mode=False, temperature=0.0, max_tokens=800,
-         timeout=60, retries=2):
-    """调用 DeepSeek，返回文本。json_mode 时强制 JSON 对象输出。"""
+         timeout=45, retries=1):
+    """调用 DeepSeek，返回文本。json_mode 时强制 JSON 对象输出。
+
+    retries 默认 1：重试是保底手段，默认值过大只会让单次咨询多花调用费。
+    """
     key = load_api_key()
     body = {
         "model": MODEL,
@@ -75,9 +78,19 @@ def warmup():
         return False
 
 
+def _strip_fence(text):
+    """模型有时把 JSON 包在 ```json 代码块里，剥掉再解析，省掉一次重试调用。"""
+    t = (text or "").strip()
+    if t.startswith("```"):
+        t = t.split("\n", 1)[1] if "\n" in t else t
+        if t.endswith("```"):
+            t = t[:-3]
+    return t.strip()
+
+
 def chat_json(messages, **kw):
     """要求返回 JSON，解析失败时重试一次。"""
-    text = chat(messages, json_mode=True, **kw)
+    text = _strip_fence(chat(messages, json_mode=True, **kw))
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -85,5 +98,5 @@ def chat_json(messages, **kw):
             {"role": "assistant", "content": text},
             {"role": "user", "content": "上一条不是合法 JSON。请只输出 JSON 对象，不要任何解释。"},
         ]
-        text2 = chat(retry, json_mode=True, **kw)
+        text2 = _strip_fence(chat(retry, json_mode=True, **kw))
         return json.loads(text2)
