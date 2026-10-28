@@ -23,31 +23,45 @@
     "nodes": [
       {
         "time": "2026-10-21 09:12",
-        "desc": "Order confirmed"
+        "desc": "Order confirmed",
+        "lat": 22.82,
+        "lng": 108.32
       },
       {
         "time": "2026-10-21 18:40",
-        "desc": "Picked up by carrier (Guangxi warehouse)"
+        "desc": "Picked up by carrier (Guangxi warehouse)",
+        "lat": 22.82,
+        "lng": 108.32
       },
       {
         "time": "2026-10-22 08:30",
-        "desc": "Arrived at Shenzhen transit hub"
+        "desc": "Arrived at Shenzhen transit hub",
+        "lat": 22.54,
+        "lng": 114.06
       },
       {
         "time": "2026-10-23 07:20",
-        "desc": "Departed origin facility"
+        "desc": "Departed origin facility",
+        "lat": 22.54,
+        "lng": 114.06
       },
       {
         "time": "2026-10-23 22:10",
-        "desc": "Loaded on cross-border flight CAN → LAX"
+        "desc": "Loaded on cross-border flight CAN → LAX",
+        "lat": 23.13,
+        "lng": 113.26
       },
       {
         "time": "2026-10-25 09:30",
-        "desc": "Customs clearance in progress (Los Angeles)"
+        "desc": "Customs clearance in progress (Los Angeles)",
+        "lat": 33.94,
+        "lng": -118.41
       },
       {
         "time": "2026-10-25 11:05",
-        "desc": "Arrived at US sorting center"
+        "desc": "Arrived at US sorting center",
+        "lat": 33.94,
+        "lng": -118.41
       }
     ],
     "cancellable": false,
@@ -119,27 +133,39 @@
     "nodes": [
       {
         "time": "2026-10-10 12:00",
-        "desc": "Order confirmed"
+        "desc": "Order confirmed",
+        "lat": 22.82,
+        "lng": 108.32
       },
       {
         "time": "2026-10-10 20:30",
-        "desc": "Picked up by carrier (Guangxi warehouse)"
+        "desc": "Picked up by carrier (Guangxi warehouse)",
+        "lat": 22.82,
+        "lng": 108.32
       },
       {
         "time": "2026-10-11 08:15",
-        "desc": "Departed China (Shenzhen → Frankfurt)"
+        "desc": "Departed China (Shenzhen → Frankfurt)",
+        "lat": 22.54,
+        "lng": 114.06
       },
       {
         "time": "2026-10-13 16:20",
-        "desc": "Arrived at Frankfurt customs"
+        "desc": "Arrived at Frankfurt customs",
+        "lat": 50.11,
+        "lng": 8.68
       },
       {
         "time": "2026-10-14 22:40",
-        "desc": "Customs clearance in progress"
+        "desc": "Customs clearance in progress",
+        "lat": 50.11,
+        "lng": 8.68
       },
       {
         "time": "2026-10-18 03:10",
-        "desc": "Shipment delayed at customs"
+        "desc": "Shipment delayed at customs",
+        "lat": 50.11,
+        "lng": 8.68
       }
     ],
     "cancellable": false,
