@@ -102,17 +102,17 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-28 12:35"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-28 12:45"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _timeline_md(nodes):
-    """物流轨迹：用纯 markdown 列表输出，不依赖 HTML，任何主题下都可见。"""
+    """物流轨迹：markdown 列表，每项一行。"""
     lines = []
     last = len(nodes) - 1
     for i, n in enumerate(nodes):
         dot = "🟢" if i == last else "🔵"
         bold = "**" if i == last else ""
-        lines.append(f"{dot} `{n['time']}`　{bold}{n['desc']}{bold}")
+        lines.append(f"- {dot} `{n['time']}`　{bold}{n['desc']}{bold}")
     return "\n".join(lines)
 
 
