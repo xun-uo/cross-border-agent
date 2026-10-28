@@ -103,7 +103,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-28 13:20"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-28 #7"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -239,10 +239,11 @@ def _map_deck(nodes, order_no=""):
     )
     lats = [p[1] for p in path]
     lngs = [p[0] for p in path]
+    # 中心放在太平洋、zoom 拉高，避免低缩放下的世界平铺与高纬拉伸
     view = pdk.ViewState(
-        latitude=(max(lats) + min(lats)) / 2,
-        longitude=(max(lngs) + min(lngs)) / 2,
-        zoom=1.1,
+        latitude=42,
+        longitude=-172,
+        zoom=3.0,
         pitch=0,
     )
     return pdk.Deck(
