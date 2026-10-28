@@ -103,7 +103,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-28 13:10"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-28 13:20"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -155,6 +155,51 @@ def _route_image(nodes, order_no="", width=1000, height=150):
     return img
 
 
+def _haversine_km(a, b):
+    import math
+    lat1, lon1, lat2, lon2 = map(math.radians, (a["lat"], a["lng"], b["lat"], b["lng"]))
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    h = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(h))
+
+
+def _great_circle(lat1, lon1, lat2, lon2, n=64):
+    """大圆航线插值：跨洋段按真实航班走向铺点，而不是投影直线。"""
+    import math
+    p1, l1, p2, l2 = map(math.radians, (lat1, lon1, lat2, lon2))
+    d = 2 * math.asin(math.sqrt(
+        math.sin((p2 - p1) / 2) ** 2 +
+        math.cos(p1) * math.cos(p2) * math.sin((l2 - l1) / 2) ** 2))
+    if d < 1e-9:
+        return [[lon1, lat1], [lon2, lat2]]
+    out = []
+    for i in range(n + 1):
+        f = i / n
+        A = math.sin((1 - f) * d) / math.sin(d)
+        B = math.sin(f * d) / math.sin(d)
+        x = A * math.cos(p1) * math.cos(l1) + B * math.cos(p2) * math.cos(l2)
+        y = A * math.cos(p1) * math.sin(l1) + B * math.cos(p2) * math.sin(l2)
+        z = A * math.sin(p1) + B * math.sin(p2)
+        out.append([math.degrees(math.atan2(y, x)),
+                    math.degrees(math.atan2(z, math.sqrt(x * x + y * y)))])
+    return out
+
+
+def _build_track(pts):
+    """相邻节点连线；超过 2000km 的段改用大圆航线。"""
+    path = []
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        if _haversine_km(a, b) > 2000:
+            seg = _great_circle(a["lat"], a["lng"], b["lat"], b["lng"])
+            path.extend(seg if not path else seg[1:])
+        else:
+            if not path:
+                path.append([float(a["lng"]), float(a["lat"])])
+            path.append([float(b["lng"]), float(b["lat"])])
+    return path
+
+
 def _map_deck(nodes, order_no=""):
     """真地图：有经纬度就用 pydeck 画轨迹，否则返回 None 交给路线图兜底。"""
     pts = [n for n in nodes if "lat" in n and "lng" in n]
@@ -165,7 +210,7 @@ def _map_deck(nodes, order_no=""):
     except Exception:
         return None
 
-    path = [[float(n["lng"]), float(n["lat"])] for n in pts]
+    path = _build_track(pts)
     last = pts[-1]
 
     path_layer = pdk.Layer(
@@ -192,10 +237,12 @@ def _map_deck(nodes, order_no=""):
         get_radius=55000,
         pickable=True,
     )
+    lats = [p[1] for p in path]
+    lngs = [p[0] for p in path]
     view = pdk.ViewState(
-        latitude=float(last["lat"]),
-        longitude=float(last["lng"]),
-        zoom=1.3,
+        latitude=(max(lats) + min(lats)) / 2,
+        longitude=(max(lngs) + min(lngs)) / 2,
+        zoom=1.1,
         pitch=0,
     )
     return pdk.Deck(
