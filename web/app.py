@@ -102,6 +102,24 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
+def _timeline_html(nodes):
+    """把物流节点画成时间线。最后一个节点高亮。"""
+    rows = []
+    for i, n in enumerate(nodes):
+        last = i == len(nodes) - 1
+        color = "#2e7d32" if last else "#1f6feb"
+        weight = "600" if last else "400"
+        rows.append(
+            "<div style='display:flex;align-items:flex-start;gap:8px'>"
+            f"<div style='width:9px;height:9px;border-radius:50%;background:{color};"
+            "margin-top:6px;flex:0 0 9px'></div>"
+            "<div style='flex:1;border-bottom:1px dashed #e3e3e3;padding:1px 0 6px;margin-bottom:2px'>"
+            f"<span style='color:#777;font-size:11px'>{n['time']}</span><br>"
+            f"<span style='font-size:13px;font-weight:{weight}'>{n['desc']}</span></div></div>"
+        )
+    return "<div style='padding:2px 0'>" + "".join(rows) + "</div>"
+
+
 def render_trace(trace):
     if not trace:
         st.caption("提交一条消息后，这里会显示每一层的输入输出。")
@@ -144,6 +162,9 @@ def render_trace(trace):
                         f"- 运单：`{order.get('tracking_no') or '—'}`\n"
                         f"- 预计到达：`{order.get('eta_from')} ~ {order.get('eta_to')}`"
                     )
+                    if order.get("nodes"):
+                        st.markdown("**物流轨迹**")
+                        st.markdown(_timeline_html(order["nodes"]), unsafe_allow_html=True)
                 else:
                     st.markdown(f"- {step.get('note', '无订单')}")
                 if step.get("kb"):
