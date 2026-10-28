@@ -103,7 +103,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-28 13:05"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-28 13:10"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -153,6 +153,57 @@ def _route_image(nodes, order_no="", width=1000, height=150):
     d.text((x0, y + 40), "ORIGIN", font=f_big, fill=dim, anchor="ma")
     d.text((x1, y + 40), "NOW", font=f_big, fill=dot_now, anchor="ma")
     return img
+
+
+def _map_deck(nodes, order_no=""):
+    """真地图：有经纬度就用 pydeck 画轨迹，否则返回 None 交给路线图兜底。"""
+    pts = [n for n in nodes if "lat" in n and "lng" in n]
+    if len(pts) < 2:
+        return None
+    try:
+        import pydeck as pdk
+    except Exception:
+        return None
+
+    path = [[float(n["lng"]), float(n["lat"])] for n in pts]
+    last = pts[-1]
+
+    path_layer = pdk.Layer(
+        "PathLayer",
+        data=[{"path": path}],
+        get_path="path",
+        get_color=[66, 133, 244],
+        width_min_pixels=3,
+        get_width=5,
+    )
+    stop_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=[{"lng": float(n["lng"]), "lat": float(n["lat"]), "desc": n["desc"]} for n in pts[:-1]],
+        get_position=["lng", "lat"],
+        get_color=[66, 133, 244],
+        get_radius=35000,
+        pickable=True,
+    )
+    now_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=[{"lng": float(last["lng"]), "lat": float(last["lat"]), "desc": last["desc"]}],
+        get_position=["lng", "lat"],
+        get_color=[56, 200, 120],
+        get_radius=55000,
+        pickable=True,
+    )
+    view = pdk.ViewState(
+        latitude=float(last["lat"]),
+        longitude=float(last["lng"]),
+        zoom=1.3,
+        pitch=0,
+    )
+    return pdk.Deck(
+        layers=[path_layer, stop_layer, now_layer],
+        initial_view_state=view,
+        map_style="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        tooltip={"text": "{desc}"},
+    )
 
 
 def _timeline_md(nodes):
@@ -209,12 +260,20 @@ def render_trace(trace):
                         f"- 预计到达：`{order.get('eta_from')} ~ {order.get('eta_to')}`"
                     )
                     if order.get("nodes"):
-                        st.markdown("**物流路线**")
-                        try:
-                            st.image(_route_image(order["nodes"], order["order_no"]),
-                                     use_container_width=True)
-                        except Exception:
-                            pass
+                        deck = _map_deck(order["nodes"], order.get("order_no", ""))
+                        if deck is not None:
+                            st.markdown("**物流地图**")
+                            try:
+                                st.pydeck_chart(deck, use_container_width=True)
+                            except Exception:
+                                deck = None
+                        if deck is None:
+                            st.markdown("**物流路线**")
+                            try:
+                                st.image(_route_image(order["nodes"], order["order_no"]),
+                                         use_container_width=True)
+                            except Exception:
+                                pass
                         with st.expander("轨迹明细"):
                             st.markdown(_timeline_md(order["nodes"]))
                 else:
