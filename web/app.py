@@ -102,22 +102,18 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-def _timeline_html(nodes):
-    """把物流节点画成时间线。最后一个节点高亮。"""
-    rows = []
+BUILD = "2026-10-28 12:35"  # 改代码时顺手改这里，用来确认线上是否已生效
+
+
+def _timeline_md(nodes):
+    """物流轨迹：用纯 markdown 列表输出，不依赖 HTML，任何主题下都可见。"""
+    lines = []
+    last = len(nodes) - 1
     for i, n in enumerate(nodes):
-        last = i == len(nodes) - 1
-        color = "#2e7d32" if last else "#1f6feb"
-        weight = "600" if last else "400"
-        rows.append(
-            "<div style='display:flex;align-items:flex-start;gap:8px'>"
-            f"<div style='width:9px;height:9px;border-radius:50%;background:{color};"
-            "margin-top:6px;flex:0 0 9px'></div>"
-            "<div style='flex:1;border-bottom:1px dashed #e3e3e3;padding:1px 0 6px;margin-bottom:2px'>"
-            f"<span style='color:#777;font-size:11px'>{n['time']}</span><br>"
-            f"<span style='font-size:13px;font-weight:{weight}'>{n['desc']}</span></div></div>"
-        )
-    return "<div style='padding:2px 0'>" + "".join(rows) + "</div>"
+        dot = "🟢" if i == last else "🔵"
+        bold = "**" if i == last else ""
+        lines.append(f"{dot} `{n['time']}`　{bold}{n['desc']}{bold}")
+    return "\n".join(lines)
 
 
 def render_trace(trace):
@@ -164,7 +160,7 @@ def render_trace(trace):
                     )
                     if order.get("nodes"):
                         st.markdown("**物流轨迹**")
-                        st.markdown(_timeline_html(order["nodes"]), unsafe_allow_html=True)
+                        st.markdown(_timeline_md(order["nodes"]))
                 else:
                     st.markdown(f"- {step.get('note', '无订单')}")
                 if step.get("kb"):
@@ -222,6 +218,7 @@ def main():
             st.rerun()
 
         st.caption("演示环境，数据为 Mock。\n合规判定不调用模型，秒级返回。")
+        st.caption(f"build {BUILD}")
 
     st.markdown("### 跨境智服 Agent")
     st.caption("用买家语言回复，并在发出前完成合规判定。左侧提问，右侧看每一层的处理过程。")
