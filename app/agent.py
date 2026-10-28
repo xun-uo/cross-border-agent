@@ -149,8 +149,19 @@ def generate_draft(text, intent, order, kb_items, market, category, language):
 
 # ---------------- 主流程 ----------------
 
+def _usage_delta(before):
+    """只统计本轮调用，而不是进程启动以来的累计值。"""
+    now = llm.usage_snapshot()
+    return {
+        "calls": now["calls"] - before["calls"],
+        "prompt_tokens": now["prompt_tokens"] - before["prompt_tokens"],
+        "completion_tokens": now["completion_tokens"] - before["completion_tokens"],
+    }
+
+
 def process(text, market="US", category="*", history=None, force_category_from_order=True):
     t0 = time.perf_counter()
+    usage_before = dict(llm.usage_snapshot())
     trace = {"input": text, "steps": [], "usage": {}, "final": {}}
 
     def step(name, payload, started):
@@ -189,7 +200,7 @@ def process(text, market="US", category="*", history=None, force_category_from_o
             "category": category,
         }
         trace["ms_total"] = round((time.perf_counter() - t0) * 1000)
-        trace["usage"] = llm.usage_snapshot()
+        trace["usage"] = _usage_delta(usage_before)
         return trace
 
     if order:
@@ -242,7 +253,7 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         "language": language,
     }
     trace["ms_total"] = round((time.perf_counter() - t0) * 1000)
-    trace["usage"] = llm.usage_snapshot()
+    trace["usage"] = _usage_delta(usage_before)
     return trace
 
 
