@@ -103,7 +103,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-28 #7"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-28 #8"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -213,20 +213,35 @@ def _map_deck(nodes, order_no=""):
     path = _build_track(pts)
     last = pts[-1]
 
+    # 跨洋段用 ArcLayer：弧线在屏幕上会明显拱起，视觉上就是“飞过去”的轨迹
+    arc_layer = pdk.Layer(
+        "ArcLayer",
+        data=[{
+            "from": [float(pts[0]["lng"]), float(pts[0]["lat"])],
+            "to": [float(last["lng"]), float(last["lat"])],
+        }],
+        get_source_position="from",
+        get_target_position="to",
+        get_source_color=[66, 133, 244],
+        get_target_color=[56, 200, 120],
+        get_width=3,
+        get_height=1.2,
+        great_circle=True,
+    )
     path_layer = pdk.Layer(
         "PathLayer",
         data=[{"path": path}],
         get_path="path",
-        get_color=[66, 133, 244],
-        width_min_pixels=3,
-        get_width=5,
+        get_color=[120, 170, 230, 120],
+        width_min_pixels=2,
+        get_width=3,
     )
     stop_layer = pdk.Layer(
         "ScatterplotLayer",
         data=[{"lng": float(n["lng"]), "lat": float(n["lat"]), "desc": n["desc"]} for n in pts[:-1]],
         get_position=["lng", "lat"],
         get_color=[66, 133, 244],
-        get_radius=35000,
+        get_radius=45000,
         pickable=True,
     )
     now_layer = pdk.Layer(
@@ -234,16 +249,14 @@ def _map_deck(nodes, order_no=""):
         data=[{"lng": float(last["lng"]), "lat": float(last["lat"]), "desc": last["desc"]}],
         get_position=["lng", "lat"],
         get_color=[56, 200, 120],
-        get_radius=55000,
+        get_radius=70000,
         pickable=True,
     )
-    lats = [p[1] for p in path]
-    lngs = [p[0] for p in path]
-    # 中心放在太平洋、zoom 拉高，避免低缩放下的世界平铺与高纬拉伸
+    # 中心放在太平洋、zoom 2.2：整条弧线能完整入镜，又不会平铺出多份世界
     view = pdk.ViewState(
-        latitude=42,
-        longitude=-172,
-        zoom=3.0,
+        latitude=46,
+        longitude=-170,
+        zoom=2.2,
         pitch=0,
     )
     return pdk.Deck(
