@@ -11,6 +11,7 @@ from datetime import date
 from pathlib import Path
 
 import streamlit as st
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -102,7 +103,56 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-28 12:45"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-28 13:05"  # 改代码时顺手改这里，用来确认线上是否已生效
+
+
+def _load_font(size):
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+              r"C:\Windows\Fonts\arial.ttf"):
+        try:
+            return ImageFont.truetype(p, size)
+        except Exception:
+            continue
+    try:
+        return ImageFont.load_default(size=size)
+    except Exception:
+        return ImageFont.load_default()
+
+
+def _route_image(nodes, order_no="", width=1000, height=150):
+    """物流路线示意图：本地渲染，不依赖地图底图与网络。"""
+    bg, line_c = (24, 34, 50, 255), (70, 110, 160, 255)
+    dot, dot_now = (66, 133, 244, 255), (56, 200, 120, 255)
+    dim, txt = (140, 155, 175, 255), (225, 232, 245, 255)
+
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, width - 1, height - 1], radius=14, fill=bg)
+
+    f_title, f_small, f_big = _load_font(15), _load_font(12), _load_font(14)
+    d.text((24, 14), f"Route · {order_no}" if order_no else "Route", font=f_title, fill=txt)
+
+    n = len(nodes)
+    x0, x1 = 74, width - 74
+    y = 86
+    step = (x1 - x0) / (n - 1) if n > 1 else 0
+    d.line([(x0, y), (x1, y)], fill=line_c, width=3)
+
+    for i, node in enumerate(nodes):
+        x = x0 + step * i
+        last = i == n - 1
+        if last:
+            d.ellipse([x - 17, y - 17, x + 17, y + 17], outline=(56, 200, 120, 110), width=2)
+            d.ellipse([x - 9, y - 9, x + 9, y + 9], fill=dot_now)
+        else:
+            d.ellipse([x - 7, y - 7, x + 7, y + 7], fill=dot)
+        d.text((x, y - 30), str(i + 1), font=f_small, fill=dim, anchor="ma")
+        t = node["time"][5:16] if len(node["time"]) >= 16 else node["time"]
+        d.text((x, y + 18), t, font=f_small, fill=dot_now if last else dim, anchor="ma")
+
+    d.text((x0, y + 40), "ORIGIN", font=f_big, fill=dim, anchor="ma")
+    d.text((x1, y + 40), "NOW", font=f_big, fill=dot_now, anchor="ma")
+    return img
 
 
 def _timeline_md(nodes):
@@ -159,8 +209,14 @@ def render_trace(trace):
                         f"- 预计到达：`{order.get('eta_from')} ~ {order.get('eta_to')}`"
                     )
                     if order.get("nodes"):
-                        st.markdown("**物流轨迹**")
-                        st.markdown(_timeline_md(order["nodes"]))
+                        st.markdown("**物流路线**")
+                        try:
+                            st.image(_route_image(order["nodes"], order["order_no"]),
+                                     use_container_width=True)
+                        except Exception:
+                            pass
+                        with st.expander("轨迹明细"):
+                            st.markdown(_timeline_md(order["nodes"]))
                 else:
                     st.markdown(f"- {step.get('note', '无订单')}")
                 if step.get("kb"):
