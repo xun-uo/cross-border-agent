@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """DeepSeek 客户端（仅依赖标准库）。"""
 import json
+import queue
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -88,9 +90,45 @@ def _strip_fence(text):
     return t.strip()
 
 
-def chat_json(messages, **kw):
-    """要求返回 JSON，解析失败时重试一次。"""
-    text = _strip_fence(chat(messages, json_mode=True, **kw))
+def chat_hedged(messages, *, hedge_after=0.9, timeout=45, **kw):
+    """对冲请求：先发一个；超过 hedge_after 秒没回来，再发一个同样的，取先到的。
+
+    只治「单次偶发卡 4–5 秒」这种尾延迟，正常情况下只花一次调用。
+    """
+    q = queue.Queue()
+
+    def worker():
+        try:
+            q.put(("ok", chat(messages, timeout=timeout, **kw)))
+        except Exception as e:  # noqa: BLE001
+            q.put(("err", e))
+
+    threading.Thread(target=worker, daemon=True).start()
+    try:
+        status, payload = q.get(timeout=hedge_after)
+    except queue.Empty:
+        threading.Thread(target=worker, daemon=True).start()
+        try:
+            status, payload = q.get(timeout=timeout)
+        except queue.Empty:
+            raise LLMError("hedged request timed out")
+
+    if status == "ok":
+        return payload
+    # 先到的是错误：再给第二个一次机会
+    try:
+        status2, payload2 = q.get(timeout=timeout * 0.6)
+        if status2 == "ok":
+            return payload2
+        raise payload2
+    except queue.Empty:
+        raise payload
+
+
+def chat_json(messages, hedge=False, **kw):
+    """要求返回 JSON，解析失败时重试一次。hedge=True 时走对冲请求。"""
+    fn = chat_hedged if hedge else chat
+    text = _strip_fence(fn(messages, json_mode=True, **kw))
     try:
         return json.loads(text)
     except json.JSONDecodeError:
@@ -98,5 +136,5 @@ def chat_json(messages, **kw):
             {"role": "assistant", "content": text},
             {"role": "user", "content": "上一条不是合法 JSON。请只输出 JSON 对象，不要任何解释。"},
         ]
-        text2 = _strip_fence(chat(retry, json_mode=True, **kw))
+        text2 = _strip_fence(fn(retry, json_mode=True, **kw))
         return json.loads(text2)
