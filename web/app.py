@@ -46,6 +46,7 @@ STEP_ICON = {
     "tool": "②",
     "draft": "③",
     "compliance": "④",
+    "semantic": "④b",
     "action": "⑤",
 }
 STEP_TITLE = {
@@ -53,6 +54,7 @@ STEP_TITLE = {
     "tool": "工具与检索",
     "draft": "生成草稿",
     "compliance": "合规判定",
+    "semantic": "语义复核",
     "action": "处置动作",
 }
 
@@ -350,6 +352,11 @@ def render_trace(trace):
                 for c in out.get("claims", []):
                     flag = "豁免" if c["exempt"] else ("命中" if c["hits"] else "无命中")
                     st.markdown(f"  - [{flag}] {c['text'][:60]}")
+            elif name == "semantic":
+                out = step.get("output", {}) or {}
+                st.markdown(
+                    f"- 结论：`{out.get('verdict')}`　级别：`{out.get('level')}`\n"
+                    f"- 原因：{out.get('reason')}")
             elif name == "action":
                 st.text(step.get("text", ""))
 
