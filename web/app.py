@@ -83,7 +83,7 @@ def bump_usage():
 TEXTS = {
     "zh": {
         "badge": "AI AGENT · 2026",
-        "title": "跨境物流智能客服",
+        "title": "跨境智能客服",
         "sub": "跨境电商客服系统 · 多语言 · 合规自检",
         "account": "账号",
         "password": "密码",
@@ -129,7 +129,7 @@ TEXTS = {
     },
     "en": {
         "badge": "AI AGENT · 2026",
-        "title": "Cross-border Logistics Agent",
+        "title": "Cross-border Smart Support",
         "sub": "Cross-border support platform · Multilingual · Compliance built in",
         "account": "Account",
         "password": "Password",
@@ -175,7 +175,7 @@ TEXTS = {
     },
     "es": {
         "badge": "AI AGENT · 2026",
-        "title": "Agente Logístico Transfronterizo",
+        "title": "Atención Inteligente Transfronteriza",
         "sub": "Plataforma de atención transfronteriza · Multilingüe · Cumplimiento",
         "account": "Cuenta",
         "password": "Contraseña",
@@ -287,7 +287,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #48 · rename"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #50 · markets"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1014,7 +1014,7 @@ def render_debug_panel():
     used = load_usage()
     st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
 
-    labels = ["自动（按订单/原文）", "US", "EU", "CN"]
+    labels = ["自动（按订单/原文）", "US", "EU", "CN", "PH", "KR", "RU", "MN"]
     cur = st.session_state.get("dbg_market", labels[0])
     market_label = st.selectbox("市场", labels, index=labels.index(cur) if cur in labels else 0)
     st.session_state["dbg_market"] = market_label
