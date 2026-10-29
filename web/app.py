@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #21 · clean"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #22 · zh-ui"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -418,7 +418,7 @@ def render_brand():
 
 
 def render_quick_pills():
-    quick = ["Where is my order?", "Return policy", "Product info"]
+    quick = ["我的订单在哪？", "退货政策", "产品咨询"]
     cols = st.columns(len(quick))
     for c, q in zip(cols, quick):
         if c.button(q, use_container_width=True, key=f"quick_{q}"):
@@ -532,7 +532,7 @@ def main():
     with chat_col:
         if not st.session_state.history:
             with st.chat_message("assistant"):
-                st.markdown("Hi! 我是这家店的客服助手。物流、退换货、产品问题都可以问我。")
+                st.markdown("你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。")
             render_quick_pills()
         for msg in st.session_state.history:
             with st.chat_message(msg["role"]):
@@ -556,7 +556,7 @@ def main():
         st.caption("今日体验额度已用完，请明天再试。")
         return
 
-    placeholder = "输入你的问题，例如 Where is my order?"
+    placeholder = "输入你的问题，例如：我的订单到哪了？"
     text = st.chat_input(placeholder)
     if text:
         _run_turn(text)
