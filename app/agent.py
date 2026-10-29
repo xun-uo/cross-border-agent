@@ -5,7 +5,7 @@ import re
 import time
 
 from .config import DATA_DIR
-from . import compliance, llm
+from . import compliance, llm, semantic
 
 _ORDERS = None
 _PRODUCTS = None
@@ -220,6 +220,16 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     s = time.perf_counter()
     evaluation = compliance.evaluate(draft, market, category)
     step("compliance", {"output": evaluation}, s)
+
+    # 4.5) 语义兜底：规则放行、但草稿里带可疑表述时才复核
+    s = time.perf_counter()
+    if evaluation["verdict"] == "pass" and semantic.should_check(draft, intent):
+        sem = semantic.check(draft, market, category)
+        if sem is not None:
+            step("semantic", {"output": sem,
+                              "note": "命中" if sem["verdict"] != "pass" else "放行"}, s)
+            if sem["verdict"] != "pass":
+                evaluation = sem
 
     # 5) 动作
     s = time.perf_counter()
