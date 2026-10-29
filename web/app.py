@@ -287,6 +287,361 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
+BUILD = "2026-10-30 #45 · brand-right"  # 改代码时顺手改这里，用来确认线上是否已生效
+
+
+def _load_font(size):
+    for p in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+              r"C:\Windows\Fonts\arial.ttf"):
+        try:
+            return ImageFont.truetype(p, size)
+        except Exception:
+            continue
+    try:
+        return ImageFont.load_default(size=size)
+    except Exception:
+        return ImageFont.load_default()
+
+
+def _route_image(nodes, order_no="", width=1000, height=150):
+    """物流路线示意图：本地渲染，不依赖地图底图与网络。"""
+    bg, line_c = (24, 34, 50, 255), (70, 110, 160, 255)
+    dot, dot_now = (66, 133, 244, 255), (56, 200, 120, 255)
+    dim, txt = (140, 155, 175, 255), (225, 232, 245, 255)
+
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([0, 0, width - 1, height - 1], radius=14, fill=bg)
+
+    f_title, f_small, f_big = _load_font(15), _load_font(12), _load_font(14)
+    d.text((24, 14), f"Route · {order_no}" if order_no else "Route", font=f_title, fill=txt)
+
+    n = len(nodes)
+    x0, x1 = 74, width - 74
+    y = 86
+    step = (x1 - x0) / (n - 1) if n > 1 else 0
+    d.line([(x0, y), (x1, y)], fill=line_c, width=3)
+
+    for i, node in enumerate(nodes):
+        x = x0 + step * i
+        last = i == n - 1
+        if last:
+            d.ellipse([x - 17, y - 17, x + 17, y + 17], outline=(56, 200, 120, 110), width=2)
+            d.ellipse([x - 9, y - 9, x + 9, y + 9], fill=dot_now)
+        else:
+            d.ellipse([x - 7, y - 7, x + 7, y + 7], fill=dot)
+        d.text((x, y - 30), str(i + 1), font=f_small, fill=dim, anchor="ma")
+        t = node["time"][5:16] if len(node["time"]) >= 16 else node["time"]
+        d.text((x, y + 18), t, font=f_small, fill=dot_now if last else dim, anchor="ma")
+
+    d.text((x0, y + 40), "ORIGIN", font=f_big, fill=dim, anchor="ma")
+    d.text((x1, y + 40), "NOW", font=f_big, fill=dot_now, anchor="ma")
+    return img
+
+
+def _haversine_km(a, b):
+    import math
+    lat1, lon1, lat2, lon2 = map(math.radians, (a["lat"], a["lng"], b["lat"], b["lng"]))
+    dlat, dlon = lat2 - lat1, lon2 - lon1
+    h = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(h))
+
+
+def _great_circle(lat1, lon1, lat2, lon2, n=64):
+    """大圆航线插值：跨洋段按真实航班走向铺点，而不是投影直线。"""
+    import math
+    p1, l1, p2, l2 = map(math.radians, (lat1, lon1, lat2, lon2))
+    d = 2 * math.asin(math.sqrt(
+        math.sin((p2 - p1) / 2) ** 2 +
+        math.cos(p1) * math.cos(p2) * math.sin((l2 - l1) / 2) ** 2))
+    if d < 1e-9:
+        return [[lon1, lat1], [lon2, lat2]]
+    out = []
+    for i in range(n + 1):
+        f = i / n
+        A = math.sin((1 - f) * d) / math.sin(d)
+        B = math.sin(f * d) / math.sin(d)
+        x = A * math.cos(p1) * math.cos(l1) + B * math.cos(p2) * math.cos(l2)
+        y = A * math.cos(p1) * math.sin(l1) + B * math.cos(p2) * math.sin(l2)
+        z = A * math.sin(p1) + B * math.sin(p2)
+        out.append([math.degrees(math.atan2(y, x)),
+                    math.degrees(math.atan2(z, math.sqrt(x * x + y * y)))])
+    return out
+
+
+def _build_track(pts):
+    """相邻节点连线；超过 2000km 的段改用大圆航线。"""
+    path = []
+    for i in range(len(pts) - 1):
+        a, b = pts[i], pts[i + 1]
+        if _haversine_km(a, b) > 2000:
+            seg = _great_circle(a["lat"], a["lng"], b["lat"], b["lng"])
+            path.extend(seg if not path else seg[1:])
+        else:
+            if not path:
+                path.append([float(a["lng"]), float(a["lat"])])
+            path.append([float(b["lng"]), float(b["lat"])])
+    return path
+
+
+def _map_deck(nodes, order_no=""):
+    """真地图：有经纬度就用 pydeck 画轨迹，否则返回 None 交给路线图兜底。"""
+    pts = [n for n in nodes if "lat" in n and "lng" in n]
+    if len(pts) < 2:
+        return None
+    try:
+        import pydeck as pdk
+    except Exception:
+        return None
+
+    path = _build_track(pts)
+    last = pts[-1]
+
+    # 跨洋段用 ArcLayer：弧线在屏幕上会明显拱起，视觉上就是“飞过去”的轨迹
+    arc_layer = pdk.Layer(
+        "ArcLayer",
+        data=[{
+            "from": [float(pts[0]["lng"]), float(pts[0]["lat"])],
+            "to": [float(last["lng"]), float(last["lat"])],
+        }],
+        get_source_position="from",
+        get_target_position="to",
+        get_source_color=[66, 133, 244],
+        get_target_color=[56, 200, 120],
+        get_width=3,
+        get_height=1.2,
+        great_circle=True,
+    )
+    path_layer = pdk.Layer(
+        "PathLayer",
+        data=[{"path": path}],
+        get_path="path",
+        get_color=[120, 170, 230, 120],
+        width_min_pixels=2,
+        get_width=3,
+    )
+    stop_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=[{"lng": float(n["lng"]), "lat": float(n["lat"]), "desc": n["desc"]} for n in pts[:-1]],
+        get_position=["lng", "lat"],
+        get_color=[66, 133, 244],
+        get_radius=45000,
+        pickable=True,
+    )
+    now_layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=[{"lng": float(last["lng"]), "lat": float(last["lat"]), "desc": last["desc"]}],
+        get_position=["lng", "lat"],
+        get_color=[56, 200, 120],
+        get_radius=70000,
+        pickable=True,
+    )
+    # 中心放在太平洋、zoom 2.2：整条弧线能完整入镜，又不会平铺出多份世界
+    view = pdk.ViewState(
+        latitude=46,
+        longitude=-170,
+        zoom=2.2,
+        pitch=0,
+    )
+    return pdk.Deck(
+        layers=[path_layer, stop_layer, now_layer],
+        initial_view_state=view,
+        map_style="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+        tooltip={"text": "{desc}"},
+    )
+
+
+def _timeline_md(nodes):
+    """物流轨迹：markdown 列表，每项一行。"""
+    lines = []
+    last = len(nodes) - 1
+    for i, n in enumerate(nodes):
+        dot = "🟢" if i == last else "🔵"
+        bold = "**" if i == last else ""
+        lines.append(f"- {dot} `{n['time']}`　{bold}{n['desc']}{bold}")
+    return "\n".join(lines)
+
+
+def render_trace(trace):
+    if not trace:
+        st.caption("提交一条消息后，这里会显示每一层的输入输出。")
+        return
+
+    final = trace.get("final", {})
+    verdict = final.get("verdict", "-")
+    if verdict == "block":
+        st.error(f"判定：拦截（{final.get('level')}）")
+    elif verdict == "rewrite":
+        st.warning(f"判定：改写（{final.get('level')}）")
+    elif verdict == "ask":
+        st.info("判定：需要补充信息（追问订单号）")
+    else:
+        st.success("判定：放行（L3）")
+
+    if final.get("clauses"):
+        st.markdown("**命中条款**")
+        for c in final["clauses"]:
+            st.markdown(f"- {c}")
+
+    st.markdown("**处理链路**")
+    for step in trace.get("steps", []):
+        name = step["step"]
+        with st.expander(f"{STEP_ICON.get(name, '·')} {STEP_TITLE.get(name, name)}　{step['ms']}ms"):
+            if name == "intent":
+                out = step.get("output", {})
+                st.markdown(
+                    f"- 主意图：`{out.get('intent')}`\n"
+                    f"- 附加标记：`{out.get('flags')}`\n"
+                    f"- 情绪：`{out.get('emotion')}`\n"
+                    f"- 转人工：`{out.get('need_human')}`\n"
+                    f"- 语言：`{out.get('language')}`"
+                )
+            elif name == "tool":
+                order = step.get("order")
+                if order:
+                    st.markdown(
+                        f"- 订单：`{order['order_no']}`　状态：`{order['status_cn']}`\n"
+                        f"- 运单：`{order.get('tracking_no') or '—'}`\n"
+                        f"- 预计到达：`{order.get('eta_from')} ~ {order.get('eta_to')}`"
+                    )
+                    if order.get("nodes"):
+                        st.markdown("**物流路线**")
+                        try:
+                            st.image(_route_image(order["nodes"], order["order_no"]),
+                                     use_container_width=True)
+                        except Exception:
+                            pass
+                        with st.expander("轨迹明细"):
+                            st.markdown(_timeline_md(order["nodes"]))
+                else:
+                    st.markdown(f"- {step.get('note', '无订单')}")
+                if step.get("kb"):
+                    st.markdown(f"- 检索命中：`{', '.join(step['kb'])}`")
+            elif name == "draft":
+                st.text(step.get("text", ""))
+            elif name == "compliance":
+                out = step.get("output", {})
+                st.markdown(f"- 结论：`{out.get('verdict')}`　级别：`{out.get('level')}`")
+                st.markdown(f"- 原因：{out.get('reason')}")
+                for c in out.get("claims", []):
+                    flag = "豁免" if c["exempt"] else ("命中" if c["hits"] else "无命中")
+                    st.markdown(f"  - [{flag}] {c['text'][:60]}")
+            elif name == "semantic":
+                out = step.get("output", {}) or {}
+                st.markdown(
+                    f"- 结论：`{out.get('verdict')}`　级别：`{out.get('level')}`\n"
+                    f"- 原因：{out.get('reason')}")
+            elif name == "action":
+                st.text(step.get("text", ""))
+
+    st.caption(
+        f"总耗时 {trace.get('ms_total')}ms　"
+        f"模型调用 {trace.get('usage', {}).get('calls', 0)} 次"
+    )
+
+
+# ---------------- 主界面 ----------------
+
+# ---------------- 样式：买家消息右对齐 ----------------
+FLOATING_STATUS_CSS = """
+<style>
+/* 隐藏平台自带的连接/运行状态浮层（"正在打开…"/"Running"） */
+[data-testid="stStatusWidget"], [data-testid="stConnectionStatus"],
+[data-testid="stAppDeployButton"], .stDeployButton { display: none !important; }
+</style>
+"""
+
+FLOAT_CSS = """
+<style>
+/* 语言下拉浮到右上角，位于平台工具栏（Share/星标/编辑/⋮）左侧 */
+.st-key-lang_box, .st-key-lang_box_login {
+    position: fixed !important;
+    top: 13px !important;
+    right: 132px !important;
+    width: 150px !important;
+    z-index: 1000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
+    margin-bottom: 0 !important;
+}
+.st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
+    transform: scale(.78) !important;
+    transform-origin: right center !important;
+}
+.st-key-lang_box [data-baseweb="select"] > div, .st-key-lang_box_login [data-baseweb="select"] > div {
+    background: transparent !important;
+    border-color: rgba(128,128,128,.25) !important;
+    border-radius: 8px !important;
+}
+</style>
+"""
+
+CHAT_CSS = """
+<style>
+/* 两边都画气泡：外层去底色，内容层收缩并加圆角 */
+[data-testid="stChatMessage"] {
+    background: transparent !important;
+    border: none !important;
+    align-items: flex-start;
+}
+[data-testid="stChatMessage"] > div:not([data-testid^="stChatMessageAvatar"]) {
+    flex: 0 1 auto;
+    max-width: 78%;
+    background: var(--secondary-background-color);
+    border: 1px solid rgba(128,128,128,.28);
+    border-radius: 14px;
+    padding: 10px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+/* 买家：反向排列 + 靠右 + 淡金边 */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    flex-direction: row-reverse;
+}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid^="stChatMessageAvatar"]) {
+    margin-left: auto;
+    margin-right: 10px;
+    text-align: right;
+    border-color: rgba(201,168,130,.45);
+    background: rgba(201,168,130,.13);
+}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"],
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
+    text-align: right;
+}
+/* 客服：靠左 */
+[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) > div:not([data-testid^="stChatMessageAvatar"]) {
+    margin-right: auto;
+    margin-left: 10px;
+    text-align: left;
+}
+</style>
+"""
+
+# ---------------- 品牌栏 ----------------
+STORE_NAME = "Niao Store"
+
+
+def render_brand():
+    c1, _, c3 = st.columns([6.0, 0.1, 1.3])
+    with c1:
+        st.markdown(f"#### 🏪 {STORE_NAME}")
+        st.caption(t("online"))
+    with c3:
+        # 只有带 ?debug=1 时才显示 trace 开关，评委看到的界面保持干净
+        show_toggle = st.query_params.get("debug") == "1"
+        if show_toggle:
+            show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
+        else:
+            show_debug = False
+    # 语言下拉是 fixed 定位，脱离文档流，不参与上面的列布局
+    with st.container(key="lang_box"):
+        lang_picker()
+    return show_debug
+
+
+# ---------------- trace 面板 ----------------
 BUILD = "2026-10-30 #44 · no-signup"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
