@@ -93,7 +93,7 @@ TEXTS = {
         "pwd_ph": "请输入密码",
         "cred_hint": "忘记密码请联系店铺管理员。",
         "wake_hint": "服务空闲时会自动休眠，首次访问请稍候。",
-        "online": "● 在线",
+        "online": "🟢 在线",
         "welcome": "你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。",
         "lang_hint": "支持中文 / English / Español —— 直接用你的语言提问，我会用同一种语言回复。",
         "q1": "我的订单在哪？",
@@ -139,7 +139,7 @@ TEXTS = {
         "pwd_ph": "Enter password",
         "cred_hint": "Forgot password? Contact your store admin.",
         "wake_hint": "The service sleeps when idle; first visit may take a moment.",
-        "online": "● Online",
+        "online": "🟢 Online",
         "welcome": "Hi! I'm this store's support assistant. Ask me about shipping, returns, or products.",
         "lang_hint": "Chinese / English / Español — just ask in your language, I reply in the same one.",
         "q1": "Where is my order?",
@@ -185,7 +185,7 @@ TEXTS = {
         "pwd_ph": "Introduzca la contraseña",
         "cred_hint": "¿Olvidó su contraseña? Contacte al administrador.",
         "wake_hint": "El servicio se suspende por inactividad; la primera visita puede tardar.",
-        "online": "● En línea",
+        "online": "🟢 En línea",
         "welcome": "¡Hola! Soy el asistente de esta tienda. Pregúntame por envíos, devoluciones o productos.",
         "lang_hint": "中文 / English / Español — pregunta en tu idioma y responderé en el mismo.",
         "q1": "¿Dónde está mi pedido?",
@@ -287,7 +287,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #46 · online-only"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #47 · lights"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1062,7 +1062,7 @@ def _run_turn(text):
         text = f"{text}\n\n（订单号：{picked}）"
 
     st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="🧑"):
         st.markdown(text)
     status = st.empty()
     status.caption(t("processing"))
@@ -1112,7 +1112,7 @@ def main():
 
     with chat_col:
         if not st.session_state.history:
-            with st.chat_message("assistant"):
+            with st.chat_message("assistant", avatar="🟡"):
                 st.markdown(t("welcome"))
                 st.caption(t("lang_hint"))
             render_quick_pills()
