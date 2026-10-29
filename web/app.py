@@ -89,6 +89,8 @@ TEXTS = {
         "password": "密码",
         "login": "进入",
         "wrong": "账号或密码错误",
+        "acct_ph": "judge",
+        "pwd_ph": "演示密码",
         "cred_hint": "演示账号请使用参赛团队提供的凭证。",
         "wake_hint": "首次打开需要唤醒实例，约 30–60 秒；唤醒后访问很快。",
         "online": "● 在线 · 通常几秒内回复 · 中 / 英 / 西",
@@ -121,6 +123,8 @@ TEXTS = {
         "password": "Password",
         "login": "Sign in",
         "wrong": "Incorrect account or password",
+        "acct_ph": "judge",
+        "pwd_ph": "demo password",
         "cred_hint": "Use the credentials provided by the team.",
         "wake_hint": "First visit may take 30–60s to wake the instance up.",
         "online": "● Online · usually replies in seconds · ZH / EN / ES",
@@ -153,6 +157,8 @@ TEXTS = {
         "password": "Contraseña",
         "login": "Entrar",
         "wrong": "Cuenta o contraseña incorrecta",
+        "acct_ph": "judge",
+        "pwd_ph": "contraseña de demo",
         "cred_hint": "Use las credenciales proporcionadas por el equipo.",
         "wake_hint": "La primera visita puede tardar 30–60 s en activar la instancia.",
         "online": "● En línea · suele responder en segundos · ZH / EN / ES",
@@ -224,8 +230,8 @@ def login_gate():
         st.markdown(f"## {t('title')}")
         st.caption(t("sub"))
         with st.form("login_form"):
-            acct = st.text_input(t("account"), placeholder="judge")
-            pwd = st.text_input(t("password"), type="password", placeholder="••••••••")
+            acct = st.text_input(t("account"), placeholder=t("acct_ph"))
+            pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
             ok = st.form_submit_button(t("login"), use_container_width=True)
         if ok:
             if acct.strip().lower() == ACCOUNT.lower() and pwd == PASSWORD:
@@ -241,7 +247,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #39 · hide-status"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #40 · pwd-ph"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
