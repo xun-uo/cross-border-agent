@@ -83,10 +83,9 @@ def bump_usage():
 LOGIN_CSS = """
 <style>
 [data-testid="stAppViewContainer"] {
-    background:
-      radial-gradient(900px 700px at 82% 6%, rgba(201,168,130,.11), transparent 62%),
-      radial-gradient(700px 620px at 8% 92%, rgba(138,115,88,.09), transparent 60%),
-      radial-gradient(1200px 800px at 50% 50%, #121311, #0B0C0B 75%);
+    background-image:
+      radial-gradient(900px 700px at 82% 6%, rgba(201,168,130,.13), transparent 62%),
+      radial-gradient(700px 620px at 8% 92%, rgba(138,115,88,.10), transparent 60%);
 }
 [data-testid="stHeader"] { background: transparent; }
 .login-badge {
@@ -112,7 +111,7 @@ LOGIN_CSS = """
 [data-testid="stForm"] {
     border: 1px solid rgba(201,168,130,.20) !important;
     border-radius: 16px !important;
-    background: rgba(28,27,25,.72) !important;
+    background: rgba(201,168,130,.055) !important;
     box-shadow: 0 24px 60px rgba(0,0,0,.55);
     padding: 26px 24px !important;
 }
@@ -150,7 +149,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #18 · login-look"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #19 · theme-follow"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
