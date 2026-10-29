@@ -66,7 +66,7 @@ _NEG_ZH = re.compile(r"不承诺|不能|无法|不含|不具|不会|不是|并�
 _NEG_EXCLUDE = ("no problem", "no worries", "no doubt", "not only", "nothing but", "no questions")
 
 
-def _negated(claim_low, term, window=28):
+def _negated(claim_low, term, window=64):
     idx = claim_low.find(term.lower())
     if idx < 0:
         return False
@@ -77,11 +77,24 @@ def _negated(claim_low, term, window=28):
     return bool(_NEG_EN.search(ctx) or _NEG_ZH.search(ctx))
 
 
+_EN_WORDY = re.compile(r"^[a-z0-9][a-z0-9 ,\-'\.]*$")
+
+
 def _match_patterns(claim_low, rule):
-    """返回命中的表述列表。支持普通子串与正则两种写法规避枚举式缺陷。"""
+    """返回命中的表述列表。
+
+    英文表述按词边界匹配，避免 heal 命中 healthcare 这类子串误判；
+    中文与含特殊符号的表述仍用子串匹配。
+    """
     terms = []
     for p in list(rule.get("patterns") or []) + list(rule.get("patterns_en") or []):
-        if p and p.lower() in claim_low:
+        if not p:
+            continue
+        pl = p.lower()
+        if _EN_WORDY.match(pl):
+            if re.search(r"(?<![a-z])" + re.escape(pl) + r"(?![a-z])", claim_low):
+                terms.append(p)
+        elif pl in claim_low:
             terms.append(p)
     for rx in rule.get("patterns_regex") or []:
         try:
