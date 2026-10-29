@@ -191,7 +191,10 @@ def lang_picker():
     cur_name = next((n for n, v in LANG_LABELS.items() if v == cur), names[0])
     pick = st.selectbox("界面语言", names, index=names.index(cur_name),
                         label_visibility="collapsed", key="lang_pick")
-    st.session_state["ui_lang"] = LANG_LABELS[pick]
+    picked = LANG_LABELS[pick]
+    if st.session_state.get("ui_lang") != picked:
+        st.session_state["ui_lang"] = picked
+        st.rerun()   # 立刻重绘，避免顶部文案还是旧语言
 
 
 def gear(key_suffix=""):
@@ -233,7 +236,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #25 · gear-settings"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #26 · lang-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
