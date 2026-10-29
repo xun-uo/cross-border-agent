@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #10 · infer-category+wordboundary"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #11 · product-layout"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -367,84 +367,87 @@ def render_trace(trace):
 
 
 # ---------------- 主界面 ----------------
-def main():
-    if not login_gate():
-        return
+# ---------------- 品牌栏 ----------------
+STORE_NAME = "Niao Store"
 
-    if "history" not in st.session_state:
-        st.session_state.history = []
-    if "last_trace" not in st.session_state:
-        st.session_state.last_trace = None
 
-    with st.sidebar:
-        st.markdown("### 演示控制台")
-        used = load_usage()
-        st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
+def render_brand():
+    c1, c2 = st.columns([5, 1.5])
+    with c1:
+        st.markdown(f"#### 🏪 {STORE_NAME}")
+        st.caption("● 在线 · 通常几秒内回复 · 中 / 英 / 西")
+    with c2:
+        show_debug = st.toggle("显示处理过程", value=False,
+                               help="答辩演示用：展开每一层的判定结果与调试参数")
+    return show_debug
 
-        market_label = st.selectbox("市场", ["自动（按订单）", "US", "EU", "CN"])
-        market = None if market_label.startswith("自动") else market_label
-        category = st.selectbox("品类", ["cosmetic", "supplement", "medical_device"],
-                                format_func=lambda x: {"cosmetic": "化妆品",
-                                                       "supplement": "膳食补充剂",
-                                                       "medical_device": "医疗器械"}[x])
 
-        st.markdown("**快捷订单**")
-        demo_orders = ["ORDER20261021001", "ORDER20261021015", "ORDER20261021007",
-                       "ORDER20261021003", "ORDER20261021005"]
-        picked = st.selectbox("选一个订单号", ["（不用）"] + demo_orders)
-        st.caption("在消息里带上订单号，系统会读取真实状态。")
-
-        st.divider()
-        if st.button("清空对话", use_container_width=True):
-            st.session_state.history = []
-            st.session_state.last_trace = None
+def render_quick_pills():
+    quick = ["Where is my order?", "Return policy", "Product info"]
+    cols = st.columns(len(quick))
+    for c, q in zip(cols, quick):
+        if c.button(q, use_container_width=True, key=f"quick_{q}"):
+            st.session_state["pending"] = q
             st.rerun()
 
-        st.caption("演示环境，数据为 Mock。\n合规判定不调用模型，秒级返回。")
-        st.caption(f"build {BUILD}")
 
-    st.markdown("### 跨境智服 Agent")
-    st.caption("用买家语言回复，并在发出前完成合规判定。左侧提问，右侧看每一层的处理过程。")
+def render_debug_panel():
+    st.markdown("##### 处理过程")
+    render_trace(st.session_state.last_trace)
 
-    left, right = st.columns([1.6, 1], gap="large")
+    st.divider()
+    st.markdown("##### 调试参数")
+    used = load_usage()
+    st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
 
-    with left:
-        if not st.session_state.history:
-            with st.chat_message("assistant"):
-                st.markdown("您好，请在下方输入买家问题。\n\n"
-                            "试试：\n"
-                            "- `Where is my order?`（会先追问订单号）\n"
-                            "- `My order ORDER20261021001 hasn't arrived.`\n"
-                            "- `This supplement can cure insomnia and anxiety.`")
-        for msg in st.session_state.history:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+    labels = ["自动（按订单/原文）", "US", "EU", "CN"]
+    cur = st.session_state.get("dbg_market", labels[0])
+    market_label = st.selectbox("市场", labels, index=labels.index(cur) if cur in labels else 0)
+    st.session_state["dbg_market"] = market_label
 
-    with right:
-        st.markdown("#### 处理链路（trace）")
-        render_trace(st.session_state.last_trace)
+    cats = ["cosmetic", "supplement", "medical_device"]
+    cur_cat = st.session_state.get("dbg_category", "cosmetic")
+    category = st.selectbox("品类兜底", cats,
+                            index=cats.index(cur_cat) if cur_cat in cats else 0,
+                            format_func=lambda x: {"cosmetic": "化妆品",
+                                                   "supplement": "膳食补充剂",
+                                                   "medical_device": "医疗器械"}[x],
+                            help="仅在订单与买家原话都推断不出品类时使用")
+    st.session_state["dbg_category"] = category
 
-    placeholder = "输入买家消息，例如 Where is my order?"
-    if picked != "（不用）" and not st.session_state.history:
-        placeholder = f"输入消息（订单 {picked} 已选）"
+    demo_orders = ["（不用）", "ORDER20261021001", "ORDER20261021015",
+                   "ORDER20261021007", "ORDER20261021003", "ORDER20261021005"]
+    cur_o = st.session_state.get("dbg_order", "（不用）")
+    picked = st.selectbox("快捷订单", demo_orders,
+                          index=demo_orders.index(cur_o) if cur_o in demo_orders else 0)
+    st.session_state["dbg_order"] = picked
 
-    text = st.chat_input(placeholder)
-    if not text:
-        return
-
-    if used >= DAILY_LIMIT:
-        st.session_state.history.append({"role": "user", "content": text})
-        st.session_state.history.append({
-            "role": "assistant",
-            "content": "今日体验额度已用完，请明天再试。如需继续体验可联系参赛团队。",
-        })
+    st.divider()
+    if st.button("清空对话", use_container_width=True):
+        st.session_state.history = []
+        st.session_state.last_trace = None
         st.rerun()
+
+    st.caption("演示环境，数据为 Mock。合规判定不调用模型。")
+    st.caption(f"build {BUILD}")
+
+
+def _now():
+    import datetime
+    return datetime.datetime.now().strftime("%H:%M")
+
+
+def _run_turn(text):
+    """执行一轮问答并写回历史。"""
+    market_label = st.session_state.get("dbg_market", "自动（按订单/原文）")
+    market = None if market_label.startswith("自动") else market_label
+    category = st.session_state.get("dbg_category", "cosmetic")
+    picked = st.session_state.get("dbg_order", "（不用）")
 
     if picked != "（不用）" and picked not in text and not agent.extract_order_no(text):
         text = f"{text}\n\n（订单号：{picked}）"
 
-    st.session_state.history.append({"role": "user", "content": text})
-    # 立刻回显这条消息：否则处理期间界面上看不到自己刚发的内容
+    st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
     with st.chat_message("user"):
         st.markdown(text)
     status = st.empty()
@@ -456,7 +459,8 @@ def main():
         except Exception as e:
             st.session_state.history.append({
                 "role": "assistant",
-                "content": f"处理出错：{type(e).__name__}。请稍后重试。",
+                "content": f"抱歉，处理出错了（{type(e).__name__}），请稍后重试。",
+                "ts": _now(),
             })
             st.rerun()
             return
@@ -464,11 +468,62 @@ def main():
     st.session_state.history.append({
         "role": "assistant",
         "content": trace["final"]["text"],
+        "ts": _now(),
     })
     st.session_state.last_trace = trace
     bump_usage()
     status.empty()
     st.rerun()
+
+
+def main():
+    if not login_gate():
+        return
+
+    st.session_state.setdefault("history", [])
+    st.session_state.setdefault("last_trace", None)
+    st.session_state.setdefault("dbg_market", "自动（按订单/原文）")
+    st.session_state.setdefault("dbg_category", "cosmetic")
+    st.session_state.setdefault("dbg_order", "（不用）")
+
+    show_debug = render_brand()
+
+    if show_debug:
+        chat_col, side = st.columns([1.55, 1], gap="large")
+    else:
+        chat_col, side = st.container(), None
+
+    with chat_col:
+        if not st.session_state.history:
+            with st.chat_message("assistant"):
+                st.markdown("Hi! 我是这家店的客服助手。物流、退换货、产品问题都可以问我。")
+            render_quick_pills()
+        for msg in st.session_state.history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+                if msg.get("ts"):
+                    st.caption(msg["ts"])
+
+    if side is not None:
+        with side:
+            render_debug_panel()
+
+    # 快捷问题触发
+    if st.session_state.get("pending"):
+        text = st.session_state.pop("pending")
+        _run_turn(text)
+        return
+
+    # 额度检查
+    used = load_usage()
+    if used >= DAILY_LIMIT:
+        st.caption("今日体验额度已用完，请明天再试。")
+        return
+
+    placeholder = "输入你的问题，例如 Where is my order?"
+    text = st.chat_input(placeholder)
+    if text:
+        _run_turn(text)
 
 
 main()
