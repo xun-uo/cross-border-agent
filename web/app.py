@@ -99,6 +99,7 @@ TEXTS = {
         "q3": "产品咨询",
         "placeholder": "输入你的问题，例如：我的订单到哪了？",
         "debug": "显示处理过程",
+        "debug_help": "答辩演示用：展开每一层的判定结果与调试参数",
         "processing": "正在处理…",
         "quota": "今日体验额度已用完，请明天再试。",
         "err": "抱歉，处理出错了，请稍后重试。",
@@ -130,6 +131,7 @@ TEXTS = {
         "q3": "Product info",
         "placeholder": "Ask anything, e.g. Where is my order?",
         "debug": "Show trace",
+        "debug_help": "For demo: expand every judgement layer and debug params",
         "processing": "Working…",
         "quota": "Daily quota reached. Please try again tomorrow.",
         "err": "Sorry, something went wrong. Please retry.",
@@ -161,6 +163,7 @@ TEXTS = {
         "q3": "Información del producto",
         "placeholder": "Escribe tu pregunta, ej. ¿Dónde está mi pedido?",
         "debug": "Mostrar traza",
+        "debug_help": "Para demo: muestra cada capa del juicio y los parámetros",
         "processing": "Procesando…",
         "quota": "Cuota diaria agotada. Inténtalo mañana.",
         "err": "Lo siento, ocurrió un error. Reintenta.",
@@ -237,7 +240,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #36 · lang-guest"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #37 · i18n-help"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -571,8 +574,7 @@ def render_brand():
         st.markdown(f"#### 🏪 {STORE_NAME}")
         st.caption(t("online"))
     with c2:
-        show_debug = st.toggle(t("debug"), value=False,
-                               help="答辩演示用：展开每一层的判定结果与调试参数")
+        show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
     with c3:
         with st.container(key="lang_box"):
             lang_picker()
