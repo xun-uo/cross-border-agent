@@ -444,6 +444,11 @@ def main():
         text = f"{text}\n\n（订单号：{picked}）"
 
     st.session_state.history.append({"role": "user", "content": text})
+    # 立刻回显这条消息：否则处理期间界面上看不到自己刚发的内容
+    with st.chat_message("user"):
+        st.markdown(text)
+    status = st.empty()
+    status.caption("正在处理…")
 
     with st.spinner("处理中…"):
         try:
@@ -462,6 +467,7 @@ def main():
     })
     st.session_state.last_trace = trace
     bump_usage()
+    status.empty()
     st.rerun()
 
 
