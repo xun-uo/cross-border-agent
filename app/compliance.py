@@ -61,7 +61,7 @@ _NEG_EN = re.compile(
     r"\b(?:not|never|no|cannot|can't|won't|don'?t|doesn'?t|didn'?t|isn'?t|aren'?t|without)\b",
     re.I,
 )
-_NEG_ZH = re.compile(r"不承诺|不能|无法|不含|不具|不会|不是|并非|不保证|不支持|不予|不可")
+_NEG_ZH = re.compile(r"不承诺|不能|无法|不含|不具|不会|不是|并非|不保证|不支持|不予|不可|不涉及|不用于|不提供|不做|不存在")
 # 这些短语里的 no 不构成否定，否则 "No problem, we will refund…" 会被误豁免
 _NEG_EXCLUDE = ("no problem", "no worries", "no doubt", "not only", "nothing but", "no questions")
 
