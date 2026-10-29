@@ -242,9 +242,175 @@ RULES = [
         "patterns_en": ["celebrity endorsed", "100% positive reviews", "every customer loves it"],
         "exempt": [],
     },
+
+    # ================= 菲律宾 PH =================
+    {
+        "id": "PH-FDA-01", "market": "PH", "category": "*", "level": "L1", "action": "block",
+        "clause": "RA 9711 FDA Act；化妆品/食品不得宣称治疗（条款待核实）",
+        "trigger": "宣称治疗或预防疾病",
+        "patterns": ["治疗", "治愈", "根治"],
+        "patterns_en": ["cure", "treat", "heal", "prevent disease", "kill bacteria"],
+        "exempt": ["not intended", "cannot treat", "no claim"],
+    },
+    {
+        "id": "PH-ADL-01", "market": "PH", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "RA 7394 Consumer Act Art. 110（条款待核实）",
+        "trigger": "绝对化或无法证实的最高级表述",
+        "patterns": ["最佳", "第一"],
+        "patterns_en": ["the best", "no.1", "number one", "100% safe", "guaranteed"],
+        "exempt": [],
+    },
+    {
+        "id": "PH-SHIP-01", "market": "PH", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "RA 7394 Consumer Act Art. 117（条款待核实）",
+        "trigger": "对到货时效做保证性承诺",
+        "patterns": ["保证到货", "一定到"],
+        "patterns_en": ["guaranteed delivery", "will arrive by", "definitely arrive", "no delays"],
+        "exempt": [],
+    },
+    {
+        "id": "PH-RETURN-01", "market": "PH", "category": "*", "level": "L1", "action": "block",
+        "clause": "RA 7394 Consumer Act Art. 141；商家售后政策（条款待核实）",
+        "trigger": "承诺超出政策的赔付或退换",
+        "patterns": ["无条件退款", "任何情况都可退"],
+        "patterns_en": ["full refund no questions", "refund anytime", "no inspection needed"],
+        "exempt": [],
+    },
+    {
+        "id": "PH-SUPPL-01", "market": "PH", "category": "supplement", "level": "L1", "action": "block",
+        "clause": "Philippine FDA 膳食补充剂标示规定（条款待核实）",
+        "trigger": "补充剂宣称疾病相关功效",
+        "patterns": ["降血糖", "抗癌"],
+        "patterns_en": ["lowers blood sugar", "fights cancer", "boosts immunity against"],
+        "exempt": ["not intended", "cannot"],
+    },
+
+    # ================= 韩国 KR =================
+    {
+        "id": "KR-ADL-01", "market": "KR", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "표시광고법 第 3 条（条款待核实）",
+        "trigger": "绝对化或最高级表述",
+        "patterns": ["최고", "최상", "완벽", "1위", "唯一"],
+        "patterns_en": ["the best", "perfect", "no.1"],
+        "exempt": [],
+    },
+    {
+        "id": "KR-COS-01", "market": "KR", "category": "cosmetic", "level": "L1", "action": "block",
+        "clause": "화장품법 第 14 条 功能性化妆品标示（条款待核实）",
+        "trigger": "未经审批宣称功能性功效",
+        "patterns": ["주름 개선", "미백", "탈모 방지"],
+        "patterns_en": ["wrinkle improvement", "whitening", "hair loss prevention"],
+        "exempt": ["미승인", "not approved"],
+    },
+    {
+        "id": "KR-DRUG-01", "market": "KR", "category": "*", "level": "L1", "action": "block",
+        "clause": "약사법 药品与非药品区分（条款待核实）",
+        "trigger": "非药品宣称治疗疾病",
+        "patterns": ["치료", "치유", "완치"],
+        "patterns_en": ["cure", "treat disease"],
+        "exempt": ["치료 목적이 아닌", "not for treatment"],
+    },
+    {
+        "id": "KR-SHIP-01", "market": "KR", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "전자상거래법 第 21 条（条款待核实）",
+        "trigger": "对配送时效做保证性承诺",
+        "patterns": ["반드시 도착", "무조건 배송"],
+        "patterns_en": ["guaranteed delivery", "definitely arrive"],
+        "exempt": [],
+    },
+    {
+        "id": "KR-REFUND-01", "market": "KR", "category": "*", "level": "L1", "action": "block",
+        "clause": "전자상거래법 第 17 条 清约撤回（条款待核实）",
+        "trigger": "限制或排除法定退货权",
+        "patterns": ["환불 불가", "교환 불가"],
+        "patterns_en": ["no refunds", "no returns", "final sale no exchange"],
+        "exempt": [],
+    },
+
+    # ================= 俄罗斯 RU =================
+    {
+        "id": "RU-ADL-01", "market": "RU", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "广告法 Federal Law No. 38-FZ Art. 5（条款待核实）",
+        "trigger": "不实或绝对化的比较级表述",
+        "patterns": ["лучший", "самый", "№1", "номер один"],
+        "patterns_en": ["the best", "no.1"],
+        "exempt": [],
+    },
+    {
+        "id": "RU-MED-01", "market": "RU", "category": "*", "level": "L1", "action": "block",
+        "clause": "广告法 Art. 24 药品与医疗广告（条款待核实）",
+        "trigger": "非药品宣称治疗功效",
+        "patterns": ["лечит", "излечивает", "вылечит"],
+        "patterns_en": ["cures", "heals disease"],
+        "exempt": ["не является лекарством", "not a medicine"],
+    },
+    {
+        "id": "RU-SUPPL-01", "market": "RU", "category": "supplement", "level": "L1", "action": "block",
+        "clause": "广告法 Art. 25 保健食品广告（条款待核实）",
+        "trigger": "补充剂宣称疾病治疗效果",
+        "patterns": ["понижает сахар", "против рака"],
+        "patterns_en": ["lowers blood sugar", "fights cancer"],
+        "exempt": ["не является лекарством"],
+    },
+    {
+        "id": "RU-SHIP-01", "market": "RU", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "消费者权益保护法 No. 2300-1 Art. 10（条款待核实）",
+        "trigger": "对交付时效做保证性承诺",
+        "patterns": ["гарантированная доставка", "точно придет"],
+        "patterns_en": ["guaranteed delivery", "will definitely arrive"],
+        "exempt": [],
+    },
+    {
+        "id": "RU-REFUND-01", "market": "RU", "category": "*", "level": "L1", "action": "block",
+        "clause": "消费者权益保护法 No. 2300-1 Art. 26（条款待核实）",
+        "trigger": "剥夺法定退货权",
+        "patterns": ["возврат невозможен", "обмену не подлежит"],
+        "patterns_en": ["no returns", "no exchange"],
+        "exempt": [],
+    },
+
+    # ================= 蒙古 MN =================
+    {
+        "id": "MN-ADL-01", "market": "MN", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "广告法 Advertising Law Art. 6（条款待核实）",
+        "trigger": "绝对化或误导性最高级表述",
+        "patterns": ["хамгийн сайн", "хамгийн шилдэг"],
+        "patterns_en": ["the best", "no.1"],
+        "exempt": [],
+    },
+    {
+        "id": "MN-MED-01", "market": "MN", "category": "*", "level": "L1", "action": "block",
+        "clause": "广告法 Art. 8 医疗与药品广告（条款待核实）",
+        "trigger": "非药品宣称治疗功效",
+        "patterns": ["эмчилнэ", "эдгээнэ"],
+        "patterns_en": ["cures", "treats disease"],
+        "exempt": ["эм биш", "not a medicine"],
+    },
+    {
+        "id": "MN-SUPPL-01", "market": "MN", "category": "supplement", "level": "L1", "action": "block",
+        "clause": "卫生部 保健食品标示规定（条款待核实）",
+        "trigger": "补充剂宣称疾病功效",
+        "patterns": ["чихрийн шижин", "хорт хавдар"],
+        "patterns_en": ["lowers blood sugar", "cancer"],
+        "exempt": ["эм биш"],
+    },
+    {
+        "id": "MN-SHIP-01", "market": "MN", "category": "*", "level": "L2", "action": "rewrite",
+        "clause": "消费者保护法 Consumer Protection Law（条款待核实）",
+        "trigger": "对时效做保证性承诺",
+        "patterns": ["баталгаатай хүргэлт"],
+        "patterns_en": ["guaranteed delivery"],
+        "exempt": [],
+    },
+    {
+        "id": "MN-REFUND-01", "market": "MN", "category": "*", "level": "L1", "action": "block",
+        "clause": "消费者保护法 Consumer Protection Law（条款待核实）",
+        "trigger": "限制法定退换权利",
+        "patterns": ["буцаах боломжгүй"],
+        "patterns_en": ["no refunds", "no returns"],
+        "exempt": [],
+    },
 ]
 
 dump("rules.json", RULES)
-print(f"规则 {len(RULES)} 条：CN {sum(1 for r in RULES if r['market']=='CN')} / "
-      f"EU {sum(1 for r in RULES if r['market']=='EU')} / "
-      f"US {sum(1 for r in RULES if r['market']=='US')}")
+print(f"规则 {len(RULES)} 条：" + " / ".join(f"{m} {sum(1 for r in RULES if r['market']==m)}" for m in ["CN","EU","US","PH","KR","RU","MN"]))
