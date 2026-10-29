@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #15 · bubble-theme"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #16 · both-bubbles"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -363,26 +363,41 @@ def render_trace(trace):
 # ---------------- 样式：买家消息右对齐 ----------------
 CHAT_CSS = """
 <style>
-/* 买家消息：外层去底色，气泡收缩靠右，颜色跟随主题 */
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
-    flex-direction: row-reverse;
+/* 两边都画气泡：外层去底色，内容层收缩并加圆角 */
+[data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
+    align-items: flex-start;
 }
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid="stChatMessageAvatarUser"]) {
+[data-testid="stChatMessage"] > div:not([data-testid^="stChatMessageAvatar"]) {
     flex: 0 1 auto;
-    margin-left: auto;
-    margin-right: 10px;
+    max-width: 78%;
     background: var(--secondary-background-color);
-    border: 1px solid rgba(128,128,128,.35);
+    border: 1px solid rgba(128,128,128,.28);
     border-radius: 14px;
     padding: 10px 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+/* 买家：反向排列 + 靠右 + 淡金边 */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    flex-direction: row-reverse;
+}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid^="stChatMessageAvatar"]) {
+    margin-left: auto;
+    margin-right: 10px;
     text-align: right;
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    border-color: rgba(201,168,130,.45);
+    background: rgba(201,168,130,.13);
 }
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"],
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
     text-align: right;
+}
+/* 客服：靠左 */
+[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) > div:not([data-testid^="stChatMessageAvatar"]) {
+    margin-right: auto;
+    margin-left: 10px;
+    text-align: left;
 }
 </style>
 """
