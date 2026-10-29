@@ -79,9 +79,6 @@ def bump_usage():
     return n
 
 
-
-
-
 # ---------------- 登录 ----------------
 def login_gate():
     if st.session_state.get("authed"):
@@ -108,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #20 · dark-switch"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #21 · clean"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -409,46 +406,14 @@ CHAT_CSS = """
 STORE_NAME = "Niao Store"
 
 
-DARK_CSS = """
-<style>
-.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-    background: #0E1117 !important;
-}
-[data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li,
-[data-testid="stMarkdownContainer"] h1, [data-testid="stMarkdownContainer"] h2,
-[data-testid="stMarkdownContainer"] h3, [data-testid="stMarkdownContainer"] h4 {
-    color: #E6E2DA !important;
-}
-[data-testid="stCaptionContainer"] p { color: #8C8478 !important; }
-[data-testid="stChatMessage"] > div:not([data-testid^="stChatMessageAvatar"]) {
-    background: #1E1E1B !important;
-    border-color: rgba(255,255,255,.10) !important;
-}
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid^="stChatMessageAvatar"]) {
-    background: rgba(201,168,130,.14) !important;
-    border-color: rgba(201,168,130,.45) !important;
-}
-[data-testid="stChatInput"] { background: #16161A !important; }
-[data-testid="stChatInput"] textarea { color: #E6E2DA !important; }
-[data-testid="stBottom"] > div { background: #0E1117 !important; }
-[data-testid="stButton"] button {
-    background: transparent !important; color: #D8D3C8 !important;
-    border-color: rgba(255,255,255,.16) !important;
-}
-</style>
-"""
-
-
 def render_brand():
-    c1, c2, c3 = st.columns([4, 1.5, 0.9])
+    c1, c2 = st.columns([5, 1.5])
     with c1:
         st.markdown(f"#### 🏪 {STORE_NAME}")
         st.caption("● 在线 · 通常几秒内回复 · 中 / 英 / 西")
     with c2:
         show_debug = st.toggle("显示处理过程", value=False,
                                help="答辩演示用：展开每一层的判定结果与调试参数")
-    with c3:
-        st.toggle("深色", value=False, key="dark_bg", help="切换背景深浅")
     return show_debug
 
 
@@ -557,8 +522,6 @@ def main():
     st.session_state.setdefault("dbg_order", "（不用）")
 
     st.markdown(CHAT_CSS, unsafe_allow_html=True)
-    if st.session_state.get("dark_bg"):
-        st.markdown(DARK_CSS, unsafe_allow_html=True)
     show_debug = render_brand()
 
     if show_debug:
