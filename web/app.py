@@ -29,6 +29,13 @@ def _st_secret(name, default):
 
 ACCOUNT = str(os.environ.get("DEMO_ACCOUNT") or _st_secret("DEMO_ACCOUNT", "judge"))
 PASSWORD = str(os.environ.get("DEMO_PASSWORD") or _st_secret("DEMO_PASSWORD", "xinghe2026"))
+
+# 账号 -> (密码, 角色)。商家进后台，买家进客服窗口。
+ACCOUNTS = {
+    "admin":   (PASSWORD, "merchant"),
+    "judge":   (PASSWORD, "merchant"),
+    "buyer":   (PASSWORD, "buyer"),
+}
 DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT") or _st_secret("DAILY_LIMIT", 300))
 USAGE_FILE = ROOT / "data" / "_usage.json"
 
@@ -270,12 +277,12 @@ def login_gate():
             pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
             ok = st.form_submit_button(t("login"), use_container_width=True)
         if ok:
-            users = st.session_state.get("users") or {}
             key = acct.strip().lower()
-            valid = (key == ACCOUNT.lower() and pwd == PASSWORD) or users.get(key) == pwd
-            if valid:
+            rec = ACCOUNTS.get(key)
+            if rec and rec[0] == pwd:
                 st.session_state.authed = True
-                st.session_state.user = acct.strip()
+                st.session_state.user = key
+                st.session_state.role = rec[1]
                 st.session_state.history = []
                 st.session_state.last_trace = None
                 st.rerun()
@@ -287,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #50 · markets"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #52 · merchant-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1090,6 +1097,122 @@ def _run_turn(text):
     st.rerun()
 
 
+
+
+# ---------------- 商家后台 ----------------
+def render_merchant():
+    from app import rules_store  # noqa: F401
+    import json as _json
+
+    c1, c2 = st.columns([5, 1.4])
+    with c1:
+        st.markdown(f"#### 🏪 {STORE_NAME} · 商家后台")
+        st.caption(f"当前账号：{st.session_state.get('user', '-')} · 规则引擎与判定统计")
+    with c2:
+        if st.button("退出登录", use_container_width=True):
+            st.session_state.clear()
+            st.rerun()
+
+    tab_rules, tab_stats, tab_logs = st.tabs(["规则库", "判定看板", "会话记录"])
+
+    with tab_rules:
+        rules = rules_store.load()
+        markets = sorted({r.get("market", "-") for r in rules})
+        cols = st.columns(len(markets) + 1)
+        cols[0].metric("规则总数", len(rules))
+        for i, mk in enumerate(markets):
+            cols[i + 1].metric(mk, sum(1 for r in rules if r.get("market") == mk))
+
+        st.divider()
+        st.markdown("**导入规则**")
+        st.caption("下载模板 → 填写 → 上传。字段：id / market / category / level / action / clause / trigger / patterns")
+        up = st.file_uploader("上传规则 JSON", type=["json"], key="rule_upload")
+        if up is not None:
+            try:
+                data = _json.loads(up.read().decode("utf-8"))
+                ok_rows, errs = rules_store.validate(data if isinstance(data, list) else data.get("rules", []))
+                if errs:
+                    st.error("校验未通过：\n- " + "\n- ".join(errs[:10]))
+                else:
+                    merged = {r["id"]: r for r in rules}
+                    for r in ok_rows:
+                        merged[r["id"]] = r
+                    n = rules_store.save(list(merged.values()))
+                    st.success(f"已导入 {len(ok_rows)} 条，当前共 {n} 条规则。")
+                    st.rerun()
+            except Exception as e:
+                st.error(f"文件解析失败：{type(e).__name__} - {e}")
+
+        st.divider()
+        st.markdown("**当前规则（可直接编辑）**")
+        edited = st.data_editor(
+            rules,
+            num_rows="dynamic",
+            use_container_width=True,
+            height=420,
+            column_config={
+                "id": st.column_config.TextColumn("ID", width="small"),
+                "market": st.column_config.TextColumn("市场", width="small"),
+                "category": st.column_config.TextColumn("品类", width="small"),
+                "level": st.column_config.SelectboxColumn("级别", options=["L1", "L2", "L3"], width="small"),
+                "action": st.column_config.SelectboxColumn("动作", options=["block", "rewrite", "pass"], width="small"),
+                "clause": st.column_config.TextColumn("条款出处", width="large"),
+                "trigger": st.column_config.TextColumn("触发条件", width="medium"),
+            },
+            key="rule_editor",
+        )
+        b1, b2, b3 = st.columns([1, 1, 2])
+        with b1:
+            if st.button("保存修改", type="primary", use_container_width=True):
+                ok_rows, errs = rules_store.validate(list(edited))
+                if errs:
+                    st.error("校验未通过：\n- " + "\n- ".join(errs[:10]))
+                else:
+                    n = rules_store.save(ok_rows)
+                    st.success(f"已保存，当前 {n} 条规则。")
+                    st.rerun()
+        with b2:
+            vs = rules_store.versions()
+            pick = st.selectbox("版本回滚", vs[:10] if vs else ["（无）"],
+                                label_visibility="collapsed")
+            if vs and st.button("回滚", use_container_width=True):
+                rules_store.rollback(pick)
+                st.success(f"已回滚到 {pick}")
+                st.rerun()
+
+    with tab_stats:
+        st.caption("统计来自判定日志，随使用实时累加。")
+        try:
+            from app import judge_log
+            s = judge_log.stats()
+            m1, m2, m3 = st.columns(3)
+            m1.metric("累计判定", s["total"])
+            m2.metric("改写/拦截占比", f"{s['rewrite_rate']}%")
+            m3.metric("覆盖市场", len(s["by_market"]))
+            if s["by_market"]:
+                st.markdown("**市场分布**")
+                st.bar_chart(s["by_market"])
+            if s["by_verdict"]:
+                st.markdown("**判定级别分布**")
+                st.bar_chart(s["by_verdict"])
+        except Exception as e:
+            st.info(f"暂无日志。{e}")
+
+    with tab_logs:
+        try:
+            from app import judge_log
+            recs = judge_log.tail(30)
+            if recs:
+                for r in reversed(recs):
+                    st.markdown(
+                        f"`{r.get('ts','')}` **{r.get('market','-')}** · "
+                        f"{r.get('verdict','-')} · {(r.get('text','') or '')[:60]}")
+            else:
+                st.info("还没有判定记录。去买家视角问几句就会有了。")
+        except Exception as e:
+            st.info(f"暂无日志。{e}")
+
+
 def main():
     if not login_gate():
         return
@@ -1099,10 +1222,15 @@ def main():
     st.session_state.setdefault("dbg_market", "自动（按订单/原文）")
     st.session_state.setdefault("dbg_category", "cosmetic")
     st.session_state.setdefault("dbg_order", "（不用）")
+    st.session_state.setdefault("role", "buyer")
 
     st.markdown(CHAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOATING_STATUS_CSS, unsafe_allow_html=True)
+    if st.session_state.get("role") == "merchant":
+        render_merchant()
+        return
+
     show_debug = render_brand()
 
     if show_debug:
