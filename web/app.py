@@ -237,7 +237,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #31 · width-back"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #32 · lang-offset"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -499,7 +499,7 @@ FLOAT_CSS = """
 .st-key-lang_box, .st-key-lang_box_login {
     position: fixed !important;
     top: 13px !important;
-    right: 196px !important;
+    right: 236px !important;
     width: 150px !important;
     z-index: 1000000 !important;
     margin: 0 !important;
