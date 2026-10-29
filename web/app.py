@@ -184,15 +184,21 @@ def t(key):
     return TEXTS.get(lang, TEXTS["zh"]).get(key, key)
 
 
-def lang_switch(key_suffix=""):
-    """登录页与主界面共用的小语言选择器。"""
+def lang_picker():
+    """齿轮 + 下拉：平时只显示当前语言，点开才列出其他。"""
     cur = st.session_state.get("ui_lang", "zh")
     names = list(LANG_LABELS.keys())
     cur_name = next((n for n, v in LANG_LABELS.items() if v == cur), names[0])
-    pick = st.radio("界面语言", names, index=names.index(cur_name),
-                    horizontal=True, label_visibility="collapsed",
-                    key=f"lang_{key_suffix}")
+    pick = st.selectbox("界面语言", names, index=names.index(cur_name),
+                        label_visibility="collapsed", key="lang_pick")
     st.session_state["ui_lang"] = LANG_LABELS[pick]
+
+
+def gear(key_suffix=""):
+    """右上角齿轮按钮，点开是设置面板。"""
+    with st.popover("⚙️", help="设置 / Settings"):
+        st.markdown("**界面语言 / Language / Idioma**")
+        lang_picker()
 
 
 # ---------------- 登录 ----------------
@@ -201,9 +207,12 @@ def login_gate():
         return True
     st.session_state.setdefault("ui_lang", "zh")
 
+    _, gear_col = st.columns([9, 1])
+    with gear_col:
+        gear("login")
+
     _, mid, _ = st.columns([1, 1.2, 1])
     with mid:
-        lang_switch("login")
         st.markdown(f"## {t('title')}")
         st.caption(t("sub"))
         with st.form("login_form"):
@@ -224,7 +233,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #24 · ui-i18n"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #25 · gear-settings"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -526,13 +535,15 @@ STORE_NAME = "Niao Store"
 
 
 def render_brand():
-    c1, c2 = st.columns([5, 1.5])
+    c1, c2, c3 = st.columns([5, 1.5, 0.6])
     with c1:
         st.markdown(f"#### 🏪 {STORE_NAME}")
         st.caption(t("online"))
     with c2:
         show_debug = st.toggle(t("debug"), value=False,
                                help="答辩演示用：展开每一层的判定结果与调试参数")
+    with c3:
+        gear("main")
     return show_debug
 
 
@@ -550,7 +561,6 @@ def render_debug_panel():
     render_trace(st.session_state.last_trace)
 
     st.divider()
-    lang_switch("main")
     st.markdown("##### 调试参数")
     used = load_usage()
     st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
