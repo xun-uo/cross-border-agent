@@ -277,6 +277,19 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         "text": final_text,
     }, s)
 
+    # 判定日志（供商家看板统计）
+    try:
+        from . import judge_log
+        judge_log.append({
+            "text": text, "market": compliance.resolve_market(order["market"]) if order else market,
+            "category": category,
+            "verdict": display_verdict, "rule_verdict": evaluation["verdict"],
+            "level": evaluation.get("level"), "clauses": evaluation.get("clauses", []),
+            "calls": trace["usage"].get("calls", 0),
+        })
+    except Exception:
+        pass
+
     display_verdict = evaluation["verdict"]
     if display_verdict == "block" and rewritten and not handoff:
         display_verdict = "rewrite"   # 已改写成安全话术，对外说「改写」而不是「拦截」
