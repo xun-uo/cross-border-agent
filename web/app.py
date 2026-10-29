@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #14 · bubble-align"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #15 · bubble-theme"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -363,22 +363,25 @@ def render_trace(trace):
 # ---------------- 样式：买家消息右对齐 ----------------
 CHAT_CSS = """
 <style>
-/* 买家消息：整行反向 + 内容收缩到文字宽度并靠右 */
+/* 买家消息：外层去底色，气泡收缩靠右，颜色跟随主题 */
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
     flex-direction: row-reverse;
+    background: transparent !important;
+    border: none !important;
 }
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid="stChatMessageAvatarUser"]) {
     flex: 0 1 auto;
     margin-left: auto;
     margin-right: 10px;
-    background: rgba(201,168,130,.10);
-    border: 1px solid rgba(201,168,130,.18);
+    background: var(--secondary-background-color);
+    border: 1px solid rgba(128,128,128,.35);
     border-radius: 14px;
     padding: 10px 18px;
     text-align: right;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"],
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"] {
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"],
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
     text-align: right;
 }
 </style>
