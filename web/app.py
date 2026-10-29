@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #22 · zh-ui"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #23 · auto-lang"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -533,6 +533,7 @@ def main():
         if not st.session_state.history:
             with st.chat_message("assistant"):
                 st.markdown("你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。")
+                st.caption("支持中文 / English / Español —— 直接用你的语言提问，我会用同一种语言回复。")
             render_quick_pills()
         for msg in st.session_state.history:
             with st.chat_message(msg["role"]):
