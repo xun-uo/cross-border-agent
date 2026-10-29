@@ -83,7 +83,7 @@ def bump_usage():
 TEXTS = {
     "zh": {
         "badge": "AI AGENT · 2026",
-        "title": "跨境智服 Agent",
+        "title": "跨境物流智能客服",
         "sub": "跨境电商客服系统 · 多语言 · 合规自检",
         "account": "账号",
         "password": "密码",
@@ -129,7 +129,7 @@ TEXTS = {
     },
     "en": {
         "badge": "AI AGENT · 2026",
-        "title": "Cross-border Agent",
+        "title": "Cross-border Logistics Agent",
         "sub": "Cross-border support platform · Multilingual · Compliance built in",
         "account": "Account",
         "password": "Password",
@@ -175,7 +175,7 @@ TEXTS = {
     },
     "es": {
         "badge": "AI AGENT · 2026",
-        "title": "Agente Transfronterizo",
+        "title": "Agente Logístico Transfronterizo",
         "sub": "Plataforma de atención transfronteriza · Multilingüe · Cumplimiento",
         "account": "Cuenta",
         "password": "Contraseña",
@@ -287,7 +287,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #47 · lights"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #48 · rename"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
