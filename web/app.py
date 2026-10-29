@@ -237,7 +237,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #28 · lang-float"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #29 · lang-narrow"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -498,9 +498,9 @@ FLOAT_CSS = """
 /* 语言下拉浮到右上角，位于平台工具栏（Share/星标/编辑/⋮）左侧 */
 .st-key-lang_box, .st-key-lang_box_login {
     position: fixed !important;
-    top: 12px !important;
-    right: 220px !important;
-    width: 150px !important;
+    top: 13px !important;
+    right: 196px !important;
+    width: 52px !important;
     z-index: 1000000 !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -509,10 +509,20 @@ FLOAT_CSS = """
     margin-bottom: 0 !important;
 }
 .st-key-lang_box [data-baseweb="select"] > div, .st-key-lang_box_login [data-baseweb="select"] > div {
-    min-height: 34px !important;
-    font-size: 13px !important;
+    min-height: 28px !important;
+    height: 28px !important;
+    padding: 0 4px 0 8px !important;
+    font-size: 12px !important;
     background: transparent !important;
-    border-color: rgba(128,128,128,.28) !important;
+    border-color: rgba(128,128,128,.25) !important;
+    border-radius: 8px !important;
+}
+.st-key-lang_box [data-baseweb="select"] svg, .st-key-lang_box_login [data-baseweb="select"] svg {
+    width: 12px !important; height: 12px !important;
+}
+.st-key-lang_box [data-baseweb="select"] [data-testid="stMarkdownContainer"],
+.st-key-lang_box_login [data-baseweb="select"] [data-testid="stMarkdownContainer"] {
+    font-size: 12px !important;
 }
 </style>
 """
