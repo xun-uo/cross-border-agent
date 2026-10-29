@@ -103,7 +103,7 @@ def classify(text, history=None):
             messages.append({"role": turn.get("role", "user"), "content": turn.get("content", "")})
     messages.append({"role": "user", "content": text})
     try:
-        data = llm.chat_json(messages, temperature=0, max_tokens=200, hedge=True)
+        data = llm.chat_json(messages, temperature=0, max_tokens=200)
     except Exception as e:
         data = {
             "intent": "product_inquiry", "flags": [], "emotion": "neutral",
@@ -147,6 +147,25 @@ def generate_draft(text, intent, order, kb_items, market, category, language):
     return llm.chat_hedged(messages, temperature=0.3, max_tokens=500).strip()
 
 
+# ---------------- 品类自动识别 ----------------
+CATEGORY_HINTS = {
+    "supplement": ["supplement", "capsule", "pill", "vitamin", "melatonin", "probiotic",
+                   "补充剂", "胶囊", "维生素", "保健品", "钙片"],
+    "medical_device": ["device", "monitor", "thermometer", "brace", "仪器", "设备", "器械"],
+    "cosmetic": ["cream", "serum", "cleanser", "lotion", "mask", "lipstick", "shampoo",
+                 "面霜", "精华", "洁面", "面膜", "口红", "乳液", "护肤"],
+}
+
+
+def infer_category(text, fallback="cosmetic"):
+    """从买家原话推断品类；订单自带的品类优先级更高（由 process 处理）。"""
+    low = (text or "").lower()
+    for cat, words in CATEGORY_HINTS.items():
+        if any(w.lower() in low for w in words):
+            return cat
+    return fallback
+
+
 # ---------------- 主流程 ----------------
 
 def _usage_delta(before):
@@ -177,12 +196,18 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     step("intent", {"output": intent}, s)
 
     language = intent.get("language") or "en"
+    # 品类：订单优先，其次从买家原话推断，最后才用界面传入的默认值
+    inferred = infer_category(text, fallback=category)
     order = find_order(intent.get("order_no"))
     if order:
         market = order["market"]
         language = order["language"]
         if force_category_from_order and order["items"]:
             category = order["items"][0]["category"]
+        else:
+            category = inferred
+    else:
+        category = inferred
 
     # 2) 工具 / 检索
     s = time.perf_counter()
@@ -251,9 +276,13 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         "text": final_text,
     }, s)
 
+    display_verdict = evaluation["verdict"]
+    if display_verdict == "block" and rewritten and not handoff:
+        display_verdict = "rewrite"   # 已改写成安全话术，对外说「改写」而不是「拦截」
     trace["final"] = {
         "text": final_text,
-        "verdict": evaluation["verdict"],
+        "verdict": display_verdict,
+        "rule_verdict": evaluation["verdict"],
         "level": evaluation["level"],
         "clauses": evaluation.get("clauses", []),
         "rewritten": rewritten,
