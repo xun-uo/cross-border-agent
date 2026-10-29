@@ -237,7 +237,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #29 · lang-narrow"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #30 · lang-width-back"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -519,10 +519,6 @@ FLOAT_CSS = """
 }
 .st-key-lang_box [data-baseweb="select"] svg, .st-key-lang_box_login [data-baseweb="select"] svg {
     width: 12px !important; height: 12px !important;
-}
-.st-key-lang_box [data-baseweb="select"] [data-testid="stMarkdownContainer"],
-.st-key-lang_box_login [data-baseweb="select"] [data-testid="stMarkdownContainer"] {
-    font-size: 12px !important;
 }
 </style>
 """
