@@ -79,18 +79,63 @@ def bump_usage():
     return n
 
 
+
+LOGIN_CSS = """
+<style>
+[data-testid="stAppViewContainer"] {
+    background:
+      radial-gradient(900px 700px at 82% 6%, rgba(201,168,130,.11), transparent 62%),
+      radial-gradient(700px 620px at 8% 92%, rgba(138,115,88,.09), transparent 60%),
+      radial-gradient(1200px 800px at 50% 50%, #121311, #0B0C0B 75%);
+}
+[data-testid="stHeader"] { background: transparent; }
+.login-badge {
+    font-size: 12px; letter-spacing: 6px; color: #C9A882;
+    text-align: center; margin-top: 8vh; font-weight: 600;
+}
+.login-title {
+    margin-top: 18px; text-align: center;
+    font-size: 46px; font-weight: 800; color: #FFFFFF; letter-spacing: 1px;
+}
+.login-title span {
+    background: linear-gradient(92deg,#E8CDA8,#C9A882 60%,#9C7F5C);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.login-sub {
+    margin-top: 14px; text-align: center;
+    font-size: 15px; color: #8C8478; letter-spacing: .5px;
+}
+.login-bar {
+    margin: 26px auto 30px; width: 120px; height: 3px; border-radius: 2px;
+    background: linear-gradient(90deg, rgba(201,168,130,0), #C9A882, rgba(201,168,130,0));
+}
+[data-testid="stForm"] {
+    border: 1px solid rgba(201,168,130,.20) !important;
+    border-radius: 16px !important;
+    background: rgba(28,27,25,.72) !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,.55);
+    padding: 26px 24px !important;
+}
+</style>
+"""
+
 # ---------------- 登录 ----------------
 def login_gate():
     if st.session_state.get("authed"):
         return True
-    _, mid, _ = st.columns([1, 1.2, 1])
+    st.markdown(LOGIN_CSS, unsafe_allow_html=True)
+    _, mid, _ = st.columns([1, 1.25, 1])
     with mid:
-        st.markdown("## 跨境智服 Agent")
-        st.caption("多语言客服 · 合规自检 · 演示环境")
+        st.markdown(
+            '<div class="login-badge">AI AGENT · 2026</div>'
+            '<div class="login-title">跨境智服 <span>Agent</span></div>'
+            '<div class="login-sub">多语言客服 · 合规自检 · 演示环境</div>'
+            '<div class="login-bar"></div>',
+            unsafe_allow_html=True)
         with st.form("login_form"):
             acct = st.text_input("账号", placeholder="演示账号")
             pwd = st.text_input("密码", type="password", placeholder="演示密码")
-            ok = st.form_submit_button("进入", use_container_width=True)
+            ok = st.form_submit_button("进 入", use_container_width=True)
         if ok:
             if acct.strip().lower() == ACCOUNT.lower() and pwd == PASSWORD:
                 st.session_state.authed = True
@@ -105,7 +150,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #17 · gold-theme"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #18 · login-look"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
