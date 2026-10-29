@@ -16,7 +16,7 @@ OWNER, REPO = "xun-uo", "cross-border-agent"
 ROOT = Path(r"D:\跨境智服")
 TOKEN = (ROOT / "gh_token.txt").read_text(encoding="utf-8").strip()
 
-SKIP_DIRS = {".venv", "__pycache__", ".git", "out", ".streamlit"}
+SKIP_DIRS = {".venv", "__pycache__", ".git", "out"}
 SKIP_FILES = {"apikey.txt", "gh_token.txt", ".env", "_usage.json"}
 INCLUDE_EXT = {".py", ".json", ".md", ".ps1", ".cmd", ".txt", ".yml", ".yaml", ".toml", ".cfg", ".ini"}
 
