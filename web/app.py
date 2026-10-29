@@ -237,7 +237,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #33 · lang-short"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #34 · lang-scale"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -508,11 +508,11 @@ FLOAT_CSS = """
 .st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
     margin-bottom: 0 !important;
 }
+.st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
+    transform: scale(.78) !important;
+    transform-origin: right center !important;
+}
 .st-key-lang_box [data-baseweb="select"] > div, .st-key-lang_box_login [data-baseweb="select"] > div {
-    min-height: 26px !important;
-    height: 26px !important;
-    padding: 0 4px 0 10px !important;
-    font-size: 12px !important;
     background: transparent !important;
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
