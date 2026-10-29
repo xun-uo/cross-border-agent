@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #11 · product-layout"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #12 · chat-align"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -367,6 +367,25 @@ def render_trace(trace):
 
 
 # ---------------- 主界面 ----------------
+
+# ---------------- 样式：买家消息右对齐 ----------------
+CHAT_CSS = """
+<style>
+/* 买家消息整行反向排列：头像在右、内容靠右 */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
+    flex-direction: row-reverse;
+}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:last-child {
+    text-align: right;
+    align-items: flex-end;
+}
+/* 时间戳跟随对齐 */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
+    text-align: right;
+}
+</style>
+"""
+
 # ---------------- 品牌栏 ----------------
 STORE_NAME = "Niao Store"
 
@@ -486,6 +505,7 @@ def main():
     st.session_state.setdefault("dbg_category", "cosmetic")
     st.session_state.setdefault("dbg_order", "（不用）")
 
+    st.markdown(CHAT_CSS, unsafe_allow_html=True)
     show_debug = render_brand()
 
     if show_debug:
