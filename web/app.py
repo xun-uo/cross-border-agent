@@ -240,7 +240,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #37 · i18n-help"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #38 · debug-param"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -574,7 +574,12 @@ def render_brand():
         st.markdown(f"#### 🏪 {STORE_NAME}")
         st.caption(t("online"))
     with c2:
-        show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
+        # 只有带 ?debug=1 时才显示 trace 开关，评委看到的界面保持干净
+        show_toggle = st.query_params.get("debug") == "1"
+        if show_toggle:
+            show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
+        else:
+            show_debug = False
     with c3:
         with st.container(key="lang_box"):
             lang_picker()
