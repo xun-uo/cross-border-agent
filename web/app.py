@@ -84,15 +84,15 @@ TEXTS = {
     "zh": {
         "badge": "AI AGENT · 2026",
         "title": "跨境智服 Agent",
-        "sub": "多语言客服 · 合规自检 · 演示环境",
+        "sub": "跨境电商客服系统 · 多语言 · 合规自检",
         "account": "账号",
         "password": "密码",
         "login": "进入",
         "wrong": "账号或密码错误",
-        "acct_ph": "judge",
-        "pwd_ph": "演示密码",
-        "cred_hint": "演示账号请使用参赛团队提供的凭证。",
-        "wake_hint": "首次打开需要唤醒实例，约 30–60 秒；唤醒后访问很快。",
+        "acct_ph": "邮箱或工号",
+        "pwd_ph": "请输入密码",
+        "cred_hint": "忘记密码请联系店铺管理员。",
+        "wake_hint": "服务空闲时会自动休眠，首次访问请稍候。",
         "online": "● 在线 · 通常几秒内回复 · 中 / 英 / 西",
         "welcome": "你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。",
         "lang_hint": "支持中文 / English / Español —— 直接用你的语言提问，我会用同一种语言回复。",
@@ -118,15 +118,15 @@ TEXTS = {
     "en": {
         "badge": "AI AGENT · 2026",
         "title": "Cross-border Agent",
-        "sub": "Multilingual support · Pre-send compliance check · Demo",
+        "sub": "Cross-border support platform · Multilingual · Compliance built in",
         "account": "Account",
         "password": "Password",
         "login": "Sign in",
         "wrong": "Incorrect account or password",
-        "acct_ph": "judge",
-        "pwd_ph": "demo password",
-        "cred_hint": "Use the credentials provided by the team.",
-        "wake_hint": "First visit may take 30–60s to wake the instance up.",
+        "acct_ph": "Email or staff ID",
+        "pwd_ph": "Enter password",
+        "cred_hint": "Forgot password? Contact your store admin.",
+        "wake_hint": "The service sleeps when idle; first visit may take a moment.",
         "online": "● Online · usually replies in seconds · ZH / EN / ES",
         "welcome": "Hi! I'm this store's support assistant. Ask me about shipping, returns, or products.",
         "lang_hint": "Chinese / English / Español — just ask in your language, I reply in the same one.",
@@ -152,15 +152,15 @@ TEXTS = {
     "es": {
         "badge": "AI AGENT · 2026",
         "title": "Agente Transfronterizo",
-        "sub": "Atención multilingüe · Verificación de cumplimiento · Demo",
+        "sub": "Plataforma de atención transfronteriza · Multilingüe · Cumplimiento",
         "account": "Cuenta",
         "password": "Contraseña",
         "login": "Entrar",
         "wrong": "Cuenta o contraseña incorrecta",
-        "acct_ph": "judge",
-        "pwd_ph": "contraseña de demo",
-        "cred_hint": "Use las credenciales proporcionadas por el equipo.",
-        "wake_hint": "La primera visita puede tardar 30–60 s en activar la instancia.",
+        "acct_ph": "Correo o ID",
+        "pwd_ph": "Introduzca la contraseña",
+        "cred_hint": "¿Olvidó su contraseña? Contacte al administrador.",
+        "wake_hint": "El servicio se suspende por inactividad; la primera visita puede tardar.",
         "online": "● En línea · suele responder en segundos · ZH / EN / ES",
         "welcome": "¡Hola! Soy el asistente de esta tienda. Pregúntame por envíos, devoluciones o productos.",
         "lang_hint": "中文 / English / Español — pregunta en tu idioma y responderé en el mismo.",
@@ -247,7 +247,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #40 · pwd-ph"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #42 · copy"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -647,7 +647,7 @@ def render_debug_panel():
         st.session_state.last_trace = None
         st.rerun()
 
-    st.caption("演示环境，数据为 Mock。合规判定不调用模型。")
+    st.caption("当前接入示例数据源。合规判定在本地完成，不调用模型。")
     st.caption(f"build {BUILD}")
 
 
