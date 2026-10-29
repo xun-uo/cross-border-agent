@@ -105,7 +105,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #12 · chat-align"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #13 · no-map"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -323,20 +323,12 @@ def render_trace(trace):
                         f"- 预计到达：`{order.get('eta_from')} ~ {order.get('eta_to')}`"
                     )
                     if order.get("nodes"):
-                        deck = _map_deck(order["nodes"], order.get("order_no", ""))
-                        if deck is not None:
-                            st.markdown("**物流地图**")
-                            try:
-                                st.pydeck_chart(deck, use_container_width=True)
-                            except Exception:
-                                deck = None
-                        if deck is None:
-                            st.markdown("**物流路线**")
-                            try:
-                                st.image(_route_image(order["nodes"], order["order_no"]),
-                                         use_container_width=True)
-                            except Exception:
-                                pass
+                        st.markdown("**物流路线**")
+                        try:
+                            st.image(_route_image(order["nodes"], order["order_no"]),
+                                     use_container_width=True)
+                        except Exception:
+                            pass
                         with st.expander("轨迹明细"):
                             st.markdown(_timeline_md(order["nodes"]))
                 else:
