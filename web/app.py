@@ -177,6 +177,7 @@ TEXTS = {
 }
 
 LANG_LABELS = {"中文": "zh", "English": "en", "Español": "es"}
+DISPLAY_LANG_LABEL = "Language / 语言 / Idioma"
 
 
 def t(key):
@@ -189,7 +190,7 @@ def lang_picker():
     cur = st.session_state.get("ui_lang", "zh")
     names = list(LANG_LABELS.keys())
     cur_name = next((n for n, v in LANG_LABELS.items() if v == cur), names[0])
-    pick = st.selectbox("界面语言", names, index=names.index(cur_name),
+    pick = st.selectbox(DISPLAY_LANG_LABEL, names, index=names.index(cur_name),
                         label_visibility="collapsed", key="lang_pick")
     picked = LANG_LABELS[pick]
     if st.session_state.get("ui_lang") != picked:
@@ -198,10 +199,8 @@ def lang_picker():
 
 
 def gear(key_suffix=""):
-    """右上角齿轮按钮，点开是设置面板。"""
-    with st.popover("⚙️", help="设置 / Settings"):
-        st.markdown("**界面语言 / Language / Idioma**")
-        lang_picker()
+    """右上角语言下拉：平时只显示当前语言，点开才列其他。"""
+    lang_picker()
 
 
 # ---------------- 登录 ----------------
@@ -210,7 +209,7 @@ def login_gate():
         return True
     st.session_state.setdefault("ui_lang", "zh")
 
-    _, gear_col = st.columns([9, 1])
+    _, gear_col = st.columns([8, 2])
     with gear_col:
         gear("login")
 
@@ -236,7 +235,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #26 · lang-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #27 · lang-dropdown"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -538,7 +537,7 @@ STORE_NAME = "Niao Store"
 
 
 def render_brand():
-    c1, c2, c3 = st.columns([5, 1.5, 0.6])
+    c1, c2, c3 = st.columns([4.4, 1.6, 1.6])
     with c1:
         st.markdown(f"#### 🏪 {STORE_NAME}")
         st.caption(t("online"))
