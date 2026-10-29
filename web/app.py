@@ -114,6 +114,18 @@ TEXTS = {
         "auto": "自动（按订单/原文）",
         "none": "（不用）",
         "usage": "今日调用",
+        "login_tab": "登录",
+        "signup_tab": "注册",
+        "email": "邮箱",
+        "email_ph": "you@example.com",
+        "pwd_new": "设置密码",
+        "pwd_confirm": "确认密码",
+        "signup_btn": "创建账号",
+        "signup_ok": "注册成功，请用该邮箱登录。",
+        "err_email": "请输入有效的邮箱地址。",
+        "err_pwd": "两次输入的密码不一致。",
+        "err_exists": "该邮箱已注册，请直接登录。",
+        "err_short": "密码至少 6 位。",
     },
     "en": {
         "badge": "AI AGENT · 2026",
@@ -148,6 +160,18 @@ TEXTS = {
         "auto": "Auto (from order / text)",
         "none": "(none)",
         "usage": "Calls today",
+        "login_tab": "Sign in",
+        "signup_tab": "Sign up",
+        "email": "Email",
+        "email_ph": "you@example.com",
+        "pwd_new": "Create password",
+        "pwd_confirm": "Confirm password",
+        "signup_btn": "Create account",
+        "signup_ok": "Account created. Please sign in with that email.",
+        "err_email": "Please enter a valid email address.",
+        "err_pwd": "Passwords do not match.",
+        "err_exists": "This email is already registered, please sign in.",
+        "err_short": "Password must be at least 6 characters.",
     },
     "es": {
         "badge": "AI AGENT · 2026",
@@ -182,6 +206,18 @@ TEXTS = {
         "auto": "Auto (según pedido / texto)",
         "none": "(ninguno)",
         "usage": "Llamadas hoy",
+        "login_tab": "Iniciar sesión",
+        "signup_tab": "Registrarse",
+        "email": "Correo",
+        "email_ph": "tu@ejemplo.com",
+        "pwd_new": "Crear contraseña",
+        "pwd_confirm": "Confirmar contraseña",
+        "signup_btn": "Crear cuenta",
+        "signup_ok": "Cuenta creada. Inicie sesión con ese correo.",
+        "err_email": "Introduzca un correo válido.",
+        "err_pwd": "Las contraseñas no coinciden.",
+        "err_exists": "Este correo ya está registrado, inicie sesión.",
+        "err_short": "La contraseña debe tener al menos 6 caracteres.",
     },
 }
 
@@ -234,8 +270,12 @@ def login_gate():
             pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
             ok = st.form_submit_button(t("login"), use_container_width=True)
         if ok:
-            if acct.strip().lower() == ACCOUNT.lower() and pwd == PASSWORD:
+            users = st.session_state.get("users") or {}
+            key = acct.strip().lower()
+            valid = (key == ACCOUNT.lower() and pwd == PASSWORD) or users.get(key) == pwd
+            if valid:
                 st.session_state.authed = True
+                st.session_state.user = acct.strip()
                 st.session_state.history = []
                 st.session_state.last_trace = None
                 st.rerun()
@@ -247,7 +287,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #42 · copy"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #44 · no-signup"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
