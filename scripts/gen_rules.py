@@ -213,7 +213,7 @@ RULES = [
             r"\b(?:treat|heal|cure|prevent|diagnose)\w*\s+(?:the\s+|a\s+|any\s+|your\s+|open\s+)?"
             r"(?:skin\s+)?(?:disease|eczema|acne|insomnia|anxiety|infection|wounds?|burns?|diabetes|condition)s?\b"
         ],
-        "exempt": ["not intended to treat", "cosmetic only"],
+        "exempt": ["not intended", "cosmetic only", "not a drug", "not for medical use"],
     },
     {
         "id": "US-REFUND-01", "market": "US", "category": "*", "level": "L1", "action": "block",
