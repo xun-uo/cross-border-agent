@@ -79,18 +79,137 @@ def bump_usage():
     return n
 
 
+# ---------------- 界面文案（i18n） ----------------
+TEXTS = {
+    "zh": {
+        "badge": "AI AGENT · 2026",
+        "title": "跨境智服 Agent",
+        "sub": "多语言客服 · 合规自检 · 演示环境",
+        "account": "账号",
+        "password": "密码",
+        "login": "进入",
+        "wrong": "账号或密码错误",
+        "cred_hint": "演示账号请使用参赛团队提供的凭证。",
+        "wake_hint": "首次打开需要唤醒实例，约 30–60 秒；唤醒后访问很快。",
+        "online": "● 在线 · 通常几秒内回复 · 中 / 英 / 西",
+        "welcome": "你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。",
+        "lang_hint": "支持中文 / English / Español —— 直接用你的语言提问，我会用同一种语言回复。",
+        "q1": "我的订单在哪？",
+        "q2": "退货政策",
+        "q3": "产品咨询",
+        "placeholder": "输入你的问题，例如：我的订单到哪了？",
+        "debug": "显示处理过程",
+        "processing": "正在处理…",
+        "quota": "今日体验额度已用完，请明天再试。",
+        "err": "抱歉，处理出错了，请稍后重试。",
+        "clear": "清空对话",
+        "trace": "处理过程",
+        "params": "调试参数",
+        "market": "市场",
+        "category": "品类兜底",
+        "order": "快捷订单",
+        "auto": "自动（按订单/原文）",
+        "none": "（不用）",
+        "usage": "今日调用",
+    },
+    "en": {
+        "badge": "AI AGENT · 2026",
+        "title": "Cross-border Agent",
+        "sub": "Multilingual support · Pre-send compliance check · Demo",
+        "account": "Account",
+        "password": "Password",
+        "login": "Sign in",
+        "wrong": "Incorrect account or password",
+        "cred_hint": "Use the credentials provided by the team.",
+        "wake_hint": "First visit may take 30–60s to wake the instance up.",
+        "online": "● Online · usually replies in seconds · ZH / EN / ES",
+        "welcome": "Hi! I'm this store's support assistant. Ask me about shipping, returns, or products.",
+        "lang_hint": "Chinese / English / Español — just ask in your language, I reply in the same one.",
+        "q1": "Where is my order?",
+        "q2": "Return policy",
+        "q3": "Product info",
+        "placeholder": "Ask anything, e.g. Where is my order?",
+        "debug": "Show trace",
+        "processing": "Working…",
+        "quota": "Daily quota reached. Please try again tomorrow.",
+        "err": "Sorry, something went wrong. Please retry.",
+        "clear": "Clear chat",
+        "trace": "Trace",
+        "params": "Debug params",
+        "market": "Market",
+        "category": "Category fallback",
+        "order": "Quick order",
+        "auto": "Auto (from order / text)",
+        "none": "(none)",
+        "usage": "Calls today",
+    },
+    "es": {
+        "badge": "AI AGENT · 2026",
+        "title": "Agente Transfronterizo",
+        "sub": "Atención multilingüe · Verificación de cumplimiento · Demo",
+        "account": "Cuenta",
+        "password": "Contraseña",
+        "login": "Entrar",
+        "wrong": "Cuenta o contraseña incorrecta",
+        "cred_hint": "Use las credenciales proporcionadas por el equipo.",
+        "wake_hint": "La primera visita puede tardar 30–60 s en activar la instancia.",
+        "online": "● En línea · suele responder en segundos · ZH / EN / ES",
+        "welcome": "¡Hola! Soy el asistente de esta tienda. Pregúntame por envíos, devoluciones o productos.",
+        "lang_hint": "中文 / English / Español — pregunta en tu idioma y responderé en el mismo.",
+        "q1": "¿Dónde está mi pedido?",
+        "q2": "Política de devoluciones",
+        "q3": "Información del producto",
+        "placeholder": "Escribe tu pregunta, ej. ¿Dónde está mi pedido?",
+        "debug": "Mostrar traza",
+        "processing": "Procesando…",
+        "quota": "Cuota diaria agotada. Inténtalo mañana.",
+        "err": "Lo siento, ocurrió un error. Reintenta.",
+        "clear": "Limpiar chat",
+        "trace": "Traza",
+        "params": "Parámetros",
+        "market": "Mercado",
+        "category": "Categoría por defecto",
+        "order": "Pedido rápido",
+        "auto": "Auto (según pedido / texto)",
+        "none": "(ninguno)",
+        "usage": "Llamadas hoy",
+    },
+}
+
+LANG_LABELS = {"中文": "zh", "English": "en", "Español": "es"}
+
+
+def t(key):
+    lang = st.session_state.get("ui_lang", "zh")
+    return TEXTS.get(lang, TEXTS["zh"]).get(key, key)
+
+
+def lang_switch(key_suffix=""):
+    """登录页与主界面共用的小语言选择器。"""
+    cur = st.session_state.get("ui_lang", "zh")
+    names = list(LANG_LABELS.keys())
+    cur_name = next((n for n, v in LANG_LABELS.items() if v == cur), names[0])
+    pick = st.radio("界面语言", names, index=names.index(cur_name),
+                    horizontal=True, label_visibility="collapsed",
+                    key=f"lang_{key_suffix}")
+    st.session_state["ui_lang"] = LANG_LABELS[pick]
+
+
 # ---------------- 登录 ----------------
 def login_gate():
     if st.session_state.get("authed"):
         return True
+    st.session_state.setdefault("ui_lang", "zh")
+
     _, mid, _ = st.columns([1, 1.2, 1])
     with mid:
-        st.markdown("## 跨境智服 Agent")
-        st.caption("多语言客服 · 合规自检 · 演示环境")
+        lang_switch("login")
+        st.markdown(f"## {t('title')}")
+        st.caption(t("sub"))
         with st.form("login_form"):
-            acct = st.text_input("账号", placeholder="演示账号")
-            pwd = st.text_input("密码", type="password", placeholder="演示密码")
-            ok = st.form_submit_button("进入", use_container_width=True)
+            acct = st.text_input(t("account"), placeholder="judge")
+            pwd = st.text_input(t("password"), type="password", placeholder="••••••••")
+            ok = st.form_submit_button(t("login"), use_container_width=True)
         if ok:
             if acct.strip().lower() == ACCOUNT.lower() and pwd == PASSWORD:
                 st.session_state.authed = True
@@ -98,14 +217,14 @@ def login_gate():
                 st.session_state.last_trace = None
                 st.rerun()
             else:
-                st.error("账号或密码错误")
-        st.caption("演示账号请使用参赛团队提供的凭证。")
-        st.caption("首次打开需要唤醒实例，约 30–60 秒；唤醒后访问很快，请耐心等待。")
+                st.error(t("wrong"))
+        st.caption(t("cred_hint"))
+        st.caption(t("wake_hint"))
     return False
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #23 · auto-lang"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #24 · ui-i18n"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -410,15 +529,15 @@ def render_brand():
     c1, c2 = st.columns([5, 1.5])
     with c1:
         st.markdown(f"#### 🏪 {STORE_NAME}")
-        st.caption("● 在线 · 通常几秒内回复 · 中 / 英 / 西")
+        st.caption(t("online"))
     with c2:
-        show_debug = st.toggle("显示处理过程", value=False,
+        show_debug = st.toggle(t("debug"), value=False,
                                help="答辩演示用：展开每一层的判定结果与调试参数")
     return show_debug
 
 
 def render_quick_pills():
-    quick = ["我的订单在哪？", "退货政策", "产品咨询"]
+    quick = [t("q1"), t("q2"), t("q3")]
     cols = st.columns(len(quick))
     for c, q in zip(cols, quick):
         if c.button(q, use_container_width=True, key=f"quick_{q}"):
@@ -431,6 +550,7 @@ def render_debug_panel():
     render_trace(st.session_state.last_trace)
 
     st.divider()
+    lang_switch("main")
     st.markdown("##### 调试参数")
     used = load_usage()
     st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
@@ -486,15 +606,15 @@ def _run_turn(text):
     with st.chat_message("user"):
         st.markdown(text)
     status = st.empty()
-    status.caption("正在处理…")
+    status.caption(t("processing"))
 
-    with st.spinner("处理中…"):
+    with st.spinner(t("processing")):
         try:
             trace = agent.process(text, market=market, category=category)
         except Exception as e:
             st.session_state.history.append({
                 "role": "assistant",
-                "content": f"抱歉，处理出错了（{type(e).__name__}），请稍后重试。",
+                "content": f"{t('err')} ({type(e).__name__})",
                 "ts": _now(),
             })
             st.rerun()
@@ -532,8 +652,8 @@ def main():
     with chat_col:
         if not st.session_state.history:
             with st.chat_message("assistant"):
-                st.markdown("你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。")
-                st.caption("支持中文 / English / Español —— 直接用你的语言提问，我会用同一种语言回复。")
+                st.markdown(t("welcome"))
+                st.caption(t("lang_hint"))
             render_quick_pills()
         for msg in st.session_state.history:
             with st.chat_message(msg["role"]):
@@ -554,10 +674,10 @@ def main():
     # 额度检查
     used = load_usage()
     if used >= DAILY_LIMIT:
-        st.caption("今日体验额度已用完，请明天再试。")
+        st.caption(t("quota"))
         return
 
-    placeholder = "输入你的问题，例如：我的订单到哪了？"
+    placeholder = t("placeholder")
     text = st.chat_input(placeholder)
     if text:
         _run_turn(text)
