@@ -103,7 +103,7 @@ def classify(text, history=None):
             messages.append({"role": turn.get("role", "user"), "content": turn.get("content", "")})
     messages.append({"role": "user", "content": text})
     try:
-        data = llm.chat_json(messages, temperature=0, max_tokens=200)
+        data = llm.chat_json(messages, temperature=0, max_tokens=200, hedge=True)
     except Exception as e:
         data = {
             "intent": "product_inquiry", "flags": [], "emotion": "neutral",
@@ -144,7 +144,7 @@ def generate_draft(text, intent, order, kb_items, market, category, language):
         {"role": "system", "content": GEN_SYS},
         {"role": "user", "content": "\n\n".join(ctx) + f"\n\n买家消息：{text}\n\n请直接给出回复。"},
     ]
-    return llm.chat(messages, temperature=0.3, max_tokens=500).strip()
+    return llm.chat_hedged(messages, temperature=0.3, max_tokens=500).strip()
 
 
 # ---------------- 主流程 ----------------
