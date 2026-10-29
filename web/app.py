@@ -208,10 +208,12 @@ def login_gate():
     if st.session_state.get("authed"):
         return True
     st.session_state.setdefault("ui_lang", "zh")
+    st.markdown(FLOAT_CSS, unsafe_allow_html=True)
 
     _, gear_col = st.columns([8, 2])
     with gear_col:
-        gear("login")
+        with st.container(key="lang_box_login"):
+            lang_picker()
 
     _, mid, _ = st.columns([1, 1.2, 1])
     with mid:
@@ -235,7 +237,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #27 · lang-dropdown"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #28 · lang-float"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -491,6 +493,30 @@ def render_trace(trace):
 # ---------------- 主界面 ----------------
 
 # ---------------- 样式：买家消息右对齐 ----------------
+FLOAT_CSS = """
+<style>
+/* 语言下拉浮到右上角，位于平台工具栏（Share/星标/编辑/⋮）左侧 */
+.st-key-lang_box, .st-key-lang_box_login {
+    position: fixed !important;
+    top: 12px !important;
+    right: 220px !important;
+    width: 150px !important;
+    z-index: 1000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
+    margin-bottom: 0 !important;
+}
+.st-key-lang_box [data-baseweb="select"] > div, .st-key-lang_box_login [data-baseweb="select"] > div {
+    min-height: 34px !important;
+    font-size: 13px !important;
+    background: transparent !important;
+    border-color: rgba(128,128,128,.28) !important;
+}
+</style>
+"""
+
 CHAT_CSS = """
 <style>
 /* 两边都画气泡：外层去底色，内容层收缩并加圆角 */
@@ -545,7 +571,8 @@ def render_brand():
         show_debug = st.toggle(t("debug"), value=False,
                                help="答辩演示用：展开每一层的判定结果与调试参数")
     with c3:
-        gear("main")
+        with st.container(key="lang_box"):
+            lang_picker()
     return show_debug
 
 
@@ -654,6 +681,7 @@ def main():
     st.session_state.setdefault("dbg_order", "（不用）")
 
     st.markdown(CHAT_CSS, unsafe_allow_html=True)
+    st.markdown(FLOAT_CSS, unsafe_allow_html=True)
     show_debug = render_brand()
 
     if show_debug:
