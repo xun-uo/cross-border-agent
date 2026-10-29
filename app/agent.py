@@ -201,7 +201,8 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     order = find_order(intent.get("order_no"))
     if order:
         market = order["market"]
-        language = order["language"]
+        # 买家语言优先，订单记录的语言只作兜底——买家说中文就用中文回
+        language = intent.get("language") or order.get("language") or "en"
         if force_category_from_order and order["items"]:
             category = order["items"][0]["category"]
         else:
