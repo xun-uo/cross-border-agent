@@ -212,6 +212,7 @@ def login_gate():
         return True
     st.session_state.setdefault("ui_lang", "zh")
     st.markdown(FLOAT_CSS, unsafe_allow_html=True)
+    st.markdown(FLOATING_STATUS_CSS, unsafe_allow_html=True)
 
     _, gear_col = st.columns([8, 2])
     with gear_col:
@@ -240,7 +241,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-29 #38 · debug-param"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-29 #39 · hide-status"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -496,6 +497,14 @@ def render_trace(trace):
 # ---------------- 主界面 ----------------
 
 # ---------------- 样式：买家消息右对齐 ----------------
+FLOATING_STATUS_CSS = """
+<style>
+/* 隐藏平台自带的连接/运行状态浮层（"正在打开…"/"Running"） */
+[data-testid="stStatusWidget"], [data-testid="stConnectionStatus"],
+[data-testid="stAppDeployButton"], .stDeployButton { display: none !important; }
+</style>
+"""
+
 FLOAT_CSS = """
 <style>
 /* 语言下拉浮到右上角，位于平台工具栏（Share/星标/编辑/⋮）左侧 */
@@ -692,6 +701,7 @@ def main():
 
     st.markdown(CHAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOAT_CSS, unsafe_allow_html=True)
+    st.markdown(FLOATING_STATUS_CSS, unsafe_allow_html=True)
     show_debug = render_brand()
 
     if show_debug:
