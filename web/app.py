@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #57 · bubble-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #60 · default-avatar"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -605,6 +605,8 @@ CHAT_CSS = """
 /* 买家：反向排列 + 靠右 + 淡金边 */
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
     flex-direction: row-reverse;
+    padding-right: 0.4rem !important;
+    padding-left: 0 !important;
 }
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid^="stChatMessageAvatar"]) {
     margin-left: auto;
@@ -617,7 +619,16 @@ CHAT_CSS = """
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
     text-align: right;
 }
-/* 客服：正向匹配 assistant，靠左 */
+/* 客服头像：黄灯 */
+[data-testid="stChatMessageAvatarAssistant"] {
+    background: #F5B942 !important;
+    border-radius: 50%;
+}
+/* 客服：靠左 */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) {
+    padding-left: 0.4rem !important;
+    padding-right: 0 !important;
+}
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) > div:not([data-testid^="stChatMessageAvatar"]) {
     margin-left: 10px;
     margin-right: auto;
@@ -963,6 +974,8 @@ CHAT_CSS = """
 /* 买家：反向排列 + 靠右 + 淡金边 */
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) {
     flex-direction: row-reverse;
+    padding-right: 0.4rem !important;
+    padding-left: 0 !important;
 }
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid^="stChatMessageAvatar"]) {
     margin-left: auto;
@@ -1072,7 +1085,7 @@ def _run_turn(text):
         text = f"{text}\n\n（订单号：{picked}）"
 
     st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
-    with st.chat_message("user", avatar="🧑"):
+    with st.chat_message("user"):
         st.markdown(text)
     status = st.empty()
     status.caption(t("processing"))
@@ -1337,12 +1350,12 @@ def main():
 
     with chat_col:
         if not st.session_state.history:
-            with st.chat_message("assistant", avatar="🟡"):
+            with st.chat_message("assistant"):
                 st.markdown(t("welcome"))
                 st.caption(t("lang_hint"))
             render_quick_pills()
         for msg in st.session_state.history:
-            with st.chat_message(msg["role"]):
+            with st.chat_message(msg.get("role", "assistant")):
                 st.markdown(msg["content"])
                 if msg.get("ts"):
                     st.caption(msg["ts"])
