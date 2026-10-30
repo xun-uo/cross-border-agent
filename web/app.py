@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #56 · accounts"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #57 · bubble-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -587,7 +587,7 @@ FLOAT_CSS = """
 
 CHAT_CSS = """
 <style>
-/* 两边都画气泡：外层去底色，内容层收缩并加圆角 */
+/* 两种消息都用正向 :has() 匹配，避免 :not(:has()) 在部分浏览器失效 */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
@@ -595,7 +595,7 @@ CHAT_CSS = """
 }
 [data-testid="stChatMessage"] > div:not([data-testid^="stChatMessageAvatar"]) {
     flex: 0 1 auto;
-    max-width: 78%;
+    max-width: 76%;
     background: var(--secondary-background-color);
     border: 1px solid rgba(128,128,128,.28);
     border-radius: 14px;
@@ -617,10 +617,13 @@ CHAT_CSS = """
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
     text-align: right;
 }
-/* 客服：靠左 */
-[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) > div:not([data-testid^="stChatMessageAvatar"]) {
-    margin-right: auto;
+/* 客服：正向匹配 assistant，靠左 */
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) > div:not([data-testid^="stChatMessageAvatar"]) {
     margin-left: 10px;
+    margin-right: auto;
+    text-align: left;
+}
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarAssistant"]) [data-testid="stMarkdownContainer"] {
     text-align: left;
 }
 </style>
