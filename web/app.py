@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #52 · merchant-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #55 · data-tab"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1076,7 +1076,9 @@ def _run_turn(text):
 
     with st.spinner(t("processing")):
         try:
-            trace = agent.process(text, market=market, category=category)
+            # 传入上文（去掉刚追加的这条），让意图识别能看懂"就是那个订单"
+            trace = agent.process(text, market=market, category=category,
+                                  history=st.session_state.history[:-1])
         except Exception as e:
             st.session_state.history.append({
                 "role": "assistant",
@@ -1113,7 +1115,7 @@ def render_merchant():
             st.session_state.clear()
             st.rerun()
 
-    tab_rules, tab_stats, tab_logs = st.tabs(["规则库", "判定看板", "会话记录"])
+    tab_rules, tab_stats, tab_logs, tab_data = st.tabs(["规则库", "判定看板", "会话记录", "商品与订单"])
 
     with tab_rules:
         rules = rules_store.load()
@@ -1125,7 +1127,22 @@ def render_merchant():
 
         st.divider()
         st.markdown("**导入规则**")
-        st.caption("下载模板 → 填写 → 上传。字段：id / market / category / level / action / clause / trigger / patterns")
+        st.caption("下载模板 → 填写 → 上传。导入前会逐条校验，报错会指出第几条、缺什么。")
+        dl1, dl2 = st.columns(2)
+        with dl1:
+            tpl = (ROOT / "data" / "rules_template.json")
+            if tpl.exists():
+                st.download_button("下载规则模板 (JSON)", tpl.read_bytes(),
+                                   file_name="rules_template.json",
+                                   mime="application/json",
+                                   use_container_width=True)
+        with dl2:
+            rd = (ROOT / "data" / "rules_template_readme.txt")
+            if rd.exists():
+                st.download_button("下载字段说明 (TXT)", rd.read_bytes(),
+                                   file_name="rules_template_readme.txt",
+                                   mime="text/plain",
+                                   use_container_width=True)
         up = st.file_uploader("上传规则 JSON", type=["json"], key="rule_upload")
         if up is not None:
             try:
@@ -1185,18 +1202,95 @@ def render_merchant():
         try:
             from app import judge_log
             s = judge_log.stats()
-            m1, m2, m3 = st.columns(3)
+            m1, m2, m3, m4 = st.columns(4)
             m1.metric("累计判定", s["total"])
             m2.metric("改写/拦截占比", f"{s['rewrite_rate']}%")
             m3.metric("覆盖市场", len(s["by_market"]))
-            if s["by_market"]:
-                st.markdown("**市场分布**")
-                st.bar_chart(s["by_market"])
-            if s["by_verdict"]:
-                st.markdown("**判定级别分布**")
-                st.bar_chart(s["by_verdict"])
+            m4.metric("覆盖语种", len(s.get("by_lang", {})) or "-")
+
+            if s["total"]:
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.markdown("**市场分布**")
+                    st.bar_chart(dict(sorted(s["by_market"].items())))
+                with c2:
+                    st.markdown("**判定结果分布**")
+                    st.bar_chart(s["by_verdict"])
+
+                c3, c4 = st.columns(2)
+                with c3:
+                    st.markdown("**命中条款 TOP5**")
+                    if s.get("top_clauses"):
+                        st.dataframe(
+                            [{"条款": k, "次数": v} for k, v in s["top_clauses"]],
+                            use_container_width=True, hide_index=True)
+                    else:
+                        st.caption("暂无拦截记录")
+                with c4:
+                    st.markdown("**按小时的趋势**")
+                    if s.get("by_hour"):
+                        st.bar_chart(dict(sorted(s["by_hour"].items())))
+                    else:
+                        st.caption("暂无数据")
+
+                st.markdown("**品类分布**")
+                if s.get("by_category"):
+                    st.bar_chart(s["by_category"])
+            else:
+                st.info("还没有判定记录。去买家视角问几句就会有了。")
         except Exception as e:
             st.info(f"暂无日志。{e}")
+
+    with tab_data:
+        st.caption("当前接入的示例数据集。真实环境应通过订单接口同步。")
+        try:
+            orders = _json.loads((ROOT / "data" / "orders.json").read_text(encoding="utf-8"))
+            products = _json.loads((ROOT / "data" / "products.json").read_text(encoding="utf-8"))
+        except Exception as e:
+            orders, products = [], []
+            st.error(f"数据读取失败：{e}")
+
+        m1, m2 = st.columns(2)
+        m1.metric("订单数", len(orders))
+        m2.metric("商品数", len(products))
+
+        if products:
+            st.markdown("**商品**")
+            rows = []
+            for p in products:
+                rows.append({
+                    "SKU": p.get("sku", "-"),
+                    "名称": p.get("name", "-"),
+                    "品类": p.get("category", "-"),
+                    "市场": p.get("market", "-"),
+                    "售价": p.get("price", "-"),
+                })
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+
+        if orders:
+            st.markdown("**订单**")
+            rows = []
+            for o in orders:
+                rows.append({
+                    "订单号": o.get("order_no", "-"),
+                    "买家": o.get("customer", "-"),
+                    "市场": o.get("market", "-"),
+                    "状态": o.get("status", "-"),
+                    "承运商": o.get("carrier", "-"),
+                    "运单号": o.get("tracking_no", "-"),
+                    "节点数": len(o.get("nodes") or []),
+                })
+            st.dataframe(rows, use_container_width=True, hide_index=True)
+
+            st.markdown("**订单物流详情**")
+            pick = st.selectbox("选择订单", [o.get("order_no") for o in orders],
+                                label_visibility="collapsed")
+            sel = next((o for o in orders if o.get("order_no") == pick), None)
+            if sel and sel.get("nodes"):
+                st.dataframe(
+                    [{"时间": n.get("time", "-"), "地点": n.get("place", "-"),
+                      "状态": n.get("status", "-")} for n in sel["nodes"]],
+                    use_container_width=True, hide_index=True)
 
     with tab_logs:
         try:
