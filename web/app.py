@@ -32,9 +32,9 @@ PASSWORD = str(os.environ.get("DEMO_PASSWORD") or _st_secret("DEMO_PASSWORD", "x
 
 # 账号 -> (密码, 角色)。商家进后台，买家进客服窗口。
 ACCOUNTS = {
-    "admin":   (PASSWORD, "merchant"),
+    "admin":   ("niao2026", "merchant"),
     "judge":   (PASSWORD, "merchant"),
-    "buyer":   (PASSWORD, "buyer"),
+    "buyer":   ("niao2026", "buyer"),
 }
 DAILY_LIMIT = int(os.environ.get("DAILY_LIMIT") or _st_secret("DAILY_LIMIT", 300))
 USAGE_FILE = ROOT / "data" / "_usage.json"
@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #55 · data-tab"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-30 #56 · accounts"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
