@@ -23,6 +23,18 @@ INCLUDE_EXT = {".py", ".json", ".md", ".ps1", ".cmd", ".txt", ".yml", ".yaml", "
 API = "https://api.github.com"
 
 
+def _urlopen_retry(req, timeout=90, attempts=4):
+    """网络抖动时重试；GitHub 偶尔直接超时。"""
+    last = None
+    for i in range(attempts):
+        try:
+            return urllib.request.urlopen(req, timeout=timeout)
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(2 + i * 3)
+    raise last
+
+
 def call(method, path, body=None, expect=(200, 201, 204)):
     url = f"{API}{path}"
     data = json.dumps(body).encode("utf-8") if body is not None else None
@@ -36,7 +48,7 @@ def call(method, path, body=None, expect=(200, 201, 204)):
         },
     )
     try:
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with _urlopen_retry(req) as r:
             raw = r.read().decode("utf-8", "replace")
             return r.status, (json.loads(raw) if raw else {})
     except urllib.error.HTTPError as e:
