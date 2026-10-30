@@ -199,7 +199,8 @@ def _usage_delta(before):
     }
 
 
-def process(text, market="US", category="*", history=None, force_category_from_order=True):
+def process(text, market="US", category="*", history=None, force_category_from_order=True,
+            force_language=None):
     t0 = time.perf_counter()
     usage_before = dict(llm.usage_snapshot())
     trace = {"input": text, "steps": [], "usage": {}, "final": {}}
@@ -225,6 +226,9 @@ def process(text, market="US", category="*", history=None, force_category_from_o
                 intent["_order_from_history"] = True
                 break
 
+    if force_language:
+        language = force_language
+        intent["language"] = force_language
     language = intent.get("language") or "en"
     # 品类：订单优先，其次从买家原话推断，最后才用界面传入的默认值
     inferred = infer_category(text, fallback=category)
