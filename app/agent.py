@@ -49,15 +49,36 @@ def extract_order_no(text):
     return re.sub(r"\s+", "", m.group(0)).upper() if m else None
 
 
+_STOP_EN = {
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "do", "does", "did",
+    "how", "what", "when", "where", "why", "which", "who", "this", "that", "these",
+    "it", "its", "i", "you", "my", "your", "me", "we", "our", "and", "or", "but",
+    "to", "of", "in", "on", "at", "for", "with", "from", "by", "if", "so", "not",
+    "can", "could", "would", "should", "will", "shall", "may", "might", "have",
+    "has", "had", "there", "here", "about", "any", "some", "please", "hi", "hello",
+}
+
+
+def _tokens(text):
+    """英文按词切（去停用词），中文按二元组切 —— 没有分词器时的折中。"""
+    text = (text or "").lower()
+    toks = set(w for w in re.findall(r"[a-z0-9]{2,}", text) if w not in _STOP_EN)
+    for s in re.findall(r"[\u4e00-\u9fa5]+", text):
+        if len(s) == 1:
+            toks.add(s)
+        for i in range(len(s) - 1):
+            toks.add(s[i:i + 2])
+    return toks
+
+
 def retrieve_kb(query, market, topic=None, limit=2):
     """极简检索：按关键词重叠打分。规则/合规不走这里。"""
-    q = set(re.findall(r"[\w\u4e00-\u9fa5]+", (query or "").lower()))
+    q = _tokens(query)
     scored = []
     for item in kb():
         if item["market"] not in ("*", market):
             continue
-        text = (item["title"] + " " + item["text"]).lower()
-        words = set(re.findall(r"[\w\u4e00-\u9fa5]+", text))
+        words = _tokens(item["title"] + " " + item["text"])
         score = len(q & words)
         if topic and item["topic"] == topic:
             score += 3
@@ -194,6 +215,15 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     s = time.perf_counter()
     intent = classify(text, history)
     step("intent", {"output": intent}, s)
+
+    # 本轮没给订单号，但上文提过 —— 直接沿用，避免重复追问
+    if not intent.get("order_no") and history:
+        for turn in reversed(history[-6:]):
+            m = re.search(r"ORDER\s*\d{6,}", str(turn.get("content", "")), re.I)
+            if m:
+                intent["order_no"] = m.group(0).upper().replace(" ", "")
+                intent["_order_from_history"] = True
+                break
 
     language = intent.get("language") or "en"
     # 品类：订单优先，其次从买家原话推断，最后才用界面传入的默认值
