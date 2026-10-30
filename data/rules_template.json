@@ -1,0 +1,37 @@
+[
+  {
+    "id": "XX-EXAMPLE-01",
+    "market": "US",
+    "category": "*",
+    "level": "L1",
+    "action": "block",
+    "clause": "填写法规文件名 + 条款号（例：FD&C Act §201(g)）",
+    "trigger": "一句话说明什么情况算违规",
+    "patterns": [
+      "中文触发词1",
+      "中文触发词2"
+    ],
+    "patterns_en": [
+      "english trigger 1",
+      "english trigger 2"
+    ],
+    "exempt": [
+      "例外情形1",
+      "例外情形2"
+    ]
+  },
+  {
+    "id": "XX-EXAMPLE-02",
+    "market": "EU",
+    "category": "cosmetic",
+    "level": "L2",
+    "action": "rewrite",
+    "clause": "填写法规文件名 + 条款号",
+    "trigger": "需要改写而不是直接拦截的情况",
+    "patterns": [],
+    "patterns_en": [
+      "trigger phrase"
+    ],
+    "exempt": []
+  }
+]
