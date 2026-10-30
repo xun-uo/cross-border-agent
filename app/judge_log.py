@@ -1,43 +1,36 @@
 # -*- coding: utf-8 -*-
-"""判定日志：记录每次处理的原文、市场、品类、判定结果，供商家看板统计。"""
-import json
-import time
-from pathlib import Path
+"""判定日志（内存版）。
 
-ROOT = Path(__file__).resolve().parent.parent
-LOG = ROOT / "out" / "judge_log.jsonl"
+Streamlit Cloud 的文件系统在重启后清空、且可能被多进程隔离，
+因此判定记录放在模块级列表里 —— 同一进程内商家后台一定看得到。
+代价：实例重启后清空（演示够用，正式产品应落数据库）。
+"""
+import time
+
 MAX = 500
+_LOGS = []
 
 
 def append(record):
     try:
-        LOG.parent.mkdir(parents=True, exist_ok=True)
-        record = dict(record)
-        record.setdefault("ts", time.strftime("%Y-%m-%d %H:%M:%S"))
-        with open(LOG, "a", encoding="utf-8") as f:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        r = dict(record)
+        r.setdefault("ts", time.strftime("%Y-%m-%d %H:%M:%S"))
+        _LOGS.append(r)
+        if len(_LOGS) > MAX:
+            del _LOGS[: len(_LOGS) - MAX]
     except Exception:
         pass
 
 
 def tail(n=50):
-    if not LOG.exists():
-        return []
     try:
-        lines = LOG.read_text(encoding="utf-8").strip().splitlines()[-n:]
+        return list(_LOGS[-n:])
     except Exception:
         return []
-    out = []
-    for ln in lines:
-        try:
-            out.append(json.loads(ln))
-        except Exception:
-            continue
-    return out
 
 
 def stats():
-    recs = tail(MAX)
+    recs = list(_LOGS)
     by_market, by_verdict, by_category, by_lang, by_hour = {}, {}, {}, {}, {}
     clause_count = {}
     total, rewritten = 0, 0
