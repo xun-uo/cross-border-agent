@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #85 · buyer-login + handoff-fixes"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #86 · handoff-ui + image"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -823,14 +823,10 @@ CHAT_CSS = """
 [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) > div:not([data-testid^="stChatMessageAvatar"]) {
     margin-left: auto;
     margin-right: 10px;
-    text-align: right;
     border-color: rgba(201,168,130,.45);
     background: rgba(201,168,130,.13);
 }
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stMarkdownContainer"],
-[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) [data-testid="stCaptionContainer"] {
-    text-align: right;
-}
+/* 文字统一从左往右排：气泡靠右，但文字不跟着右对齐（长文本右对齐最后一行会贴边） */
 /* 客服：靠左 */
 [data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) > div:not([data-testid^="stChatMessageAvatar"]) {
     margin-right: auto;
@@ -866,6 +862,13 @@ CHAT_CSS = """
 [data-testid="stChatMessage"]:has(.human-msg) > div:not([data-testid^="stChatMessageAvatar"]) {
     padding-right: 18px;
 }
+/* 商家后台里买家的话：靠左但同样不该挂 AI 徽章 */
+[data-testid="stChatMessage"]:has(.no-badge) > div:not([data-testid^="stChatMessageAvatar"])::after {
+    content: none !important;
+}
+[data-testid="stChatMessage"]:has(.no-badge) > div:not([data-testid^="stChatMessageAvatar"]) {
+    padding-right: 18px;
+}
 /* ===== 人工接管系统提示：居中灰字，不套气泡（淘宝客服那种） ===== */
 .sys-note {
     text-align: center;
@@ -873,6 +876,17 @@ CHAT_CSS = """
     font-size: 12.5px;
     line-height: 1.6;
     margin: 16px 0 12px;
+}
+/* 对话里的图片：气泡是 fit-content，不撑开的话图片会被压成缩略图 */
+[data-testid="stChatMessage"] [data-testid="stImage"] {
+    width: 100% !important;
+}
+[data-testid="stChatMessage"] [data-testid="stImage"] img {
+    max-width: 100% !important;
+    width: auto !important;
+    min-width: 220px !important;
+    height: auto !important;
+    border-radius: 10px;
 }
 </style>
 
@@ -1017,13 +1031,17 @@ def _run_turn(text):
 
     _tool = next((s for s in trace.get("steps", []) if s.get("step") == "tool"), {})
     _order = (_tool.get("order") or {})
+    _intent = next((s for s in trace.get("steps", []) if s.get("step") == "intent"), {})
+    _intent_name = (_intent.get("output") or {}).get("intent")
+    # 只有物流查询才画轨迹图。其他意图即便为了推断品类读了订单，也不该甩一张物流图出来
+    _nodes = (_order.get("nodes") or []) if _intent_name == "logistics_query" else []
     st.session_state.history.append({
         "role": "assistant",
         "content": trace["final"]["text"],
         "ts": _now(),
         "language": trace["final"].get("language"),
-        "order_no": _order.get("order_no"),
-        "nodes": _order.get("nodes") or [],
+        "order_no": _order.get("order_no") if _nodes else None,
+        "nodes": _nodes,
     })
     st.session_state.last_trace = trace
     try:
@@ -1044,6 +1062,66 @@ def _run_turn(text):
     st.rerun()
 
 
+UPLOAD_DIR = ROOT / "data" / "uploads"
+
+
+def _save_upload(uploaded, sid):
+    """把上传的图片落地，返回路径；失败返回 None。"""
+    import time as _t
+    try:
+        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        ext = Path(uploaded.name).suffix.lower()
+        if ext not in (".png", ".jpg", ".jpeg", ".webp"):
+            ext = ".png"
+        fn = UPLOAD_DIR / f"{(sid or 'anon')}_{int(_t.time() * 1000)}{ext}"
+        fn.write_bytes(uploaded.getvalue())
+        return str(fn)
+    except Exception:
+        return None
+
+
+def _run_image_turn(text, files):
+    """买家发图：图片落地 → 记进双方对话 → 直接转人工。
+
+    图片在客服场景里基本都是证据（破损、错发、漏发），该由人看、由人定，
+    所以不送进模型做识别，直接进人工队列。
+    """
+    from app import handoff
+    sid = st.session_state.get("sid")
+    path = None
+    for f in (files or []):
+        path = _save_upload(f, sid)
+        if path:
+            break
+    if not path:
+        st.warning("图片保存失败，请重试。")
+        return
+
+    st.session_state.history.append({
+        "role": "user",
+        "content": text or "",
+        "image": path,
+        "ts": _now(),
+    })
+    try:
+        handoff.ensure(sid, language=st.session_state.get("ui_lang", "zh"))
+        handoff.add_message(sid, "user", text or "买家发来一张图片",
+                            source="buyer", image=path)
+        handoff.mark_pending(sid, reason="buyer_image")
+        handoff.enter_human(sid)
+        st.session_state["handoff_active"] = True
+    except Exception:
+        pass
+
+    note = "图片已收到，已转人工客服处理，请稍候。"
+    st.session_state.history.append({"role": "note", "content": note, "ts": _now()})
+    try:
+        handoff.add_message(sid, "assistant", note, source="ai")
+    except Exception:
+        pass
+    st.rerun()
+
+
 # ---------------- 商家后台 ----------------
 @st.fragment(run_every=6)
 def _handoff_tab():
@@ -1053,51 +1131,90 @@ def _handoff_tab():
     商家正在回复时被强行折叠一次，体验很差。
     """
     from app import handoff, store_config
+
+    # 面板内的成功提示：整页 rerun 会滚回顶部，这里只重绘面板，滚动位置能留住
+    _pflash = st.session_state.pop("_panel_flash", None)
+    if _pflash:
+        st.success(_pflash)
+
+    # 上一轮点了「发送回复」：这一轮在输入框创建之前把它清空。
+    # 直接在按钮里改 text_area 的 key 会抛异常（widget 已实例化），所以走标记延迟一步。
+    for _k in [k for k in list(st.session_state.keys()) if k.startswith("_clear_")]:
+        _target = _k[len("_clear_"):]
+        st.session_state[_target] = ""
+        st.session_state.pop(_k, None)
+
     pend = handoff.pending()
     if not pend:
         st.info("暂无进行中的人工会话。买家触发「转人工」后会出现在这里。")
         return
     st.caption(f"{len(pend)} 个进行中的人工会话 · 每 6 秒自动刷新")
 
-    labels = {}
     for s in pend:
+        sid = s["sid"]
         stt = {"pending": "待回复", "answered": "已回复",
                "handled": "已回复"}.get(s.get("status"), "-")
-        labels[f"{stt} · {s['sid']} · {s.get('created', '')} · "
-               f"{len(s.get('messages', []))} 条"] = s["sid"]
+        open_key = f"_hopen_{sid}"
+        is_open = st.session_state.get(open_key, False)
 
-    pick = st.selectbox("选择会话", list(labels.keys()), key="handoff_pick_label")
-    sid = labels[pick]
-    s = handoff.get(sid) or {}
+        # 不用 st.expander：面板每 6 秒重绘，expander 的展开状态会被重置，
+        # 商家正在看对话时被强行收起一次。展开状态存进 session_state 才稳。
+        cc1, cc2 = st.columns([5, 1])
+        with cc1:
+            st.markdown(f"**{stt}** · 会话 `{sid}` · {s.get('created', '')} · "
+                        f"{len(s.get('messages', []))} 条消息")
+        with cc2:
+            if st.button("收起" if is_open else "查看", key=f"_htog_{sid}",
+                         use_container_width=True):
+                st.session_state[open_key] = not is_open
+                st.rerun(scope="fragment")
 
-    for m in s.get("messages", []):
-        who = {"buyer": "买家", "user": "买家"}.get(m.get("role"), "AI")
-        if m.get("source") == "human":
-            who = "人工"
-        elif m.get("source") == "note":
-            who = "系统"
-        st.markdown(f"**{who}**（{m.get('ts', '')}）：{m['text']}")
+        if is_open:
+            # 商家视角：自己这边发的（AI 和人工）靠右，买家靠左——和买家端正好相反
+            for m in s.get("messages", []):
+                src = m.get("source")
+                if src == "note":
+                    st.markdown(
+                        f'<div class="sys-note">{m.get("text", "")}</div>',
+                        unsafe_allow_html=True)
+                    continue
+                is_buyer = src in ("buyer", "user") or m.get("role") in ("buyer", "user")
+                with st.chat_message("assistant" if is_buyer else "user"):
+                    if is_buyer:
+                        # 买家的话在商家视角靠左，但它不是 AI 说的，不能挂 AI 徽章
+                        st.markdown('<span class="no-badge"></span>', unsafe_allow_html=True)
+                    st.markdown(m.get("text", ""))
+                    if m.get("image"):
+                        try:
+                            st.image(m["image"], use_container_width=True)
+                        except Exception:
+                            st.caption("（图片已失效）")
+                    if m.get("ts"):
+                        who = {"buyer": "买家", "human": "人工"}.get(src, "AI")
+                        st.caption(f"{who} · {m['ts']}")
 
-    txt = st.text_area("人工回复", key=f"reply_{sid}",
-                       placeholder="以人工客服身份回复买家…")
-    b1, b2 = st.columns(2)
-    with b1:
-        if st.button("发送回复", key=f"send_{sid}", type="primary",
-                     use_container_width=True):
-            if txt.strip():
-                nm = store_config.load().get("agent_name", "")
-                handoff.human_reply(sid, txt.strip(), agent_name=nm)
-                handoff.mark_handled(sid)
-                st.session_state["_flash"] = "已发送。买家会在 4 秒内自动收到。"
-                st.rerun()
-            else:
-                st.warning("回复内容不能为空")
-    with b2:
-        if st.button("结束会话（交还 AI）", key=f"done_{sid}",
-                     use_container_width=True,
-                     help="结束后该买家的问题重新由 AI 处理"):
-            handoff.back_to_ai(sid)
-            st.rerun()
+            txt = st.text_area("人工回复", key=f"reply_{sid}",
+                               placeholder="以人工客服身份回复买家…")
+            b1, b2 = st.columns(2)
+            with b1:
+                if st.button("发送回复", key=f"send_{sid}", type="primary",
+                             use_container_width=True):
+                    if txt.strip():
+                        nm = store_config.load().get("agent_name", "")
+                        handoff.human_reply(sid, txt.strip(), agent_name=nm)
+                        handoff.mark_handled(sid)
+                        st.session_state[f"_clear_reply_{sid}"] = True
+                        st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
+                        st.rerun(scope="fragment")
+                    else:
+                        st.warning("回复内容不能为空")
+            with b2:
+                if st.button("结束会话（交还 AI）", key=f"done_{sid}",
+                             use_container_width=True,
+                             help="结束后该买家的问题重新由 AI 处理"):
+                    handoff.back_to_ai(sid)
+                    st.rerun(scope="fragment")
+        st.divider()
 
 
 def render_merchant():
@@ -1499,6 +1616,11 @@ def main():
                     # 标记：CSS 用它把这句的 AI 徽章去掉
                     st.markdown('<span class="human-msg"></span>', unsafe_allow_html=True)
                 st.markdown(msg["content"])
+                if msg.get("image"):
+                    try:
+                        st.image(msg["image"], use_container_width=True)
+                    except Exception:
+                        st.caption("（图片已失效，请重新上传）")
                 if msg.get("ts"):
                     _ts = f"人工客服 · {msg['ts']}" if msg.get("human") else msg["ts"]
                     st.caption(_ts)
@@ -1548,9 +1670,14 @@ def main():
             return
 
     placeholder = t("placeholder")
-    text = st.chat_input(placeholder)
-    if text:
-        _run_turn(text)
+    msg = st.chat_input(placeholder, accept_file=True,
+                        file_type=["png", "jpg", "jpeg", "webp"],
+                        max_upload_size=10)
+    if msg:
+        if getattr(msg, "files", None):
+            _run_image_turn(getattr(msg, "text", "") or "", msg.files)
+        elif getattr(msg, "text", ""):
+            _run_turn(msg.text)
 
 
 main()
