@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #70 · handoff-done"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #71 · live-poll"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1011,6 +1011,32 @@ def render_merchant():
             st.info(f"暂无日志。{e}")
 
 
+@st.fragment(run_every=4)
+def _poll_human_replies():
+    """每 4 秒拉一次人工回复；有新的就触发整页重绘，实现「准实时」。
+
+    Streamlit 没有服务端推送，fragment 轮询是官方支持的做法。
+    """
+    sid = st.session_state.get("sid")
+    if not sid or not st.session_state.get("authed"):
+        return
+    if st.session_state.get("role") != "buyer":
+        return
+    try:
+        from app import handoff
+        news = handoff.pull_replies(sid)
+    except Exception:
+        return
+    if news:
+        for r in news:
+            st.session_state.setdefault("history", []).append({
+                "role": "assistant",
+                "content": "**【人工客服】** " + r["text"],
+                "ts": r.get("ts", ""),
+            })
+        st.rerun(scope="app")
+
+
 def main():
     if not login_gate():
         return
@@ -1087,6 +1113,8 @@ def main():
     if side is not None:
         with side:
             render_debug_panel()
+
+    _poll_human_replies()
 
     # 快捷问题触发
     if st.session_state.get("pending"):
