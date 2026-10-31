@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #73 · human-mode"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #75 · comfort-b"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1053,6 +1053,20 @@ def _poll_human_replies():
         if not handoff.is_human_mode(sid):
             st.session_state["handoff_active"] = False
             return
+    except Exception:
+        pass
+
+    # 人工超时未回 → 自动安抚一次（不让买家干等）
+    try:
+        if handoff.need_comfort(sid):
+            text = handoff.add_comfort_message(sid)
+            if text:
+                st.session_state.setdefault("history", []).append({
+                    "role": "assistant",
+                    "content": text,
+                    "ts": "",
+                })
+                st.rerun(scope="app")
     except Exception:
         pass
 
