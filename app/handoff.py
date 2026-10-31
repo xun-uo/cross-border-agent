@@ -27,6 +27,7 @@ def ensure(sid, market="", language="zh", buyer=""):
                 "language": language,
                 "buyer": buyer,
                 "status": "ai",       # ai / pending / answered / closed
+                "mode": "ai",         # ai = AI 处理；human = 人工接管中
                 "messages": [],       # {role, text, ts, source}
                 "reply_idx": 0,       # 买家已消费到第几条人工回复
             }
@@ -101,3 +102,24 @@ def mark_handled(sid):
     with _LOCK:
         if s["status"] in ("pending", "answered"):
             s["status"] = "handled"
+
+def enter_human(sid):
+    """转入人工模式：此后买家消息都不走 AI。"""
+    s = ensure(sid)
+    with _LOCK:
+        s["mode"] = "human"
+        if s["status"] == "ai":
+            s["status"] = "pending"
+
+
+def back_to_ai(sid):
+    """人工结束会话，交还 AI。"""
+    s = ensure(sid)
+    with _LOCK:
+        s["mode"] = "ai"
+        s["status"] = "handled"
+
+
+def is_human_mode(sid):
+    s = get(sid)
+    return bool(s and s.get("mode") == "human")
