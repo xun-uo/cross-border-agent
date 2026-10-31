@@ -247,8 +247,12 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         language = force_language
         intent["language"] = force_language
     # 关键词兜底：明确要「办」的，无论模型怎么判都转人工
-    _DO_WORDS = ("我要退货", "我要换货", "申请退货", "申请换货", "给我退款", "我要退款",
-                 "报修", "要保修", "申请保修", "补发", "要求赔偿", "我要投诉")
+    _DO_WORDS = ("我要退货", "我要退", "要退货", "想退货", "申请退货",
+                 "我要换货", "要换货", "想换货", "申请换货",
+                 "给我退款", "我要退款", "要退款", "申请退款",
+                 "报修", "要保修", "申请保修", "修一下",
+                 "补发", "漏发", "少件", "错发",
+                 "要求赔偿", "要赔偿", "我要投诉")
     if intent.get("intent") in ("return_exchange", "complaint") and any(w in text for w in _DO_WORDS):
         intent["need_human"] = True
 
