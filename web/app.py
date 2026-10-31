@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-30 #61 · force-lang"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #62 · dedupe-brand"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -644,24 +644,6 @@ CHAT_CSS = """
 STORE_NAME = "Niao Store"
 
 
-def render_brand():
-    c1, _, c3 = st.columns([6.0, 0.1, 1.3])
-    with c1:
-        st.markdown(f"#### 🏪 {STORE_NAME}")
-        st.caption(t("online"))
-    with c3:
-        # 只有带 ?debug=1 时才显示 trace 开关，评委看到的界面保持干净
-        show_toggle = st.query_params.get("debug") == "1"
-        if show_toggle:
-            show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
-        else:
-            show_debug = False
-    # 语言下拉是 fixed 定位，脱离文档流，不参与上面的列布局
-    with st.container(key="lang_box"):
-        lang_picker()
-    return show_debug
-
-
 # ---------------- trace 面板 ----------------
 BUILD = "2026-10-30 #44 · no-signup"  # 改代码时顺手改这里，用来确认线上是否已生效
 
@@ -1002,20 +984,19 @@ STORE_NAME = "Niao Store"
 
 
 def render_brand():
-    c1, c2, c3 = st.columns([4.4, 1.6, 1.6])
+    # 店名占大部分，换开关单独一列贴右；语言下拉是 fixed 定位，不参与布局
+    c1, _, c3 = st.columns([7.0, 0.1, 1.15])
     with c1:
         st.markdown(f"#### 🏪 {STORE_NAME}")
         st.caption(t("online"))
-    with c2:
-        # 只有带 ?debug=1 时才显示 trace 开关，评委看到的界面保持干净
+    with c3:
         show_toggle = st.query_params.get("debug") == "1"
         if show_toggle:
             show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
         else:
             show_debug = False
-    with c3:
-        with st.container(key="lang_box"):
-            lang_picker()
+    with st.container(key="lang_box"):
+        lang_picker()
     return show_debug
 
 
