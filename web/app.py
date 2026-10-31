@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #63 · lang-carry"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #64 · ui-lang-drives-reply"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -667,13 +667,6 @@ def render_debug_panel():
     used = load_usage()
     st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
 
-    langs = ["自动（跟随买家）", "中文", "English", "Español"]
-    cur_l = st.session_state.get("dbg_lang", langs[0])
-    lang_pick = st.selectbox("回复语言", langs,
-                             index=langs.index(cur_l) if cur_l in langs else 0,
-                             help="默认跟随买家使用的语言；想强制单一语言时在这里选")
-    st.session_state["dbg_lang"] = lang_pick
-
     labels = ["自动（按订单/原文）", "US", "EU", "CN", "PH", "KR", "RU", "MN"]
     cur = st.session_state.get("dbg_market", labels[0])
     market_label = st.selectbox("市场", labels, index=labels.index(cur) if cur in labels else 0)
@@ -730,8 +723,8 @@ def _run_turn(text):
     with st.spinner(t("processing")):
         try:
             # 传入上文（去掉刚追加的这条），让意图识别能看懂"就是那个订单"
-            _lm = {"自动（跟随买家）": None, "中文": "zh", "English": "en", "Español": "es"}
-            force_lang = _lm.get(st.session_state.get("dbg_lang", "自动（跟随买家）"))
+            # 回复语言 = 界面语言：选了中文就回中文，选了 English 就回英文
+            force_lang = st.session_state.get("ui_lang", "zh")
             trace = agent.process(text, market=market, category=category,
                                   history=st.session_state.history[:-1],
                                   force_language=force_lang)
