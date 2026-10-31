@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #62 · dedupe-brand"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #63 · lang-carry"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -748,6 +748,7 @@ def _run_turn(text):
         "role": "assistant",
         "content": trace["final"]["text"],
         "ts": _now(),
+        "language": trace["final"].get("language"),
     })
     st.session_state.last_trace = trace
     bump_usage()
