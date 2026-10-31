@@ -37,10 +37,13 @@ def ensure(sid, market="", language="zh", buyer=""):
         return s
 
 
-def add_message(sid, role, text, source="ai"):
+def add_message(sid, role, text, source="ai", image=None):
     s = ensure(sid)
     with _LOCK:
-        s["messages"].append({"role": role, "text": text, "ts": _now(), "source": source})
+        msg = {"role": role, "text": text, "ts": _now(), "source": source}
+        if image:
+            msg["image"] = image
+        s["messages"].append(msg)
         if source == "human":
             s["status"] = "answered"
         elif source == "buyer" and s.get("mode") == "human":
