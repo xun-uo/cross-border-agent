@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #71 · live-poll"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #72 · poll-on-demand"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -761,6 +761,7 @@ def _run_turn(text):
         if trace["final"].get("handoff"):
             handoff.mark_pending(st.session_state["sid"],
                                  reason=f"need_human · {trace['final'].get('verdict')}")
+            st.session_state["handoff_active"] = True   # 开始轮询人工回复
     except Exception:
         pass
     bump_usage()
@@ -1013,10 +1014,9 @@ def render_merchant():
 
 @st.fragment(run_every=4)
 def _poll_human_replies():
-    """每 4 秒拉一次人工回复；有新的就触发整页重绘，实现「准实时」。
-
-    Streamlit 没有服务端推送，fragment 轮询是官方支持的做法。
-    """
+    """只有在「转人工进行中」时才轮询，避免空闲时白耗资源。"""
+    if not st.session_state.get("handoff_active"):
+        return
     sid = st.session_state.get("sid")
     if not sid or not st.session_state.get("authed"):
         return
@@ -1034,6 +1034,7 @@ def _poll_human_replies():
                 "content": "**【人工客服】** " + r["text"],
                 "ts": r.get("ts", ""),
             })
+        st.session_state["handoff_active"] = False   # 收到人工回复，停止轮询
         st.rerun(scope="app")
 
 
