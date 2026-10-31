@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #65 · route-in-chat"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #70 · handoff-done"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -714,6 +714,13 @@ def _run_turn(text):
     if picked != "（不用）" and picked not in text and not agent.extract_order_no(text):
         text = f"{text}\n\n（订单号：{picked}）"
 
+    from app import handoff
+    try:
+        handoff.ensure(st.session_state["sid"], language=st.session_state.get("ui_lang", "zh"))
+        handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
+    except Exception:
+        pass
+
     st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
     with st.chat_message("user"):
         st.markdown(text)
@@ -748,6 +755,14 @@ def _run_turn(text):
         "nodes": _order.get("nodes") or [],
     })
     st.session_state.last_trace = trace
+    try:
+        handoff.add_message(st.session_state["sid"], "assistant",
+                            trace["final"]["text"], source="ai")
+        if trace["final"].get("handoff"):
+            handoff.mark_pending(st.session_state["sid"],
+                                 reason=f"need_human · {trace['final'].get('verdict')}")
+    except Exception:
+        pass
     bump_usage()
     status.empty()
     st.rerun()
@@ -769,7 +784,42 @@ def render_merchant():
             st.session_state.clear()
             st.rerun()
 
-    tab_rules, tab_stats, tab_logs, tab_data = st.tabs(["规则库", "判定看板", "会话记录", "商品与订单"])
+    tab_handoff, tab_rules, tab_stats, tab_logs, tab_data = st.tabs(
+        ["待处理会话", "规则库", "判定看板", "会话记录", "商品与订单"])
+
+    with tab_handoff:
+        from app import handoff
+        pend = handoff.pending()
+        if not pend:
+            st.info("暂无待人工处理的会话。买家触发「转人工」后会出现在这里。")
+        else:
+            st.caption(f"待处理 {len(pend)} 条 · 回复后买家刷新页面即可看到（Streamlit 不支持实时推送）")
+            for s in pend:
+                with st.expander(f"会话 {s['sid']} · {s.get('created','')} · "
+                                 f"{len(s.get('messages', []))} 条消息 · {s.get('reason','')}"):
+                    for m in s.get("messages", []):
+                        who = {"buyer": "买家", "user": "买家"}.get(m.get("role"), "AI")
+                        if m.get("source") == "human":
+                            who = "人工"
+                        st.markdown(f"**{who}**（{m.get('ts','')}）：{m['text']}")
+                    txt = st.text_area("人工回复", key=f"reply_{s['sid']}",
+                                       placeholder="以人工客服身份回复买家…")
+                    b1, b2 = st.columns(2)
+                    with b1:
+                        if st.button("发送回复", key=f"send_{s['sid']}", type="primary",
+                                     use_container_width=True):
+                            if txt.strip():
+                                handoff.human_reply(s["sid"], txt.strip())
+                                handoff.mark_handled(s["sid"])
+                                st.success("已发送。买家刷新页面即可看到。")
+                                st.rerun()
+                            else:
+                                st.warning("回复内容不能为空")
+                    with b2:
+                        if st.button("标记已处理", key=f"done_{s['sid']}",
+                                     use_container_width=True):
+                            handoff.mark_handled(s["sid"])
+                            st.rerun()
 
     with tab_rules:
         rules = rules_store.load()
@@ -979,6 +1029,17 @@ def main():
         render_merchant()
         return
 
+    # 会话 sid 写进 URL —— st.session_state 不跨刷新，URL 可以
+    _sid = st.query_params.get("sid") or st.session_state.get("sid")
+    if not _sid:
+        import uuid as _uuid
+        _sid = _uuid.uuid4().hex[:10]
+        try:
+            st.query_params["sid"] = _sid
+        except Exception:
+            pass
+    st.session_state["sid"] = _sid
+
     show_debug = render_brand()
 
     if show_debug:
@@ -987,6 +1048,22 @@ def main():
         chat_col, side = st.container(), None
 
     with chat_col:
+        # 拉取人工回复（买家刷新时能看到）
+        _pull_sid = st.query_params.get("sid") or st.session_state.get("sid")
+        if _pull_sid:
+            st.session_state["sid"] = _pull_sid
+        if st.session_state.get("sid"):
+            try:
+                from app import handoff as _ho
+                for _r in _ho.pull_replies(st.session_state["sid"]):
+                    st.session_state.history.append({
+                        "role": "assistant",
+                        "content": "**【人工客服】** " + _r["text"],
+                        "ts": _r.get("ts", _now()),
+                    })
+            except Exception:
+                pass
+
         if not st.session_state.history:
             with st.chat_message("assistant"):
                 st.markdown(t("welcome"))
