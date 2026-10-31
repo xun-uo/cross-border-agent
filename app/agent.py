@@ -67,6 +67,37 @@ def has_language_signal(text):
     return bool(LANG_SIGNAL.search(text or ""))
 
 
+_HUMAN_ZH = ("转人工", "找人工", "要人工", "人工客服", "人工服务", "人工坐席",
+             "真人", "转客服", "找客服", "要客服", "客服在吗", "叫客服")
+_HUMAN_EN = ("human", "real person", "live agent", "representative",
+             "speak to someone", "talk to someone",
+             "talk to an agent", "speak to an agent", "talk to a human",
+             "transfer me", "customer service", "support agent")
+
+
+def wants_human(text):
+    """买家是不是在明确要求转人工。
+
+    短句里出现「人工 / 真人」就算——买家一般懒得说全，直接一个「人工」。
+    长句放宽到词组匹配：长句里出现「人工」多半是在说别的事，误判代价比漏判高。
+    """
+    t = (text or "").strip().lower()
+    if not t:
+        return False
+    if len(t) <= 10 and ("人工" in t or "真人" in t):
+        return True
+    # 英文里买家常常只说「agent please / I want an agent」；
+    # 排除 customs agent / freight agent 这类物流专业说法
+    if (len(t) <= 20 and "agent" in t
+            and not any(w in t for w in ("customs", "freight", "broker", "shipping"))):
+        return True
+    if len(t) > 40:
+        return False
+    if any(w in t for w in _HUMAN_ZH):
+        return True
+    return any(w in t for w in _HUMAN_EN)
+
+
 def _tokens(text):
     """英文按词切（去停用词），中文按二元组切 —— 没有分词器时的折中。"""
     text = (text or "").lower()
@@ -217,7 +248,12 @@ def _usage_delta(before):
 
 
 def process(text, market="US", category="*", history=None, force_category_from_order=True,
-            force_language=None):
+            force_language=None, bound_order=None):
+    """bound_order：买家登录时绑定的订单号。
+
+    买家是凭「订单号 + 手机尾号」登录的，身份就等于这一单——所以问「我的快递到哪了」
+    不需要再追问订单号，直接查绑定的那一单。
+    """
     t0 = time.perf_counter()
     usage_before = dict(llm.usage_snapshot())
     trace = {"input": text, "steps": [], "usage": {}, "final": {}}
@@ -266,9 +302,28 @@ def process(text, market="US", category="*", history=None, force_category_from_o
                 intent["_lang_from_history"] = True
                 break
     language = language or "en"
+
+    # 买家明确要人工 → 直接转接。不查订单、不生成业务回答，
+    # 否则会出现「先甩一段物流，再说请同事协助」这种答非所问。
+    if wants_human(text):
+        trace["steps"].append({"step": "human_request", "ms": 0,
+                               "note": "明确要求人工，短路转接"})
+        trace["final"] = {
+            "text": _handoff_note(language),
+            "verdict": "handoff",
+            "level": "L3",
+            "rewritten": False,
+            "handoff": True,
+            "market": compliance.resolve_market(market),
+            "category": category,
+            "language": language,
+        }
+        trace["ms_total"] = round((time.perf_counter() - t0) * 1000)
+        trace["usage"] = _usage_delta(usage_before)
+        return trace
     # 品类：订单优先，其次从买家原话推断，最后才用界面传入的默认值
     inferred = infer_category(text, fallback=category)
-    order = find_order(intent.get("order_no"))
+    order = find_order(intent.get("order_no") or bound_order)
     if order:
         market = order["market"]
         # 买家语言优先，订单记录的语言只作兜底——买家说中文就用中文回
