@@ -268,6 +268,8 @@ def login_gate():
         with st.container(key="lang_box_login"):
             lang_picker()
 
+    _ph = st.empty()
+    st.session_state["_login_ph"] = _ph
     _, mid, _ = st.columns([1, 1.2, 1])
     with mid:
         st.markdown(f"## {t('title')}")
@@ -285,6 +287,10 @@ def login_gate():
                 st.session_state.role = rec[1]
                 st.session_state.history = []
                 st.session_state.last_trace = None
+                # 先清掉登录区再重绘，避免旧表单闪一下
+                _ph = st.session_state.pop("_login_ph", None)
+                if _ph is not None:
+                    _ph.empty()
                 st.rerun()
             else:
                 st.error(t("wrong"))
@@ -294,7 +300,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #80 · svg-route"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #81 · no-flash"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
