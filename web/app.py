@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #64 · ui-lang-drives-reply"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #65 · route-in-chat"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -737,11 +737,15 @@ def _run_turn(text):
             st.rerun()
             return
 
+    _tool = next((s for s in trace.get("steps", []) if s.get("step") == "tool"), {})
+    _order = (_tool.get("order") or {})
     st.session_state.history.append({
         "role": "assistant",
         "content": trace["final"]["text"],
         "ts": _now(),
         "language": trace["final"].get("language"),
+        "order_no": _order.get("order_no"),
+        "nodes": _order.get("nodes") or [],
     })
     st.session_state.last_trace = trace
     bump_usage()
@@ -993,6 +997,15 @@ def main():
                 st.markdown(msg["content"])
                 if msg.get("ts"):
                     st.caption(msg["ts"])
+                # 有物流节点就直接画路线图，买家视角也能看到进度
+                if msg.get("nodes"):
+                    try:
+                        st.image(_route_image(msg["nodes"], msg.get("order_no") or ""),
+                                 use_container_width=True)
+                        with st.expander("轨迹明细"):
+                            st.markdown(_timeline_md(msg["nodes"]))
+                    except Exception:
+                        pass
 
     if side is not None:
         with side:
