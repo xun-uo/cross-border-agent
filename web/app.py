@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #78 · badge-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #80 · svg-route"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -308,6 +308,77 @@ def _load_font(size):
         return ImageFont.load_default(size=size)
     except Exception:
         return ImageFont.load_default()
+
+
+def _route_svg(nodes, order_no="", width=1000, height=170):
+    """物流路线 SVG：线条长出来 + 节点依次亮 + 当前节点脉冲。"""
+    if not nodes:
+        return ""
+    n = len(nodes)
+    pad_l, pad_r = 70, 70
+    usable = width - pad_l - pad_r
+    y = 74
+    step = usable / max(n - 1, 1)
+    xs = [pad_l + i * step for i in range(n)]
+    line_d = "M %.1f %.1f L %.1f %.1f" % (xs[0], y, xs[-1], y)
+
+    css = (
+        "<style>"
+        ".rt-line{stroke:#4A6EAA;stroke-width:3;fill:none;stroke-linecap:round;"
+        "stroke-dasharray:1000;stroke-dashoffset:1000;animation:rtDraw 1.1s ease-out forwards;}"
+        "@keyframes rtDraw{to{stroke-dashoffset:0;}}"
+        ".rt-node{opacity:0;animation:rtFade .35s ease-out forwards;}"
+        "@keyframes rtFade{to{opacity:1;}}"
+        ".rt-pulse{animation:rtPulse 1.9s ease-out infinite;}"
+        "@keyframes rtPulse{0%{r:11;opacity:.55}70%{r:24;opacity:0}100%{r:24;opacity:0}}"
+        ".rt-label{font-size:11px;fill:#8C8478;}"
+        ".rt-title{font-size:13px;fill:#C9A882;font-weight:600;letter-spacing:.5px;}"
+        ".rt-tag{font-size:10px;letter-spacing:1px;}"
+        "</style>"
+    )
+
+    parts = ['<svg viewBox="0 0 %d %d" width="100%%" xmlns="http://www.w3.org/2000/svg" '
+             'style="font-family:-apple-system,Segoe UI,Microsoft YaHei,sans-serif;">' % (width, height)]
+    parts.append(css)
+    parts.append('<text class="rt-title" x="14" y="22">Route · %s</text>' % (order_no or ""))
+    parts.append('<path class="rt-line" d="%s" />' % line_d)
+
+    for i, nd in enumerate(nodes):
+        last = (i == n - 1)
+        delay = 0.35 + i * 0.16
+        color = "#3DBE78" if last else "#4A8AF4"
+        r = 11 if last else 8
+        parts.append('<g class="rt-node" style="animation-delay:%.2fs">' % delay)
+        if last:
+            parts.append('<circle class="rt-pulse" cx="%.1f" cy="%d" r="11" fill="#3DBE78" />' % (xs[i], y))
+        parts.append('<circle cx="%.1f" cy="%d" r="%d" fill="%s" stroke="#fff" stroke-width="2" />'
+                     % (xs[i], y, r, color))
+        parts.append("</g>")
+
+        tm = (nd.get("time") or "")[5:16]
+        parts.append('<text class="rt-label" x="%.1f" y="%d" text-anchor="middle" '
+                     'style="opacity:0;animation:rtFade .35s ease-out forwards;animation-delay:%.2fs">%s</text>'
+                     % (xs[i], y + 28, delay, tm))
+
+        if i == 0:
+            parts.append('<text class="rt-label rt-tag" x="%.1f" y="%d" text-anchor="middle" '
+                         'style="opacity:0;animation:rtFade .35s ease-out forwards;animation-delay:%.2fs">ORIGIN</text>'
+                         % (xs[i], y + 44, delay))
+        if last:
+            parts.append('<text class="rt-label rt-tag" x="%.1f" y="%d" text-anchor="middle" fill="#3DBE78" '
+                         'style="opacity:0;animation:rtFade .35s ease-out forwards;animation-delay:%.2fs">NOW</text>'
+                         % (xs[i], y + 44, delay))
+
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def _route_html(nodes, order_no=""):
+    svg = _route_svg(nodes, order_no)
+    if not svg:
+        return ""
+    return ('<div style="background:#131A26;border-radius:12px;padding:14px 16px 6px;'
+            'border:1px solid rgba(74,110,170,.35);">%s</div>' % svg)
 
 
 def _route_image(nodes, order_no="", width=1000, height=150):
@@ -1170,12 +1241,16 @@ def main():
                 # 有物流节点就直接画路线图，买家视角也能看到进度
                 if msg.get("nodes"):
                     try:
-                        st.image(_route_image(msg["nodes"], msg.get("order_no") or ""),
-                                 use_container_width=True)
+                        st.markdown(_route_html(msg["nodes"], msg.get("order_no") or ""),
+                                    unsafe_allow_html=True)
                         with st.expander("轨迹明细"):
                             st.markdown(_timeline_md(msg["nodes"]))
                     except Exception:
-                        pass
+                        try:
+                            st.image(_route_image(msg["nodes"], msg.get("order_no") or ""),
+                                     use_container_width=True)
+                        except Exception:
+                            pass
 
     if side is not None:
         with side:
