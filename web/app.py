@@ -255,66 +255,12 @@ def gear(key_suffix=""):
     lang_picker()
 
 
-# ---------------- 登录 ----------------
-LOGIN_CSS = """
-<style>
-/* 登录卡片：收窄到 440px 并居中 */
-[data-testid="stForm"] {
-    max-width: 440px !important;
-    margin: 18px auto 0 !important;
-    padding: 30px 28px !important;
-    border-radius: 18px !important;
-    border: 1px solid rgba(128,128,128,.22) !important;
-    background: #FFFFFF !important;
-    box-shadow: 0 10px 34px rgba(0,0,0,.09) !important;
-}
-/* 输入框加高、圆角加大 */
-[data-testid="stForm"] input {
-    height: 44px !important;
-    border-radius: 10px !important;
-    font-size: 15px !important;
-}
-/* 主按钮：金色实心 */
-[data-testid="stForm"] button[kind="secondaryFormSubmit"],
-[data-testid="stForm"] button {
-    height: 46px !important;
-    border-radius: 10px !important;
-    background: #C9A882 !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    letter-spacing: 2px !important;
-    box-shadow: 0 4px 14px rgba(201,168,130,.35) !important;
-}
-[data-testid="stForm"] button:hover {
-    background: #B8976F !important;
-}
-/* 标题区：金色短横线 */
-.login-line {
-    width: 52px; height: 3px; margin: 14px auto 26px;
-    background: linear-gradient(90deg, rgba(201,168,130,0), #C9A882, rgba(201,168,130,0));
-    border-radius: 2px;
-}
-/* 登录页整体垂直位置 */
-.login-wrap { margin-top: 9vh; }
-/* 标题区居中，和卡片对齐 */
-[data-testid="stMarkdownContainer"]:has(h2) { text-align: center; }
-[data-testid="stMarkdownContainer"]:has(h2) + [data-testid="stCaptionContainer"] { text-align: center; }
-[data-testid="stCaptionContainer"] { text-align: center; }
-.login-line { margin-left: auto; margin-right: auto; }
-</style>
-"""
-
-
 def login_gate():
     if st.session_state.get("authed"):
         return True
     st.session_state.setdefault("ui_lang", "zh")
     st.markdown(FLOAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOATING_STATUS_CSS, unsafe_allow_html=True)
-    st.markdown(LOGIN_CSS, unsafe_allow_html=True)
-    st.markdown('<div class="login-wrap"></div>', unsafe_allow_html=True)
 
     _, gear_col = st.columns([8, 2])
     with gear_col:
@@ -327,7 +273,6 @@ def login_gate():
     with mid:
         st.markdown(f"## {t('title')}")
         st.caption(t("sub"))
-        st.markdown('<div class="login-line"></div>', unsafe_allow_html=True)
         with st.form("login_form"):
             acct = st.text_input(t("account"), placeholder=t("acct_ph"))
             pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
@@ -354,7 +299,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #83 · login-center"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #84 · revert-login"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -942,8 +887,6 @@ def _run_turn(text):
     bump_usage()
     status.empty()
     st.rerun()
-
-
 
 
 # ---------------- 商家后台 ----------------
