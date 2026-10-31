@@ -100,6 +100,15 @@ TEXTS = {
         "pwd_ph": "请输入密码",
         "cred_hint": "忘记密码请联系店铺管理员。",
         "wake_hint": "服务空闲时会自动休眠，首次访问请稍候。",
+        "tab_buyer": "买家",
+        "tab_shop": "商家",
+        "order_no": "订单号",
+        "order_ph": "例如 ORDER20261021001",
+        "phone_tail": "手机号后四位",
+        "tail_ph": "例如 0001",
+        "enter_btn": "进入",
+        "err_login": "订单号或手机尾号不对，请检查后重试。",
+        "bound_to": "当前订单",
         "online": "🟢 在线",
         "welcome": "你好，我是这家店的客服助手。物流、退换货、产品问题都可以问我。",
         "lang_hint": "支持中文 / English / Español —— 直接用你的语言提问，我会用同一种语言回复。",
@@ -111,7 +120,16 @@ TEXTS = {
         "debug_help": "答辩演示用：展开每一层的判定结果与调试参数",
         "processing": "正在处理…",
         "quota": "今日体验额度已用完，请明天再试。",
+        "quota_more": "今日体验额度已用完，明天 0 点自动重置。",
+        "quota_tip": "想继续看系统能力，可以切到商家后台看规则库、判定看板与会话记录。",
         "err": "抱歉，处理出错了，请稍后重试。",
+        "err_timeout": "这次响应超时了，不是你的问题。可以点「重试上一条」再发一次。",
+        "err_busy": "模型服务当前繁忙，稍等几秒再试。",
+        "err_key": "服务端密钥失效，重试无效，请联系管理员。",
+        "err_net": "连不上模型服务，检查网络后重试。",
+        "retry": "重试上一条",
+        "handoff_expired": "人工会话已过期（服务重启过），已为你重新启用 AI 助手。",
+        "waiting": "已转人工，正在等待商家回复…",
         "clear": "清空对话",
         "trace": "处理过程",
         "params": "调试参数",
@@ -146,6 +164,15 @@ TEXTS = {
         "pwd_ph": "Enter password",
         "cred_hint": "Forgot password? Contact your store admin.",
         "wake_hint": "The service sleeps when idle; first visit may take a moment.",
+        "tab_buyer": "Buyer",
+        "tab_shop": "Merchant",
+        "order_no": "Order number",
+        "order_ph": "e.g. ORDER20261021001",
+        "phone_tail": "Last 4 digits of phone",
+        "tail_ph": "e.g. 0001",
+        "enter_btn": "Enter",
+        "err_login": "Order number or phone digits don't match. Please check and retry.",
+        "bound_to": "Current order",
         "online": "🟢 Online",
         "welcome": "Hi! I'm this store's support assistant. Ask me about shipping, returns, or products.",
         "lang_hint": "Chinese / English / Español — just ask in your language, I reply in the same one.",
@@ -157,7 +184,16 @@ TEXTS = {
         "debug_help": "For demo: expand every judgement layer and debug params",
         "processing": "Working…",
         "quota": "Daily quota reached. Please try again tomorrow.",
+        "quota_more": "Daily demo quota reached. It resets at midnight.",
+        "quota_tip": "To keep exploring, switch to the merchant console for the rule library, judgement stats and session log.",
         "err": "Sorry, something went wrong. Please retry.",
+        "err_timeout": "The request timed out — not your fault. Tap 'Retry last message' to send it again.",
+        "err_busy": "The model service is busy right now. Try again in a few seconds.",
+        "err_key": "Server API key is invalid; retrying won't help. Please contact the admin.",
+        "err_net": "Can't reach the model service. Check your connection and retry.",
+        "retry": "Retry last message",
+        "handoff_expired": "The human session has expired (the service restarted). AI assistant is back on.",
+        "waiting": "Handed over to a human agent — waiting for a reply…",
         "clear": "Clear chat",
         "trace": "Trace",
         "params": "Debug params",
@@ -192,6 +228,15 @@ TEXTS = {
         "pwd_ph": "Introduzca la contraseña",
         "cred_hint": "¿Olvidó su contraseña? Contacte al administrador.",
         "wake_hint": "El servicio se suspende por inactividad; la primera visita puede tardar.",
+        "tab_buyer": "Comprador",
+        "tab_shop": "Comercio",
+        "order_no": "Número de pedido",
+        "order_ph": "p. ej. ORDER20261021001",
+        "phone_tail": "Últimos 4 dígitos del teléfono",
+        "tail_ph": "p. ej. 0001",
+        "enter_btn": "Entrar",
+        "err_login": "El pedido o los dígitos no coinciden. Revíselos y reintente.",
+        "bound_to": "Pedido actual",
         "online": "🟢 En línea",
         "welcome": "¡Hola! Soy el asistente de esta tienda. Pregúntame por envíos, devoluciones o productos.",
         "lang_hint": "中文 / English / Español — pregunta en tu idioma y responderé en el mismo.",
@@ -203,7 +248,16 @@ TEXTS = {
         "debug_help": "Para demo: muestra cada capa del juicio y los parámetros",
         "processing": "Procesando…",
         "quota": "Cuota diaria agotada. Inténtalo mañana.",
+        "quota_more": "Cuota diaria de la demo agotada. Se reinicia a medianoche.",
+        "quota_tip": "Para seguir explorando, entra al panel del comercio: biblioteca de reglas, estadísticas y registro de sesiones.",
         "err": "Lo siento, ocurrió un error. Reintenta.",
+        "err_timeout": "La solicitud se agotó por tiempo — no es culpa suya. Pulse «Reintentar» para enviarla de nuevo.",
+        "err_busy": "El servicio del modelo está ocupado. Inténtelo en unos segundos.",
+        "err_key": "La clave del servidor no es válida; reintentar no ayudará. Contacte con el administrador.",
+        "err_net": "No se puede conectar con el servicio del modelo. Revise la red y reintente.",
+        "retry": "Reintentar el último mensaje",
+        "handoff_expired": "La sesión con el agente humano ha caducado (el servicio se reinició). El asistente AI vuelve a estar activo.",
+        "waiting": "Transferido a un agente humano — esperando respuesta…",
         "clear": "Limpiar chat",
         "trace": "Traza",
         "params": "Parámetros",
@@ -237,6 +291,26 @@ def t(key):
     return TEXTS.get(lang, TEXTS["zh"]).get(key, key)
 
 
+def _friendly_error(e):
+    """把底层异常翻译成用户能看懂、也能据此行动的一句话。
+
+    区分超时 / 限流 / 密钥 / 网络四种可分辨的情况，剩下的才归到通用错误。
+    不把异常类名直接甩给买家看。
+    """
+    import re
+    s = f"{type(e).__name__}: {e}".lower()
+    if "timeout" in s or "timed out" in s:
+        return t("err_timeout")
+    if re.search(r"http 5\d\d", s) or "429" in s or "rate limit" in s:
+        return t("err_busy")
+    if "401" in s or "403" in s or "unauthorized" in s or "api key" in s:
+        return t("err_key")
+    if ("urlerror" in s or "connection" in s or "network" in s
+            or "resolve" in s or "ssl" in s):
+        return t("err_net")
+    return t("err")
+
+
 def lang_picker():
     """齿轮 + 下拉：平时只显示当前语言，点开才列出其他。"""
     cur = st.session_state.get("ui_lang", "zh")
@@ -253,6 +327,35 @@ def lang_picker():
 def gear(key_suffix=""):
     """右上角语言下拉：平时只显示当前语言，点开才列其他。"""
     lang_picker()
+
+
+def _after_login(user, role, bound_order=None):
+    """登录成功后统一收尾。调用方负责 st.rerun()。"""
+    st.session_state.authed = True
+    st.session_state.user = user
+    st.session_state.role = role
+    st.session_state.bound_order = bound_order
+    st.session_state.history = []
+    st.session_state.last_trace = None
+    # 先清掉登录区再重绘，避免旧表单闪一下
+    _ph = st.session_state.pop("_login_ph", None)
+    if _ph is not None:
+        _ph.empty()
+
+
+def _verify_buyer(order_no, tail):
+    """买家凭「订单号 + 手机后四位」进入。成功返回订单对象，失败返回 None。
+
+    真实产品这里应换成短信验证码；比赛环境没有短信通道，用尾号四位代替，
+    它至少证明「知道这一单 + 拿得到预留手机」，比裸订单号强一档。
+    """
+    from app import agent as _agent
+    tail = (tail or "").strip()
+    o = _agent.find_order((order_no or "").strip())
+    if not o or len(tail) != 4 or (o.get("phone") or "")[-4:] != tail:
+        st.error(t("err_login"))
+        return None
+    return o
 
 
 def login_gate():
@@ -273,33 +376,42 @@ def login_gate():
     with mid:
         st.markdown(f"## {t('title')}")
         st.caption(t("sub"))
-        with st.form("login_form"):
-            acct = st.text_input(t("account"), placeholder=t("acct_ph"))
-            pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
-            ok = st.form_submit_button(t("login"), use_container_width=True)
-        if ok:
-            key = acct.strip().lower()
-            rec = ACCOUNTS.get(key)
-            if rec and rec[0] == pwd:
-                st.session_state.authed = True
-                st.session_state.user = key
-                st.session_state.role = rec[1]
-                st.session_state.history = []
-                st.session_state.last_trace = None
-                # 先清掉登录区再重绘，避免旧表单闪一下
-                _ph = st.session_state.pop("_login_ph", None)
-                if _ph is not None:
-                    _ph.empty()
-                st.rerun()
-            else:
-                st.error(t("wrong"))
-        st.caption(t("cred_hint"))
+
+        tab_buyer, tab_shop = st.tabs([t("tab_buyer"), t("tab_shop")])
+
+        with tab_buyer:
+            with st.form("buyer_login"):
+                _no = st.text_input(t("order_no"), placeholder=t("order_ph"))
+                _tail = st.text_input(t("phone_tail"), placeholder=t("tail_ph"),
+                                      max_chars=4)
+                _b_ok = st.form_submit_button(t("enter_btn"), use_container_width=True)
+            if _b_ok:
+                _o = _verify_buyer(_no, _tail)
+                if _o:
+                    _after_login("buyer", "buyer", _o["order_no"])
+                    st.rerun()
+
+        with tab_shop:
+            with st.form("login_form"):
+                acct = st.text_input(t("account"), placeholder=t("acct_ph"))
+                pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
+                ok = st.form_submit_button(t("login"), use_container_width=True)
+            if ok:
+                key = acct.strip().lower()
+                rec = ACCOUNTS.get(key)
+                if rec and rec[0] == pwd:
+                    _after_login(key, rec[1], None)
+                    st.rerun()
+                else:
+                    st.error(t("wrong"))
+            st.caption(t("cred_hint"))
+
         st.caption(t("wake_hint"))
     return False
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #84 · revert-login"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #85 · buyer-login + handoff-fixes"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -658,6 +770,30 @@ FLOAT_CSS = """
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
 }
+
+/* 登录卡片：不要白底，跟页面背景同色，只留一圈细边 */
+[data-testid="stForm"] {
+    background: transparent !important;
+    border: 1px solid rgba(201,168,130,.22) !important;
+    border-radius: 16px !important;
+    padding: 1.3rem 1.5rem !important;
+}
+/* 卡片里的「登录 / 注册」标签，白底时看不见，透明后按主题色走 */
+[data-testid="stForm"] [data-baseweb="tab"] p {
+    color: inherit !important;
+}
+/* 访客入口：低调描边，别抢登录主按钮的注意力 */
+.st-key-guest_in button {
+    background: transparent !important;
+    border: 1px dashed rgba(201,168,130,.5) !important;
+    color: rgba(201,168,130,1) !important;
+    box-shadow: none !important;
+    font-weight: 500 !important;
+}
+.st-key-guest_in button:hover {
+    border-color: rgba(201,168,130,.9) !important;
+    background: rgba(201,168,130,.08) !important;
+}
 </style>
 """
 
@@ -722,6 +858,21 @@ CHAT_CSS = """
     font-family: "Segoe UI", Arial, sans-serif;
     line-height: 1.4;
     pointer-events: none;
+}
+/* 人工客服说的话：人说的话不能标成 AI */
+[data-testid="stChatMessage"]:has(.human-msg) > div:not([data-testid^="stChatMessageAvatar"])::after {
+    content: none !important;
+}
+[data-testid="stChatMessage"]:has(.human-msg) > div:not([data-testid^="stChatMessageAvatar"]) {
+    padding-right: 18px;
+}
+/* ===== 人工接管系统提示：居中灰字，不套气泡（淘宝客服那种） ===== */
+.sys-note {
+    text-align: center;
+    color: rgba(150, 150, 150, .95);
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 16px 0 12px;
 }
 </style>
 
@@ -822,7 +973,7 @@ def _run_turn(text):
             handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
             st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
             st.session_state.history.append({
-                "role": "assistant",
+                "role": "note",
                 "content": "已转接人工客服，您的问题会由人工同事跟进，请稍候。",
                 "ts": _now(),
             })
@@ -850,12 +1001,16 @@ def _run_turn(text):
             force_lang = st.session_state.get("ui_lang", "zh")
             trace = agent.process(text, market=market, category=category,
                                   history=st.session_state.history[:-1],
-                                  force_language=force_lang)
+                                  force_language=force_lang,
+                                  bound_order=st.session_state.get("bound_order"))
         except Exception as e:
+            # 记下这条消息，界面给一个「重试上一条」的入口，而不是让用户自己重打一遍
+            st.session_state["last_failed"] = text
             st.session_state.history.append({
                 "role": "assistant",
-                "content": f"{t('err')} ({type(e).__name__})",
+                "content": _friendly_error(e),
                 "ts": _now(),
+                "error": True,
             })
             st.rerun()
             return
@@ -890,6 +1045,61 @@ def _run_turn(text):
 
 
 # ---------------- 商家后台 ----------------
+@st.fragment(run_every=6)
+def _handoff_tab():
+    """待处理会话面板：每 6 秒自动刷新。
+
+    用 selectbox 选会话，不用 expander——fragment 重绘会让 expander 自动收起，
+    商家正在回复时被强行折叠一次，体验很差。
+    """
+    from app import handoff, store_config
+    pend = handoff.pending()
+    if not pend:
+        st.info("暂无进行中的人工会话。买家触发「转人工」后会出现在这里。")
+        return
+    st.caption(f"{len(pend)} 个进行中的人工会话 · 每 6 秒自动刷新")
+
+    labels = {}
+    for s in pend:
+        stt = {"pending": "待回复", "answered": "已回复",
+               "handled": "已回复"}.get(s.get("status"), "-")
+        labels[f"{stt} · {s['sid']} · {s.get('created', '')} · "
+               f"{len(s.get('messages', []))} 条"] = s["sid"]
+
+    pick = st.selectbox("选择会话", list(labels.keys()), key="handoff_pick_label")
+    sid = labels[pick]
+    s = handoff.get(sid) or {}
+
+    for m in s.get("messages", []):
+        who = {"buyer": "买家", "user": "买家"}.get(m.get("role"), "AI")
+        if m.get("source") == "human":
+            who = "人工"
+        elif m.get("source") == "note":
+            who = "系统"
+        st.markdown(f"**{who}**（{m.get('ts', '')}）：{m['text']}")
+
+    txt = st.text_area("人工回复", key=f"reply_{sid}",
+                       placeholder="以人工客服身份回复买家…")
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button("发送回复", key=f"send_{sid}", type="primary",
+                     use_container_width=True):
+            if txt.strip():
+                nm = store_config.load().get("agent_name", "")
+                handoff.human_reply(sid, txt.strip(), agent_name=nm)
+                handoff.mark_handled(sid)
+                st.session_state["_flash"] = "已发送。买家会在 4 秒内自动收到。"
+                st.rerun()
+            else:
+                st.warning("回复内容不能为空")
+    with b2:
+        if st.button("结束会话（交还 AI）", key=f"done_{sid}",
+                     use_container_width=True,
+                     help="结束后该买家的问题重新由 AI 处理"):
+            handoff.back_to_ai(sid)
+            st.rerun()
+
+
 def render_merchant():
     from app import rules_store  # noqa: F401
     import json as _json
@@ -903,43 +1113,16 @@ def render_merchant():
             st.session_state.clear()
             st.rerun()
 
-    tab_handoff, tab_rules, tab_stats, tab_logs, tab_data = st.tabs(
-        ["待处理会话", "规则库", "判定看板", "会话记录", "商品与订单"])
+    # 操作成功提示：rerun 会吃掉当轮的 st.success，所以存下来下一轮再显示
+    _flash = st.session_state.pop("_flash", None)
+    if _flash:
+        st.success(_flash)
+
+    tab_handoff, tab_rules, tab_stats, tab_logs, tab_data, tab_store = st.tabs(
+        ["待处理会话", "规则库", "判定看板", "会话记录", "商品与订单", "店铺设置"])
 
     with tab_handoff:
-        from app import handoff
-        pend = handoff.pending()
-        if not pend:
-            st.info("暂无待人工处理的会话。买家触发「转人工」后会出现在这里。")
-        else:
-            st.caption(f"待处理 {len(pend)} 条 · 回复后买家刷新页面即可看到（Streamlit 不支持实时推送）")
-            for s in pend:
-                with st.expander(f"会话 {s['sid']} · {s.get('created','')} · "
-                                 f"{len(s.get('messages', []))} 条消息 · {s.get('reason','')}"):
-                    for m in s.get("messages", []):
-                        who = {"buyer": "买家", "user": "买家"}.get(m.get("role"), "AI")
-                        if m.get("source") == "human":
-                            who = "人工"
-                        st.markdown(f"**{who}**（{m.get('ts','')}）：{m['text']}")
-                    txt = st.text_area("人工回复", key=f"reply_{s['sid']}",
-                                       placeholder="以人工客服身份回复买家…")
-                    b1, b2 = st.columns(2)
-                    with b1:
-                        if st.button("发送回复", key=f"send_{s['sid']}", type="primary",
-                                     use_container_width=True):
-                            if txt.strip():
-                                handoff.human_reply(s["sid"], txt.strip())
-                                handoff.mark_handled(s["sid"])
-                                st.success("已发送。买家刷新页面即可看到。")
-                                st.rerun()
-                            else:
-                                st.warning("回复内容不能为空")
-                    with b2:
-                        if st.button("结束会话（交还 AI）", key=f"done_{s['sid']}",
-                                     use_container_width=True,
-                                     help="结束后该买家的问题重新由 AI 处理"):
-                            handoff.back_to_ai(s["sid"])
-                            st.rerun()
+        _handoff_tab()
 
     with tab_rules:
         rules = rules_store.load()
@@ -979,7 +1162,7 @@ def render_merchant():
                     for r in ok_rows:
                         merged[r["id"]] = r
                     n = rules_store.save(list(merged.values()))
-                    st.success(f"已导入 {len(ok_rows)} 条，当前共 {n} 条规则。")
+                    st.session_state["_flash"] = f"已导入 {len(ok_rows)} 条，当前共 {n} 条规则。"
                     st.rerun()
             except Exception as e:
                 st.error(f"文件解析失败：{type(e).__name__} - {e}")
@@ -1010,7 +1193,7 @@ def render_merchant():
                     st.error("校验未通过：\n- " + "\n- ".join(errs[:10]))
                 else:
                     n = rules_store.save(ok_rows)
-                    st.success(f"已保存，当前 {n} 条规则。")
+                    st.session_state["_flash"] = f"已保存，当前 {n} 条规则。"
                     st.rerun()
         with b2:
             vs = rules_store.versions()
@@ -1018,7 +1201,7 @@ def render_merchant():
                                 label_visibility="collapsed")
             if vs and st.button("回滚", use_container_width=True):
                 rules_store.rollback(pick)
-                st.success(f"已回滚到 {pick}")
+                st.session_state["_flash"] = f"已回滚到 {pick}"
                 st.rerun()
 
     with tab_stats:
@@ -1130,6 +1313,30 @@ def render_merchant():
         except Exception as e:
             st.info(f"暂无日志。{e}")
 
+    with tab_store:
+        from app import store_config as _store_cfg
+        cfg = _store_cfg.load()
+        st.caption("这里的设置改完直接对买家端生效，不需要改代码。")
+        with st.form("store_cfg"):
+            url = st.text_input("店铺官网地址", value=cfg.get("site_url", ""),
+                                placeholder="https://your-store.com")
+            label = st.text_input("跳转按钮文案", value=cfg.get("site_label", ""),
+                                  placeholder="前往店铺官网")
+            agent_name = st.text_input("客服对外名称", value=cfg.get("agent_name", ""),
+                                       placeholder="留空则显示「人工客服」")
+            saved = st.form_submit_button("保存设置", type="primary",
+                                          use_container_width=True)
+        if saved:
+            _store_cfg.save({
+                "site_url": (url or "").strip(),
+                "site_label": (label or "").strip() or "前往店铺官网",
+                "agent_name": (agent_name or "").strip(),
+            })
+            st.session_state["_flash"] = "店铺设置已保存，买家端刷新即可看到。"
+            st.rerun()
+        if cfg.get("site_url"):
+            st.caption(f"当前跳转地址：{cfg['site_url']}")
+
 
 @st.fragment(run_every=4)
 def _poll_human_replies():
@@ -1170,11 +1377,19 @@ def _poll_human_replies():
 
     if news:
         for r in news:
-            st.session_state.setdefault("history", []).append({
-                "role": "assistant",
-                "content": "**【人工客服】** " + r["text"],
-                "ts": r.get("ts", ""),
-            })
+            if r.get("source") == "note":
+                st.session_state.setdefault("history", []).append({
+                    "role": "note",
+                    "content": r.get("text", ""),
+                    "ts": r.get("ts", ""),
+                })
+            else:
+                st.session_state.setdefault("history", []).append({
+                    "role": "assistant",
+                    "content": r.get("text", ""),
+                    "human": True,
+                    "ts": r.get("ts", ""),
+                })
         st.rerun(scope="app")
 
 
@@ -1215,21 +1430,57 @@ def main():
         chat_col, side = st.container(), None
 
     with chat_col:
-        # 拉取人工回复（买家刷新时能看到）
+        _bound = st.session_state.get("bound_order")
+        if _bound:
+            st.caption(f"{t('bound_to')}：`{_bound}`")
+        # 商家在后台配的官网地址：买家登录后可直接跳过去
+        try:
+            from app import store_config as _store_mod
+            _sc = _store_mod.load()
+        except Exception:
+            _sc = {}
+        if _sc.get("site_url"):
+            st.link_button(_sc.get("site_label") or "前往店铺官网", _sc["site_url"])
+        # 拉取人工回复（买家页面在人工模式下 4 秒轮询一次）
         _pull_sid = st.query_params.get("sid") or st.session_state.get("sid")
         if _pull_sid:
             st.session_state["sid"] = _pull_sid
+
+        from app import handoff as _ho
+        _hs = _ho.get(st.session_state["sid"]) if st.session_state.get("sid") else None
+
+        # 服务重启会清空内存里的会话；此时买家还挂着「人工中」，必须说清楚，不能让他干等
+        if st.session_state.get("handoff_active") and _hs is None:
+            st.session_state.history.append({
+                "role": "assistant",
+                "content": t("handoff_expired"),
+                "ts": _now(),
+            })
+            st.session_state["handoff_active"] = False
+            _hs = None
+
         if st.session_state.get("sid"):
             try:
-                from app import handoff as _ho
                 for _r in _ho.pull_replies(st.session_state["sid"]):
-                    st.session_state.history.append({
-                        "role": "assistant",
-                        "content": "**【人工客服】** " + _r["text"],
-                        "ts": _r.get("ts", _now()),
-                    })
+                    if _r.get("source") == "note":
+                        st.session_state.history.append({
+                            "role": "note",
+                            "content": _r.get("text", ""),
+                            "ts": _r.get("ts", _now()),
+                        })
+                    else:
+                        st.session_state.history.append({
+                            "role": "assistant",
+                            "content": _r.get("text", ""),
+                            "human": True,
+                            "ts": _r.get("ts", _now()),
+                        })
             except Exception:
                 pass
+
+        # 已转人工、商家还没回：明确告诉买家现在在等谁
+        if _hs and _hs.get("mode") == "human" and _hs.get("status") != "answered":
+            st.caption(t("waiting"))
 
         if not st.session_state.history:
             with st.chat_message("assistant"):
@@ -1237,10 +1488,20 @@ def main():
                 st.caption(t("lang_hint"))
             render_quick_pills()
         for msg in st.session_state.history:
+            # 系统提示（如「人工客服已接入」）：居中灰字，不套气泡
+            if msg.get("role") == "note":
+                st.markdown(
+                    f'<div class="sys-note">{msg.get("content", "")}</div>',
+                    unsafe_allow_html=True)
+                continue
             with st.chat_message(msg.get("role", "assistant")):
+                if msg.get("human"):
+                    # 标记：CSS 用它把这句的 AI 徽章去掉
+                    st.markdown('<span class="human-msg"></span>', unsafe_allow_html=True)
                 st.markdown(msg["content"])
                 if msg.get("ts"):
-                    st.caption(msg["ts"])
+                    _ts = f"人工客服 · {msg['ts']}" if msg.get("human") else msg["ts"]
+                    st.caption(_ts)
                 # 有物流节点就直接画路线图，买家视角也能看到进度
                 if msg.get("nodes"):
                     try:
@@ -1270,8 +1531,21 @@ def main():
     # 额度检查
     used = load_usage()
     if used >= DAILY_LIMIT:
-        st.caption(t("quota"))
+        st.warning(t("quota_more"))
+        st.caption(t("quota_tip"))
         return
+
+    # 上一轮失败了：给一个入口重发，不用用户自己重打一遍
+    if st.session_state.get("last_failed"):
+        if st.button(t("retry"), key="retry_last"):
+            _txt = st.session_state.pop("last_failed")
+            _h = st.session_state.get("history", [])
+            if _h and _h[-1].get("error"):
+                _h.pop()
+            if _h and _h[-1].get("role") == "user":
+                _h.pop()
+            _run_turn(_txt)
+            return
 
     placeholder = t("placeholder")
     text = st.chat_input(placeholder)
