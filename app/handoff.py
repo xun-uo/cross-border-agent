@@ -43,6 +43,13 @@ def add_message(sid, role, text, source="ai"):
         s["messages"].append({"role": role, "text": text, "ts": _now(), "source": source})
         if source == "human":
             s["status"] = "answered"
+        elif source == "buyer" and s.get("mode") == "human":
+            # 买家在人工模式下发新消息 → 重新进入待处理。
+            # 否则商家回复过一次之后 status 停在 handled，买家再追问就永远不出现在待处理列表里，
+            # 商家看不见、买家干等。
+            s["status"] = "pending"
+            if not s.get("pending_since"):
+                s["pending_since"] = time.time()
 
 
 def mark_pending(sid, reason=""):
@@ -54,10 +61,16 @@ def mark_pending(sid, reason=""):
 
 
 def pending():
-    """待人工处理的会话，最新的在前。"""
+    """人工模式下的会话，最新的在前。
+
+    注意：这里筛的是 mode == "human"，不是 status == "pending"。
+    商家回复一次之后 status 会变成 answered/handled，如果按 status 筛，
+    会话会从列表里直接消失——商家看不见历史，想补一句话都没入口。
+    只有点了「交还 AI」把 mode 改回 ai，才会从列表里移除。
+    """
     with _LOCK:
-        out = [dict(s) for s in _SESSIONS.values() if s["status"] == "pending"]
-    out.sort(key=lambda x: x["created"], reverse=True)
+        out = [dict(s) for s in _SESSIONS.values() if s.get("mode") == "human"]
+    out.sort(key=lambda x: x.get("created"), reverse=True)
     return out
 
 
@@ -72,9 +85,17 @@ def get(sid):
         return dict(s) if s else None
 
 
-def human_reply(sid, text):
+def human_reply(sid, text, agent_name=""):
     s = ensure(sid)
     with _LOCK:
+        # 第一次人工回复 = 真正接管的时刻，先插一条系统小字，
+        # 让买家知道「现在换人了」，而不是突然冒出一句话
+        first = not any(m.get("source") == "human" for m in s["messages"])
+        if first:
+            who = (agent_name or "").strip() or "人工客服"
+            s["messages"].append({"role": "assistant",
+                                  "text": f"{who} 已接入，为您服务",
+                                  "ts": _now(), "source": "note"})
         s["messages"].append({"role": "assistant", "text": text,
                               "ts": _now(), "source": "human"})
         s["status"] = "answered"
@@ -82,12 +103,12 @@ def human_reply(sid, text):
 
 
 def pull_replies(sid):
-    """买家端调用：取尚未消费的人工回复，并把游标推到末尾。"""
+    """买家端调用：取尚未消费的人工回复与系统提示，并把游标推到末尾。"""
     with _LOCK:
         s = _SESSIONS.get(sid)
         if not s:
             return []
-        human = [m for m in s["messages"] if m.get("source") == "human"]
+        human = [m for m in s["messages"] if m.get("source") in ("human", "note")]
         new = human[s["reply_idx"]:]
         s["reply_idx"] = len(human)
         return list(new)
