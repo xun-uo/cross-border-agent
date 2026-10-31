@@ -121,6 +121,15 @@ INTENT_SYS = """你是跨境电商客服系统的意图识别模块。
 - 语气激烈不等于 complaint。只要同时存在具体事务诉求（如"破了要退"），
   主意图归事务类，complaint 只放进 flags。
 - 情绪激烈、提到曝光/起诉/平台投诉时，need_human = true。
+
+退换货 / 保修必须区分「要办」和「问规则」：
+- 要办理（申请退货、申请换货、报修、要求补发、要求退款、商品有问题要处理）
+  → intent 保持 return_exchange，且 need_human = true（转人工处理）
+- 只是询问规则（退货期限多久、能退吗、保修几年、政策是什么、怎么算超期）
+  → intent 保持 return_exchange，need_human = false（AI 直接答政策）
+
+判断标准：这句话只要表达了「我要你们给我办这件事」，就是办理，转人工；
+只表达「我想了解规则」，交给 AI。
 - product_inquiry 里如果买家问"能不能治某病"，仍属 product_inquiry，但 flags 加 compliance_sensitive。
 - 不要输出任何解释。"""
 
@@ -237,6 +246,12 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     if force_language:
         language = force_language
         intent["language"] = force_language
+    # 关键词兜底：明确要「办」的，无论模型怎么判都转人工
+    _DO_WORDS = ("我要退货", "我要换货", "申请退货", "申请换货", "给我退款", "我要退款",
+                 "报修", "要保修", "申请保修", "补发", "要求赔偿", "我要投诉")
+    if intent.get("intent") in ("return_exchange", "complaint") and any(w in text for w in _DO_WORDS):
+        intent["need_human"] = True
+
     language = intent.get("language")
     if not has_language_signal(text) and history:
         # 本句只有订单号之类的片段 —— 沿用上文最近一次的语言
@@ -264,8 +279,28 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     # 2) 工具 / 检索
     s = time.perf_counter()
     kb_items = []
-    need_order = intent["intent"] in ("logistics_query", "return_exchange")
+    # 物流查询一定需要订单号；退换货只有「要办理」才需要，问规则的不用
+    _is_return = intent["intent"] == "return_exchange"
+    need_order = (intent["intent"] == "logistics_query") or (_is_return and intent.get("need_human"))
     if need_order and not order and not intent.get("order_no"):
+        # 要办理退换货 / 保修 → 直接转人工，不追问订单号（人工会问）
+        if intent.get("need_human") and intent.get("intent") == "return_exchange":
+            step("tool", {"order": None, "note": "要办理退换货，直接转人工"}, s)
+            _hand = _handoff_note(language)
+            trace["final"] = {
+                "text": _hand,
+                "verdict": "handoff",
+                "level": "L3",
+                "rewritten": False,
+                "handoff": True,
+                "market": compliance.resolve_market(market),
+                "category": category,
+                "language": language,
+            }
+            trace["ms_total"] = round((time.perf_counter() - t0) * 1000)
+            trace["usage"] = _usage_delta(usage_before)
+            return trace
+
         step("tool", {"order": None, "note": "缺订单号，转为追问"}, s)
         trace["final"] = {
             "text": _ask_order_no(language),
