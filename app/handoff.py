@@ -28,6 +28,8 @@ def ensure(sid, market="", language="zh", buyer=""):
                 "buyer": buyer,
                 "status": "ai",       # ai / pending / answered / closed
                 "mode": "ai",         # ai = AI 处理；human = 人工接管中
+                "pending_since": None,
+                "comforted": False,
                 "messages": [],       # {role, text, ts, source}
                 "reply_idx": 0,       # 买家已消费到第几条人工回复
             }
@@ -110,6 +112,8 @@ def enter_human(sid):
         s["mode"] = "human"
         if s["status"] == "ai":
             s["status"] = "pending"
+        if not s.get("pending_since"):
+            s["pending_since"] = time.time()
 
 
 def back_to_ai(sid):
@@ -123,3 +127,48 @@ def back_to_ai(sid):
 def is_human_mode(sid):
     s = get(sid)
     return bool(s and s.get("mode") == "human")
+
+COMFORT = {
+    "zh": "您好，人工客服当前接待较多。您的对话已进入优先处理队列，稍后会有专人与您联系。感谢您的耐心等待。",
+    "en": "Hi, our team is currently handling a high volume of chats. "
+          "Your conversation has been queued with priority and an agent will reach out shortly. "
+          "Thank you for your patience.",
+    "es": "Hola, nuestro equipo está atendiendo un volumen alto de consultas. "
+          "Su conversación está en cola con prioridad y un agente le contactará en breve. "
+          "Gracias por su paciencia.",
+}
+
+
+def need_comfort(sid, wait_seconds=10):
+    """是否需要发安抚话术：已转人工、超时未回、且还没安抚过。"""
+    with _LOCK:
+        s = _SESSIONS.get(sid)
+        if not s:
+            return None
+        if s.get("mode") != "human" or s.get("comforted"):
+            return None
+        since = s.get("pending_since")
+        if not since or time.time() - since < wait_seconds:
+            return None
+        return s.get("language") or "zh"
+
+
+def mark_comforted(sid):
+    with _LOCK:
+        s = _SESSIONS.get(sid)
+        if s:
+            s["comforted"] = True
+
+
+def add_comfort_message(sid):
+    """把安抚话术写进会话，并标记已安抚（直接操作原对象）。"""
+    with _LOCK:
+        s = _SESSIONS.get(sid)
+        if not s:
+            return None
+        lang = s.get("language") or "zh"
+        text = COMFORT.get(lang, COMFORT["zh"])
+        s["messages"].append({"role": "assistant", "text": text,
+                              "ts": _now(), "source": "system"})
+        s["comforted"] = True
+        return text
