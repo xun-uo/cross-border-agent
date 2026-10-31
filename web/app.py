@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #72 · poll-on-demand"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #73 · human-mode"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -715,6 +715,22 @@ def _run_turn(text):
         text = f"{text}\n\n（订单号：{picked}）"
 
     from app import handoff
+
+    # 人工接管中：买家说啥都不进 AI，只存档等人工回
+    try:
+        if st.session_state.get("sid") and handoff.is_human_mode(st.session_state["sid"]):
+            handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
+            st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
+            st.session_state.history.append({
+                "role": "assistant",
+                "content": "已转接人工客服，您的问题会由人工同事跟进，请稍候。",
+                "ts": _now(),
+            })
+            st.session_state["handoff_active"] = True   # 继续轮询
+            st.rerun()
+    except Exception:
+        pass
+
     try:
         handoff.ensure(st.session_state["sid"], language=st.session_state.get("ui_lang", "zh"))
         handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
@@ -762,6 +778,10 @@ def _run_turn(text):
             handoff.mark_pending(st.session_state["sid"],
                                  reason=f"need_human · {trace['final'].get('verdict')}")
             st.session_state["handoff_active"] = True   # 开始轮询人工回复
+            try:
+                handoff.enter_human(st.session_state["sid"])   # 持续人工模式
+            except Exception:
+                pass
     except Exception:
         pass
     bump_usage()
@@ -817,9 +837,10 @@ def render_merchant():
                             else:
                                 st.warning("回复内容不能为空")
                     with b2:
-                        if st.button("标记已处理", key=f"done_{s['sid']}",
-                                     use_container_width=True):
-                            handoff.mark_handled(s["sid"])
+                        if st.button("结束会话（交还 AI）", key=f"done_{s['sid']}",
+                                     use_container_width=True,
+                                     help="结束后该买家的问题重新由 AI 处理"):
+                            handoff.back_to_ai(s["sid"])
                             st.rerun()
 
     with tab_rules:
@@ -1027,6 +1048,14 @@ def _poll_human_replies():
         news = handoff.pull_replies(sid)
     except Exception:
         return
+    # 人工结束了会话 → 停止轮询
+    try:
+        if not handoff.is_human_mode(sid):
+            st.session_state["handoff_active"] = False
+            return
+    except Exception:
+        pass
+
     if news:
         for r in news:
             st.session_state.setdefault("history", []).append({
@@ -1034,7 +1063,6 @@ def _poll_human_replies():
                 "content": "**【人工客服】** " + r["text"],
                 "ts": r.get("ts", ""),
             })
-        st.session_state["handoff_active"] = False   # 收到人工回复，停止轮询
         st.rerun(scope="app")
 
 
