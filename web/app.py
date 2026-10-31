@@ -294,7 +294,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #75 · comfort-b"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-10-31 #78 · badge-fix"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -625,7 +625,31 @@ CHAT_CSS = """
     margin-left: 10px;
     text-align: left;
 }
+/* ===== 气泡内右上角 AI 徽章 ===== */
+[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) > div:not([data-testid^="stChatMessageAvatar"]) {
+    position: relative;
+    padding-right: 54px;
+}
+[data-testid="stChatMessage"]:not(:has([data-testid="stChatMessageAvatarUser"])) > div:not([data-testid^="stChatMessageAvatar"])::after {
+    content: "AI";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: rgba(176,138,85,.12);
+    border: 1px solid rgba(176,138,85,.45);
+    border-radius: 6px;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    color: #B08A55;
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.4;
+    pointer-events: none;
+}
 </style>
+
+
 """
 
 # ---------------- 品牌栏 ----------------
