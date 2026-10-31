@@ -59,6 +59,14 @@ _STOP_EN = {
 }
 
 
+LANG_SIGNAL = re.compile(r"[a-zA-Z]{3,}|[\u4e00-\u9fa5]{2,}")
+
+
+def has_language_signal(text):
+    """这句话里有没有能判断语种的内容（纯订单号、纯数字、纯符号 → 没有）。"""
+    return bool(LANG_SIGNAL.search(text or ""))
+
+
 def _tokens(text):
     """英文按词切（去停用词），中文按二元组切 —— 没有分词器时的折中。"""
     text = (text or "").lower()
@@ -229,7 +237,16 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     if force_language:
         language = force_language
         intent["language"] = force_language
-    language = intent.get("language") or "en"
+    language = intent.get("language")
+    if not has_language_signal(text) and history:
+        # 本句只有订单号之类的片段 —— 沿用上文最近一次的语言
+        for turn in reversed(history[-6:]):
+            if turn.get("language"):
+                language = turn["language"]
+                intent["language"] = language
+                intent["_lang_from_history"] = True
+                break
+    language = language or "en"
     # 品类：订单优先，其次从买家原话推断，最后才用界面传入的默认值
     inferred = infer_category(text, fallback=category)
     order = find_order(intent.get("order_no"))
@@ -258,6 +275,7 @@ def process(text, market="US", category="*", history=None, force_category_from_o
             "handoff": False,
             "market": compliance.resolve_market(market),
             "category": category,
+            "language": language,
         }
         trace["ms_total"] = round((time.perf_counter() - t0) * 1000)
         trace["usage"] = _usage_delta(usage_before)
