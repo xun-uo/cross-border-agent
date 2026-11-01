@@ -8,6 +8,7 @@ from . import llm
 
 _RULES = None
 _MARKET_FALLBACK = {"LATAM": "US", "*": "US"}
+_KNOWN_MARKETS = None
 
 # 句末切分：中文标点后切；英文句号后面必须跟空白才切（避免 No.1 / 1.5% 被切断）
 _BOUNDARY = re.compile(r"(?<=[。！？])|(?<=[.!?])(?=\s)")
@@ -20,20 +21,30 @@ def load_rules():
     return _RULES
 
 
+def known_markets():
+    """规则表里真实存在的市场。原来只认 CN/EU/US，PH/KR/RU/MN 会被静默
+    映射成 US，那 20 条规则永远不会命中。"""
+    global _KNOWN_MARKETS
+    if _KNOWN_MARKETS is None:
+        _KNOWN_MARKETS = {r["market"] for r in load_rules()}
+    return _KNOWN_MARKETS
+
+
 def resolve_market(market):
     market = (market or "US").upper()
-    if market in ("CN", "EU", "US"):
+    if market in known_markets():
         return market
     return _MARKET_FALLBACK.get(market, "US")
 
 
 def rules_for(market, category):
+    """category="**" 表示不过滤品类（人工回复用，因为不知道买家买的是什么）。"""
     market = resolve_market(market)
     out = []
     for r in load_rules():
         if r["market"] != market:
             continue
-        if r["category"] != "*" and r["category"] != category:
+        if category != "**" and r["category"] != "*" and r["category"] != category:
             continue
         out.append(r)
     return out
@@ -196,6 +207,35 @@ def evaluate(draft, market="US", category="*"):
         "market": resolve_market(market),
         "category": category,
     }
+
+
+# ---------------- 人工回复：全市场判定 ----------------
+_LEVEL_ORDER = {"L3": 0, "L2": 1, "L1": 2}
+
+
+def evaluate_all(text, category="**"):
+    """人工客服发的话：对全部市场判一遍，取最严重的那条。
+
+    人工回复不预设买家在哪个市场、买的什么品类，所以按最严处理——
+    任何一个市场 / 品类认定违规，都不该发出去。
+    """
+    worst = {"verdict": "pass", "level": "L3", "clauses": [],
+             "market": None, "reason": "未命中任何市场的规则", "hits": []}
+    for m in sorted(known_markets()):
+        ev = evaluate(text, market=m, category=category)
+        if ev["level"] == "L3":
+            continue
+        worst["hits"].append({
+            "market": m, "level": ev["level"],
+            "clauses": ev["clauses"], "reason": ev["reason"],
+        })
+        if _LEVEL_ORDER[ev["level"]] > _LEVEL_ORDER[worst["level"]]:
+            worst.update({
+                "verdict": ev["verdict"], "level": ev["level"],
+                "clauses": ev["clauses"], "market": m,
+                "reason": ev["reason"],
+            })
+    return worst
 
 
 # ---------------- 生成前：注入禁止清单 ----------------
