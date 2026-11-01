@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #90 · 页头/回复框真固定"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #91 · 页头透明化"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -901,17 +901,20 @@ LAYOUT_CSS = """
    没有「可黏的行程」= 完全不起作用（实测 rectTop 会一路滚到 -1230） */
 /* 买家端页头：纯 markdown 的固定块（走 st.columns 会让内部塌陷、文字不渲染）。
    层级必须高过 Streamlit 自带的 stHeader（z-index 约 99 万），否则被它盖住看不见；
-   只占左上角一块，右边留给语言下拉和平台工具栏。 */
+   只占左上角一块，右边留给语言下拉和平台工具栏。
+   背景用中性半透明 + 毛玻璃：这个版本没有主题色变量，写死任何一个色都会跟页面差一截。 */
 .shop-head-fixed {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     width: min(860px, 64vw) !important;
     z-index: 1000001 !important;
-    background: #ffffff !important;
+    background: transparent !important;
+    backdrop-filter: blur(14px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
     padding: 10px 0 8px 5rem !important;
-    border-bottom: 1px solid rgba(128,128,128,.14);
-    border-right: 1px solid rgba(128,128,128,.14);
+    border-bottom: 1px solid rgba(128,128,128,.18);
+    border-right: 1px solid rgba(128,128,128,.18);
     border-bottom-right-radius: 10px;
 }
 /* 商家端页头整块容器 */
@@ -921,14 +924,13 @@ LAYOUT_CSS = """
     left: 0 !important;
     width: min(860px, 64vw) !important;
     z-index: 1000001 !important;
-    background: #ffffff !important;
+    background: transparent !important;
+    backdrop-filter: blur(14px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
     padding: 10px 0 8px 5rem !important;
-    border-bottom: 1px solid rgba(128,128,128,.14);
-    border-right: 1px solid rgba(128,128,128,.14);
+    border-bottom: 1px solid rgba(128,128,128,.18);
+    border-right: 1px solid rgba(128,128,128,.18);
     border-bottom-right-radius: 10px;
-}
-@media (prefers-color-scheme: dark) {
-    .shop-head-fixed, .st-key-mhead { background: #0e1117 !important; }
 }
 /* 给固定页头和固定回复框让出空间，内容不从它们底下钻出来 */
 [data-testid="stMainBlockContainer"] {
@@ -967,9 +969,10 @@ LAYOUT_CSS = """
     right: 5rem !important;
     z-index: 860 !important;
 }
-[data-testid="stChatInput"] > div { background: #ffffff !important; }
-@media (prefers-color-scheme: dark) {
-    [data-testid="stChatInput"] > div { background: #0e1117 !important; }
+[data-testid="stChatInput"] > div {
+    background: transparent !important;
+    backdrop-filter: blur(14px) saturate(1.2) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
 }
 /* 会话消息区按视口算高度，一屏正好放下 */
 .st-key-msgbox {
