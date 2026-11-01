@@ -216,6 +216,12 @@ COMFORT = {
           "the reply will appear right here.",
     "es": "Nuestro equipo aún no ha respondido. Su consulta está en cola — "
           "la respuesta aparecerá justo aquí.",
+    "vi": "Nhân viên chưa trả lời. Tin của bạn đã vào hàng đợi — "
+          "phản hồi sẽ hiện ngay tại đây.",
+    "th": "เจ้าหน้าที่ยังไม่ตอบ ข้อความของคุณอยู่ในคิวแล้ว "
+          "คำตอบจะแสดงที่นี่เลยค่ะ",
+    "id": "Agen kami belum membalas. Pesan Anda sudah masuk antrean — "
+          "balasannya akan muncul di sini.",
 }
 
 
