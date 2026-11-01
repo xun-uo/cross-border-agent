@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #88 · 商家端布局 + 安抚话术"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #89 · 页头固定 + 会话分组"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -893,22 +893,106 @@ CHAT_CSS = """
 
 """
 
+# ---------------- 样式：页头固定 + 回复框贴底 ----------------
+LAYOUT_CSS = """
+<style>
+/* 这个版本的 Streamlit 没有 --background-color 变量，只能按系统主题写死两套 */
+.st-key-brandhead, .st-key-mhead {
+    position: sticky !important;
+    top: -1px !important;
+    z-index: 900 !important;
+    background: #ffffff !important;
+    padding: 4px 0 8px !important;
+    border-bottom: 1px solid rgba(128,128,128,.14);
+}
+@media (prefers-color-scheme: dark) {
+    .st-key-brandhead, .st-key-mhead { background: #0e1117 !important; }
+}
+/* 顶部留白收窄，页头才能贴住顶端（默认 6rem 太空） */
+[data-testid="stMainBlockContainer"] {
+    padding-top: 2.2rem !important;
+}
+/* 页头一行：店名 / 在线 / 当前订单 */
+.shop-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+.shop-name { font-size: 1.15rem; font-weight: 700; line-height: 1.4; }
+.shop-online { font-size: .8rem; opacity: .85; }
+.shop-order { font-size: .8rem; opacity: .72; white-space: nowrap; }
+.shop-order code { font-size: .92em; padding: 1px 5px; }
+.shop-site {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 4px 12px;
+    font-size: .8rem;
+    text-decoration: none !important;
+    border: 1px solid rgba(128,128,128,.35);
+    border-radius: 999px;
+    opacity: .88;
+}
+.shop-site:hover { border-color: rgba(201,168,130,.85); opacity: 1; }
+
+/* 回复框钉在屏幕底部（tab 里的 chat_input 不会自己粘） */
+[data-testid="stChatInput"] {
+    position: sticky !important;
+    bottom: 6px !important;
+    z-index: 850 !important;
+}
+[data-testid="stChatInput"] > div { background: #ffffff !important; }
+@media (prefers-color-scheme: dark) {
+    [data-testid="stChatInput"] > div { background: #0e1117 !important; }
+}
+/* 会话消息区高度跟着视口走：一屏正好放下，回复框被顶到底部 */
+.st-key-msgbox {
+    height: calc(100vh - 430px) !important;
+    min-height: 240px !important;
+}
+</style>
+"""
+
 # ---------------- 品牌栏 ----------------
 STORE_NAME = "Niao Store"
 
 
 def render_brand():
-    # 店名占大部分，换开关单独一列贴右；语言下拉是 fixed 定位，不参与布局
-    c1, _, c3 = st.columns([7.0, 0.1, 1.15])
-    with c1:
-        st.markdown(f"#### 🏪 {STORE_NAME}")
-        st.caption(t("online"))
-    with c3:
-        show_toggle = st.query_params.get("debug") == "1"
-        if show_toggle:
-            show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
-        else:
-            show_debug = False
+    """买家端页头：店名 / 在线 / 当前订单排一行，官网按钮在下面，整块钉在顶部。
+
+    原来的「当前订单」单独占一行、还在消息流里，消息一多就被顶出屏幕。
+    """
+    show_debug = False
+    with st.container(key="brandhead"):
+        c1, c2 = st.columns([8.6, 1.4])
+        with c1:
+            _bound = st.session_state.get("bound_order")
+            _order = ""
+            if _bound:
+                _order = (f'<span class="shop-order">{t("bound_to")} '
+                          f'<code>{_bound}</code></span>')
+            st.markdown(
+                f'<div class="shop-head">'
+                f'<span class="shop-name">🏪 {STORE_NAME}</span>'
+                f'<span class="shop-online">{t("online")}</span>'
+                f'{_order}</div>',
+                unsafe_allow_html=True)
+            try:
+                from app import store_config as _store_mod
+                _sc = _store_mod.load()
+            except Exception:
+                _sc = {}
+            if _sc.get("site_url"):
+                _label = _sc.get("site_label") or "前往店铺官网"
+                st.markdown(
+                    f'<a class="shop-site" href="{_sc["site_url"]}" target="_blank" '
+                    f'rel="noopener">{_label}</a>',
+                    unsafe_allow_html=True)
+        with c2:
+            if st.query_params.get("debug") == "1":
+                show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
+    # 语言下拉是 fixed 定位，放进 columns / sticky 容器里都会被挤掉，单独放最外层
     with st.container(key="lang_box"):
         lang_picker()
     return show_debug
@@ -1160,12 +1244,18 @@ def _handoff_tab():
         st.session_state["_hopen"] = None
         open_sid = None
 
-    # ---- 顶部：会话列表，一行一个 ----
-    for s in pend:
+    # ---- 顶部：按状态分两组折叠，未回复的默认展开、已回复的默认收起 ----
+    # 用 session_state 记展开状态，不用 st.expander —— fragment 每 6 秒重绘会把它重置
+    groups = st.session_state.setdefault("_ggroup", {"pending": True, "done": False})
+    _unread = [s for s in pend if s.get("status") == "pending"]
+    _done = [s for s in pend if s.get("status") != "pending"]
+    _cur_open = st.session_state.get("_hopen")
+
+    def _render_row(s):
         sid = s["sid"]
         stt = {"pending": "待回复", "answered": "已回复",
                "handled": "已回复"}.get(s.get("status"), "-")
-        is_open = (open_sid == sid)
+        is_open = (_cur_open == sid)
         c1, c2 = st.columns([5, 1])
         with c1:
             dot = "🔵 " if is_open else ""
@@ -1177,6 +1267,25 @@ def _handoff_tab():
                 st.session_state["_hopen"] = None if is_open else sid
                 st.rerun(scope="fragment")
 
+    for gkey, gtitle, items, dflt in (("pending", "未回复", _unread, True),
+                                      ("done", "已回复", _done, False)):
+        isg = groups.get(gkey, dflt)
+        arrow = "▾" if isg else "▸"
+        gc1, gc2 = st.columns([5, 1])
+        with gc1:
+            st.markdown(f"**{arrow} {gtitle}（{len(items)}）**")
+        with gc2:
+            if st.button("收起" if isg else "展开", key=f"_gg_{gkey}",
+                         use_container_width=True):
+                groups[gkey] = not isg
+                st.session_state["_ggroup"] = groups
+                st.rerun(scope="fragment")
+        if isg:
+            if not items:
+                st.caption("（没有）")
+            for s in items:
+                _render_row(s)
+
     cur = next((s for s in pend if s["sid"] == open_sid), None)
     if not cur:
         return
@@ -1186,7 +1295,8 @@ def _handoff_tab():
     # ---- 下方：只渲染展开的那个会话 ----
     # 固定高度 + 内部滚动：消息再多也只在这个框里滚，页面总高度不变，
     # 底下的回复框就不会被顶出屏幕（tab 里的 chat_input 不会自动 sticky）。
-    with st.container(border=True, height=400):
+    # 高度由 CSS 按视口算（.st-key-msgbox），这里给的 400 只是兜底。
+    with st.container(border=True, height=400, key="msgbox"):
         msgs = cur.get("messages", [])
         if not msgs:
             st.caption("这个会话里还没有消息。")
@@ -1245,14 +1355,21 @@ def render_merchant():
     from app import rules_store  # noqa: F401
     import json as _json
 
-    c1, c2 = st.columns([5, 1.4])
-    with c1:
-        st.markdown(f"#### 🏪 {STORE_NAME} · 商家后台")
-        st.caption(f"当前账号：{st.session_state.get('user', '-')} · 规则引擎与判定统计")
-    with c2:
-        if st.button("退出登录", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
+    # 页头钉在顶部；tabs 和下面的分组各占一行，顺序就是店铺名 → 账号 → tabs → 分组
+    with st.container(key="mhead"):
+        c1, c2 = st.columns([6, 1.4])
+        with c1:
+            st.markdown(
+                f'<div class="shop-head">'
+                f'<span class="shop-name">🏪 {STORE_NAME} · 商家后台</span>'
+                f'<span class="shop-online">🟢 在线</span>'
+                f'</div>',
+                unsafe_allow_html=True)
+            st.caption(f"当前账号：{st.session_state.get('user', '-')} · 规则引擎与判定统计")
+        with c2:
+            if st.button("退出登录", use_container_width=True):
+                st.session_state.clear()
+                st.rerun()
 
     # 操作成功提示：rerun 会吃掉当轮的 st.success，所以存下来下一轮再显示
     _flash = st.session_state.pop("_flash", None)
@@ -1548,6 +1665,7 @@ def main():
     st.markdown(CHAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOATING_STATUS_CSS, unsafe_allow_html=True)
+    st.markdown(LAYOUT_CSS, unsafe_allow_html=True)
     if st.session_state.get("role") == "merchant":
         render_merchant()
         return
@@ -1571,17 +1689,7 @@ def main():
         chat_col, side = st.container(), None
 
     with chat_col:
-        _bound = st.session_state.get("bound_order")
-        if _bound:
-            st.caption(f"{t('bound_to')}：`{_bound}`")
-        # 商家在后台配的官网地址：买家登录后可直接跳过去
-        try:
-            from app import store_config as _store_mod
-            _sc = _store_mod.load()
-        except Exception:
-            _sc = {}
-        if _sc.get("site_url"):
-            st.link_button(_sc.get("site_label") or "前往店铺官网", _sc["site_url"])
+        # 店名 / 在线 / 当前订单 / 官网入口已经挪到 render_brand() 的固定页头里
         # 拉取人工回复（买家页面在人工模式下 4 秒轮询一次）
         _pull_sid = st.query_params.get("sid") or st.session_state.get("sid")
         if _pull_sid:
