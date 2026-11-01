@@ -767,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #112 · 医疗器械规则 + 五市场数据"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #113 · 规则编辑即时生效 + 核对状态"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1908,11 +1908,27 @@ def render_merchant():
 
     with tab_rules:
         rules = rules_store.load()
-        markets = sorted({r.get("market", "-") for r in rules})
-        cols = st.columns(len(markets) + 1)
-        cols[0].metric("规则总数", len(rules))
+        # 条款出处分两种：已对照官方原文核对过的，和仍是示例待核的。
+        # 这一栏必须能看到——对外说「29 条已核实」时，得指得出是哪 29 条。
+        _ver = sum(1 for r in rules if not r.get("unverified"))
+        _ex = len(rules) - _ver
+        m1, m2, m3 = st.columns(3)
+        m1.metric("规则总数", len(rules))
+        m2.metric("已核对条款", _ver, help="条款出处已对照官方原文逐条核对")
+        m3.metric("示例待核", _ex, help="条款出处尚未核对，数据中标注为「待核实」")
+        _bym = {}
+        for r in rules:
+            mk = r.get("market", "-")
+            _bym.setdefault(mk, [0, 0])
+            _bym[mk][0] += 1
+            if not r.get("unverified"):
+                _bym[mk][1] += 1
+        st.caption("　".join("%s %d 条（已核 %d）" % (mk, v[0], v[1])
+                             for mk, v in sorted(_bym.items())))
+        markets = sorted(_bym)
+        cols = st.columns(len(markets))
         for i, mk in enumerate(markets):
-            cols[i + 1].metric(mk, sum(1 for r in rules if r.get("market") == mk))
+            cols[i].metric(mk, _bym[mk][0])
 
         st.divider()
         st.markdown("**导入规则**")
@@ -1951,8 +1967,13 @@ def render_merchant():
 
         st.divider()
         st.markdown("**当前规则（可直接编辑）**")
+        _rows = []
+        for _r0 in rules:
+            _r1 = {k: v for k, v in _r0.items() if k != "unverified"}
+            _r1["verified"] = "示例·待核实" if _r0.get("unverified") else "已核对"
+            _rows.append(_r1)
         edited = st.data_editor(
-            rules,
+            _rows,
             num_rows="dynamic",
             use_container_width=True,
             height=420,
@@ -1964,13 +1985,20 @@ def render_merchant():
                 "action": st.column_config.SelectboxColumn("动作", options=["block", "rewrite", "pass"], width="small"),
                 "clause": st.column_config.TextColumn("条款出处", width="large"),
                 "trigger": st.column_config.TextColumn("触发条件", width="medium"),
+                "verified": st.column_config.TextColumn("核对状态", width="small"),
             },
             key="rule_editor",
         )
         b1, b2, b3 = st.columns([1, 1, 2])
         with b1:
             if st.button("保存修改", type="primary", use_container_width=True):
-                ok_rows, errs = rules_store.validate(list(edited))
+                _clean = []
+                for _r in edited:
+                    _x = dict(_r)
+                    _v = _x.pop("verified", "")
+                    _x["unverified"] = ("待核实" in str(_v))
+                    _clean.append(_x)
+                ok_rows, errs = rules_store.validate(_clean)
                 if errs:
                     st.error("校验未通过：\n- " + "\n- ".join(errs[:10]))
                 else:
