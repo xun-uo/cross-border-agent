@@ -767,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #115 · 英日市场，覆盖 9 个市场"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #116 · 物流图浅色适配 + 固定浅色主题"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -808,8 +808,8 @@ def _route_svg(nodes, order_no="", width=1000, height=180):
         "@keyframes rtFade{to{opacity:1;}}"
         ".rt-pulse{animation:rtPulse 1.9s ease-out infinite;}"
         "@keyframes rtPulse{0%{r:11;opacity:.55}70%{r:24;opacity:0}100%{r:24;opacity:0}}"
-        ".rt-label{font-size:11px;fill:#8C8478;}"
-        ".rt-title{font-size:13px;fill:#C9A882;font-weight:600;letter-spacing:.5px;}"
+        ".rt-label{font-size:11px;fill:#6A7080;}"
+        ".rt-title{font-size:13px;fill:#A8843F;font-weight:600;letter-spacing:.5px;}"
         ".rt-tag{font-size:10px;letter-spacing:1px;}"
         "</style>"
     )
@@ -838,8 +838,8 @@ def _route_svg(nodes, order_no="", width=1000, height=180):
         parts.append(
             '<g class="rt-tip">'
             '<rect x="%.1f" y="%d" width="%.1f" height="22" rx="6" '
-            'fill="#0B1220" stroke="rgba(74,110,170,.55)" stroke-width="1"/>'
-            '<text x="%.1f" y="%d" text-anchor="middle" font-size="11" fill="#DCE5F2">%s</text>'
+            'fill="#FFFFFF" stroke="rgba(74,110,170,.45)" stroke-width="1"/>'
+            '<text x="%.1f" y="%d" text-anchor="middle" font-size="11" fill="#2B3240">%s</text>'
             '</g>' % (_tx, y - 48, _tw, _tx + _tw / 2, y - 33, _html.escape(_tip_txt)))
         if last:
             parts.append('<circle class="rt-pulse" cx="%.1f" cy="%d" r="11" fill="#3DBE78" />' % (xs[i], y))
@@ -869,8 +869,8 @@ def _route_html(nodes, order_no=""):
     svg = _route_svg(nodes, order_no)
     if not svg:
         return ""
-    return ('<div style="background:#131A26;border-radius:12px;padding:14px 16px 6px;'
-            'border:1px solid rgba(74,110,170,.35);">%s</div>' % svg)
+    return ('<div style="background:#F4F7FC;border-radius:12px;padding:14px 16px 6px;'
+            'border:1px solid rgba(74,110,170,.22);">%s</div>' % svg)
 
 
 def _route_image(nodes, order_no="", width=1000, height=150):
