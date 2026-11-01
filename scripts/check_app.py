@@ -16,6 +16,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8502"
 NAME = sys.argv[2] if len(sys.argv) > 2 else "local"
 ROLE = sys.argv[3] if len(sys.argv) > 3 else "buyer"
+SCHEME = sys.argv[4] if len(sys.argv) > 4 else "light"
 SHOT = rf"D:\跨境智服\out\app_{NAME}_{ROLE}.png"
 
 
@@ -58,7 +59,9 @@ def login(pg):
 
 with sync_playwright() as p:
     browser = p.chromium.launch(channel="msedge", headless=True)
-    page = browser.new_page(viewport={"width": 1440, "height": 1100})
+    ctx = browser.new_context(viewport={"width": 1440, "height": 1100},
+                              color_scheme=SCHEME)
+    page = ctx.new_page()
     page.goto(URL, timeout=120000, wait_until="domcontentloaded")
 
     if not wake_and_wait(page):
