@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #89 · 页头固定 + 会话分组"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #90 · 页头/回复框真固定"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -897,20 +897,43 @@ CHAT_CSS = """
 LAYOUT_CSS = """
 <style>
 /* 这个版本的 Streamlit 没有 --background-color 变量，只能按系统主题写死两套 */
-.st-key-brandhead, .st-key-mhead {
-    position: sticky !important;
-    top: -1px !important;
-    z-index: 900 !important;
+/* 页头用 fixed，不用 sticky：sticky 的包裹层高度正好等于页头高度，
+   没有「可黏的行程」= 完全不起作用（实测 rectTop 会一路滚到 -1230） */
+/* 买家端页头：纯 markdown 的固定块（走 st.columns 会让内部塌陷、文字不渲染）。
+   层级必须高过 Streamlit 自带的 stHeader（z-index 约 99 万），否则被它盖住看不见；
+   只占左上角一块，右边留给语言下拉和平台工具栏。 */
+.shop-head-fixed {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: min(860px, 64vw) !important;
+    z-index: 1000001 !important;
     background: #ffffff !important;
-    padding: 4px 0 8px !important;
+    padding: 10px 0 8px 5rem !important;
     border-bottom: 1px solid rgba(128,128,128,.14);
+    border-right: 1px solid rgba(128,128,128,.14);
+    border-bottom-right-radius: 10px;
+}
+/* 商家端页头整块容器 */
+.st-key-mhead {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: min(860px, 64vw) !important;
+    z-index: 1000001 !important;
+    background: #ffffff !important;
+    padding: 10px 0 8px 5rem !important;
+    border-bottom: 1px solid rgba(128,128,128,.14);
+    border-right: 1px solid rgba(128,128,128,.14);
+    border-bottom-right-radius: 10px;
 }
 @media (prefers-color-scheme: dark) {
-    .st-key-brandhead, .st-key-mhead { background: #0e1117 !important; }
+    .shop-head-fixed, .st-key-mhead { background: #0e1117 !important; }
 }
-/* 顶部留白收窄，页头才能贴住顶端（默认 6rem 太空） */
+/* 给固定页头和固定回复框让出空间，内容不从它们底下钻出来 */
 [data-testid="stMainBlockContainer"] {
-    padding-top: 2.2rem !important;
+    padding-top: 6.2rem !important;
+    padding-bottom: 7rem !important;
 }
 /* 页头一行：店名 / 在线 / 当前订单 */
 .shop-head {
@@ -936,17 +959,19 @@ LAYOUT_CSS = """
 }
 .shop-site:hover { border-color: rgba(201,168,130,.85); opacity: 1; }
 
-/* 回复框钉在屏幕底部（tab 里的 chat_input 不会自己粘） */
+/* 回复框固定在屏幕底部（tab 里的 chat_input 不会自己贴底） */
 [data-testid="stChatInput"] {
-    position: sticky !important;
-    bottom: 6px !important;
-    z-index: 850 !important;
+    position: fixed !important;
+    bottom: 14px !important;
+    left: 5rem !important;
+    right: 5rem !important;
+    z-index: 860 !important;
 }
 [data-testid="stChatInput"] > div { background: #ffffff !important; }
 @media (prefers-color-scheme: dark) {
     [data-testid="stChatInput"] > div { background: #0e1117 !important; }
 }
-/* 会话消息区高度跟着视口走：一屏正好放下，回复框被顶到底部 */
+/* 会话消息区按视口算高度，一屏正好放下 */
 .st-key-msgbox {
     height: calc(100vh - 430px) !important;
     min-height: 240px !important;
@@ -959,40 +984,42 @@ STORE_NAME = "Niao Store"
 
 
 def render_brand():
-    """买家端页头：店名 / 在线 / 当前订单排一行，官网按钮在下面，整块钉在顶部。
+    """买家端固定页头：店名 / 在线 / 当前订单排一行，官网入口在下面。
 
-    原来的「当前订单」单独占一行、还在消息流里，消息一多就被顶出屏幕。
+    整块是纯 markdown 的 fixed div。不用 st.columns 包——包了之后
+    Streamlit 的包裹层高度会塌成 0，里面文字渲染不出来。
     """
     show_debug = False
-    with st.container(key="brandhead"):
-        c1, c2 = st.columns([8.6, 1.4])
-        with c1:
-            _bound = st.session_state.get("bound_order")
-            _order = ""
-            if _bound:
-                _order = (f'<span class="shop-order">{t("bound_to")} '
-                          f'<code>{_bound}</code></span>')
-            st.markdown(
-                f'<div class="shop-head">'
-                f'<span class="shop-name">🏪 {STORE_NAME}</span>'
-                f'<span class="shop-online">{t("online")}</span>'
-                f'{_order}</div>',
-                unsafe_allow_html=True)
-            try:
-                from app import store_config as _store_mod
-                _sc = _store_mod.load()
-            except Exception:
-                _sc = {}
-            if _sc.get("site_url"):
-                _label = _sc.get("site_label") or "前往店铺官网"
-                st.markdown(
-                    f'<a class="shop-site" href="{_sc["site_url"]}" target="_blank" '
-                    f'rel="noopener">{_label}</a>',
-                    unsafe_allow_html=True)
-        with c2:
-            if st.query_params.get("debug") == "1":
-                show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
-    # 语言下拉是 fixed 定位，放进 columns / sticky 容器里都会被挤掉，单独放最外层
+
+    _bound = st.session_state.get("bound_order")
+    _order = ""
+    if _bound:
+        _order = (f'<span class="shop-order">{t("bound_to")} '
+                  f'<code>{_bound}</code></span>')
+
+    try:
+        from app import store_config as _store_mod
+        _sc = _store_mod.load()
+    except Exception:
+        _sc = {}
+    _site = ""
+    if _sc.get("site_url"):
+        _label = _sc.get("site_label") or "前往店铺官网"
+        _site = (f'<a class="shop-site" href="{_sc["site_url"]}" '
+                 f'target="_blank" rel="noopener">{_label}</a>')
+
+    st.markdown(
+        f'<div class="shop-head-fixed">'
+        f'<div class="shop-head">'
+        f'<span class="shop-name">🏪 {STORE_NAME}</span>'
+        f'<span class="shop-online">{t("online")}</span>'
+        f'{_order}'
+        f'</div>{_site}</div>',
+        unsafe_allow_html=True)
+
+    if st.query_params.get("debug") == "1":
+        show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
+    # 语言下拉是 fixed 定位，单独放最外层
     with st.container(key="lang_box"):
         lang_picker()
     return show_debug
