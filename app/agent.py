@@ -135,7 +135,7 @@ INTENT_SYS = """你是跨境电商客服系统的意图识别模块。
   "intent": "logistics_query | return_exchange | order_change | product_inquiry | complaint | compliance_sensitive",
   "flags": ["complaint" 和/或 "compliance_sensitive"，没有就空数组],
   "emotion": "neutral | frustrated | angry",
-  "language": "en | es | de | fr | zh",
+  "language": "en | es | de | fr | zh | vi | th | id",
   "need_human": true/false,
   "order_no": "文中出现的订单号，没有则为空字符串"
 }
@@ -478,7 +478,15 @@ _HANDOFF = {
     "de": "Ich ziehe eine Kollegin hinzu, die Ihnen weiterhilft.",
     "fr": "Je transmets votre demande à un collègue qui va vous aider.",
     "zh": "我请同事来协助您处理。",
+    "vi": "Tôi sẽ nhờ đồng nghiệp hỗ trợ bạn việc này.",
+    "th": "ฉันจะให้เพื่อนร่วมงานมาช่วยดูแลเรื่องนี้ค่ะ",
+    "id": "Saya akan melibatkan rekan kami untuk membantu Anda.",
 }
+_ASK_ORDER.update({
+    "vi": "Được ạ — bạn cho tôi xin mã đơn hàng nhé? Thường bắt đầu bằng ORDER.",
+    "th": "ได้ค่ะ ขอหมายเลขคำสั่งซื้อหน่อยได้ไหมคะ ปกติจะขึ้นต้นด้วย ORDER",
+    "id": "Boleh — minta nomor pesanan Anda? Biasanya diawali ORDER.",
+})
 
 
 def _ask_order_no(language):
