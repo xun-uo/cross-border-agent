@@ -391,9 +391,15 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         trace["usage"] = _usage_delta(usage_before)
         return trace
 
+    # 只有意图确实相关时才给 topic 加权。原来只要不是退换货就一律按 shipping 加权，
+    # 结果「跨境进口免税额度」这种问题被「发货时效」类条目挤掉，关税/清关条目检索不到。
+    _topic = None
+    if intent["intent"] == "return_exchange":
+        _topic = "return_policy"
+    elif intent["intent"] == "logistics_query":
+        _topic = "shipping"
     if order:
-        kb_items = retrieve_kb(text, compliance.resolve_market(market),
-                               topic="return_policy" if intent["intent"] == "return_exchange" else "shipping")
+        kb_items = retrieve_kb(text, compliance.resolve_market(market), topic=_topic)
     else:
         kb_items = retrieve_kb(text, compliance.resolve_market(market))
     step("tool", {"order": order, "kb": [i["id"] for i in kb_items]}, s)
