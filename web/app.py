@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #106 · 接管归属"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #107 · 历史会话归档"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1683,6 +1683,66 @@ def render_merchant():
                     use_container_width=True, hide_index=True)
 
     with tab_logs:
+        # ===== 历史会话：处理完的会话可以点开、把整段对话重看一遍 =====
+        from app import handoff as _ho
+        # Streamlit 的 tabs 是一次性渲染全部内容的，切 tab 不会重新跑服务端，
+        # 所以这块看到的是打开页面那一刻的快照 —— 给个刷新按钮，不然刚结束的会话不出现。
+        _hc1, _hc2 = st.columns([5, 1])
+        with _hc1:
+            st.markdown("##### 历史会话")
+        with _hc2:
+            if st.button("刷新", key="logs_refresh", use_container_width=True):
+                st.rerun()
+        st.caption("人工交还 AI 之后的会话都在这里，点「查看」能重看整段对话。")
+        _done = _ho.finished(20)
+        if not _done:
+            st.caption("还没有已结束的会话。")
+        else:
+            _fopen = st.session_state.get("_fopen")
+            for s in _done:
+                _sid = s["sid"]
+                _isopen = (_fopen == _sid)
+                _tag = "人工处理过" if s.get("had_human") else "AI 处理"
+                _c1, _c2 = st.columns([5, 1])
+                with _c1:
+                    st.markdown(
+                        f"{'🔵 ' if _isopen else ''}**{_tag}** · 会话 `{_sid}` · "
+                        f"{s.get('created', '')} · {len(s.get('messages', []))} 条消息")
+                with _c2:
+                    if st.button("收起" if _isopen else "查看", key=f"_ftog_{_sid}",
+                                 use_container_width=True):
+                        st.session_state["_fopen"] = None if _isopen else _sid
+                        st.rerun()
+                if _isopen:
+                    with st.container(border=True, height=380, key=f"fbox_{_sid}"):
+                        for m in s.get("messages", []):
+                            _src = m.get("source")
+                            if _src == "note":
+                                st.markdown(
+                                    f'<div class="sys-note">{m.get("text", "")}</div>',
+                                    unsafe_allow_html=True)
+                                continue
+                            _is_buyer = (_src in ("buyer", "user")
+                                         or m.get("role") in ("buyer", "user"))
+                            with st.chat_message("assistant" if _is_buyer else "user"):
+                                if _is_buyer:
+                                    st.markdown('<span class="no-badge"></span>',
+                                                unsafe_allow_html=True)
+                                st.markdown(m.get("text", ""))
+                                if m.get("image"):
+                                    try:
+                                        st.image(m["image"], use_container_width=True)
+                                    except Exception:
+                                        st.caption("（图片已失效）")
+                                if m.get("ts"):
+                                    _who_m = {"buyer": "买家", "human": "人工",
+                                              "system": "系统"}.get(_src, "AI")
+                                    st.caption(f"{_who_m} · {m['ts']}")
+
+        st.divider()
+
+        # ===== 问答流水：每轮问了什么、答了什么、判定结果 =====
+        st.markdown("##### 问答流水")
         try:
             from app import judge_log
             recs = judge_log.tail(30)
