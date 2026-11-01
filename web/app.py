@@ -65,6 +65,85 @@ STEP_TITLE = {
     "action": "处置动作",
 }
 
+# 「处理过程」面板的文案：单独一张表，不并进 TEXTS——
+# 这份面板只在 ?debug=1 时出现，属于技术视图，没必要和买家界面共用一套 key。
+# 面板里那些具体值（intent 名、verdict、订单字段）保持原样，本来就是代码里的枚举。
+DBG = {
+    "zh": {"empty": "提交一条消息后，这里会显示每一层的输入输出。",
+           "block": "判定：拦截", "rewrite": "判定：改写",
+           "ask": "判定：需要补充信息", "pass": "判定：放行",
+           "clauses": "命中条款", "chain": "处理链路",
+           "s_intent": "意图识别", "s_tool": "工具与检索", "s_draft": "生成草稿",
+           "s_compliance": "合规判定", "s_semantic": "语义复核", "s_action": "处置动作",
+           "route": "物流路线", "total": "总耗时", "calls": "模型调用", "times": "次"},
+    "en": {"empty": "Send a message to see each pipeline stage's input and output here.",
+           "block": "Verdict: blocked", "rewrite": "Verdict: rewritten",
+           "ask": "Verdict: need more info", "pass": "Verdict: passed",
+           "clauses": "Matched clauses", "chain": "Pipeline",
+           "s_intent": "Intent", "s_tool": "Tools & retrieval", "s_draft": "Draft",
+           "s_compliance": "Compliance", "s_semantic": "Semantic check", "s_action": "Action",
+           "route": "Route", "total": "Total", "calls": "Model calls", "times": ""},
+    "es": {"empty": "Envía un mensaje para ver la entrada/salida de cada etapa aquí.",
+           "block": "Veredicto: bloqueado", "rewrite": "Veredicto: reescrito",
+           "ask": "Veredicto: falta información", "pass": "Veredicto: aprobado",
+           "clauses": "Cláusulas coincidentes", "chain": "Cadena de procesamiento",
+           "s_intent": "Intención", "s_tool": "Herramientas y búsqueda", "s_draft": "Borrador",
+           "s_compliance": "Cumplimiento", "s_semantic": "Revisión semántica",
+           "s_action": "Acción", "total": "Tiempo total", "calls": "Llamadas al modelo",
+           "times": ""},
+    "vi": {"empty": "Gửi tin nhắn để xem đầu vào/đầu ra từng bước tại đây.",
+           "block": "Kết luận: bị chặn", "rewrite": "Kết luận: viết lại",
+           "ask": "Kết luận: cần thêm thông tin", "pass": "Kết luận: cho qua",
+           "clauses": "Điều khoản khớp", "chain": "Chuỗi xử lý",
+           "s_intent": "Nhận diện ý định", "s_tool": "Công cụ & truy xuất", "s_draft": "Soạn nháp",
+           "s_compliance": "Kiểm tra tuân thủ", "s_semantic": "Kiểm tra ngữ nghĩa",
+           "s_action": "Hành động", "total": "Tổng thời gian", "calls": "Lượt gọi model",
+           "times": ""},
+    "th": {"empty": "ส่งข้อความเพื่อดูข้อมูลเข้า/ออกของแต่ละขั้นตอนที่นี่",
+           "block": "ผลตัดสิน: ถูกบล็อก", "rewrite": "ผลตัดสิน: เขียนใหม่",
+           "ask": "ผลตัดสิน: ต้องข้อมูลเพิ่ม", "pass": "ผลตัดสิน: ผ่าน",
+           "clauses": "ข้อกำหนดที่ตรง", "chain": "ลำดับการประมวลผล",
+           "s_intent": "จำแนกเจตนา", "s_tool": "เครื่องมือและค้นคืน", "s_draft": "ร่างคำตอบ",
+           "s_compliance": "ตรวจสอบข้อกำหนด", "s_semantic": "ตรวจสอบเชิงความหมาย",
+           "s_action": "การดำเนินการ", "total": "เวลารวม", "calls": "เรียกโมเดล",
+           "times": "ครั้ง"},
+    "id": {"empty": "Kirim pesan untuk melihat input/output tiap tahap di sini.",
+           "block": "Putusan: diblokir", "rewrite": "Putusan: ditulis ulang",
+           "ask": "Putusan: perlu info tambahan", "pass": "Putusan: lolos",
+           "clauses": "Klausul yang cocok", "chain": "Alur pemrosesan",
+           "s_intent": "Klasifikasi intent", "s_tool": "Alat & pencarian", "s_draft": "Draf",
+           "s_compliance": "Pemeriksaan kepatuhan", "s_semantic": "Pemeriksaan semantik",
+           "s_action": "Tindakan", "total": "Total waktu", "calls": "Panggilan model",
+           "times": ""},
+}
+
+
+_DBG_MORE = {
+    "zh": {"panel": "处理过程", "params": "调试参数", "usage": "今日调用", "clear": "清空对话"},
+    "en": {"panel": "Process trace", "params": "Debug params", "usage": "Calls today",
+           "clear": "Clear chat"},
+    "es": {"panel": "Traza del proceso", "params": "Parámetros de depuración",
+           "usage": "Llamadas hoy", "clear": "Limpiar chat"},
+    "vi": {"panel": "Quy trình xử lý", "params": "Tham số gỡ lỗi",
+           "usage": "Lượt gọi hôm nay", "clear": "Xóa hội thoại"},
+    "th": {"panel": "ขั้นตอนการประมวลผล", "params": "พารามิเตอร์ดีบัก",
+           "usage": "เรียกวันนี้", "clear": "ล้างบทสนทนา"},
+    "id": {"panel": "Jejak proses", "params": "Parameter debug",
+           "usage": "Panggilan hari ini", "clear": "Hapus obrolan"},
+}
+for _k, _v in _DBG_MORE.items():
+    DBG.setdefault(_k, {}).update(_v)
+
+
+def td(key):
+    """处理过程面板取词。缺翻译时回落中文，不会掉出 key 名。
+    注意不能用 `or` 兜底——英文里 times 是空串，falsy 会被误判成没翻译。"""
+    lang = st.session_state.get("ui_lang", "zh")
+    d = DBG.get(lang) or DBG["zh"]
+    if key in d:
+        return d[key]
+    return DBG["zh"].get(key, key)
+
 
 # ---------------- 用量控制 ----------------
 def load_usage():
@@ -511,6 +590,33 @@ def _friendly_error(e):
     return t("err")
 
 
+def _retranslate_history(lang):
+    """切语言后把 AI 说过的话重译一遍；买家自己的话保持原样。
+
+    一次调用批量翻译，不逐条请求——聊了 5 轮也只多花一次模型调用。
+    翻失败就原样留着，不能让历史记录凭空消失。
+    """
+    h = st.session_state.get("history") or []
+    idx = [i for i, m in enumerate(h)
+           if m.get("role") == "assistant" and not m.get("human") and not m.get("error")
+           and m.get("content") and m.get("language") != lang]
+    if not idx:
+        return
+    try:
+        from app import agent as _agent
+        out = _agent.translate_batch([h[i]["content"] for i in idx], lang)
+    except Exception:
+        return
+    if len(out) != len(idx):
+        return
+    for i, txt in zip(idx, out):
+        txt = (txt or "").strip()
+        if txt:
+            h[i]["content"] = txt
+            h[i]["language"] = lang
+    st.session_state["history"] = h
+
+
 def lang_picker():
     """齿轮 + 下拉：平时只显示当前语言，点开才列出其他。"""
     cur = st.session_state.get("ui_lang", "zh")
@@ -521,6 +627,11 @@ def lang_picker():
     picked = LANG_LABELS[pick]
     if st.session_state.get("ui_lang") != picked:
         st.session_state["ui_lang"] = picked
+        try:
+            st.query_params["l"] = picked   # 写进 URL，刷新后不丢
+        except Exception:
+            pass
+        _retranslate_history(picked)        # 历史气泡跟着换语言
         st.rerun()   # 立刻重绘，避免顶部文案还是旧语言
 
 
@@ -551,6 +662,8 @@ def _after_login(user, role, bound_order=None):
             st.query_params["o"] = bound_order
         if role == "merchant":
             st.query_params["m"] = user
+        # 语言也进 URL：刷新后不该又变回中文
+        st.query_params["l"] = st.session_state.get("ui_lang", "zh")
     except Exception:
         pass
 
@@ -579,6 +692,11 @@ def login_gate():
     if st.session_state.get("authed"):
         return True
 
+    # 语言从 URL 恢复：刷新 / 换标签页都不该把界面语言丢掉
+    _lq = st.query_params.get("l")
+    if _lq and _lq in LANG_LABELS.values() and not st.session_state.get("ui_lang"):
+        st.session_state["ui_lang"] = _lq
+
     # 刷新页面后 session_state 是空的，但 URL 里还留着 sid / 订单号。
     # 买家靠这组参数自动还原登录态，聊天记录再按 sid 从服务端捞回来。
     # 不还原商家：URL 里带个账号就能进后台太松了，商家刷新请重新登录。
@@ -593,6 +711,7 @@ def login_gate():
                 st.session_state.role = "buyer"
                 st.session_state.bound_order = _o["order_no"]
                 st.session_state["sid"] = _q.get("sid")
+                st.session_state["ui_lang"] = _q.get("l") or "zh"
                 st.session_state.setdefault("history", [])
                 return True
     except Exception:
@@ -648,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #109 · 刷新不丢会话"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #110 · 语言全链路"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -682,6 +801,8 @@ def _route_svg(nodes, order_no="", width=1000, height=170):
         "stroke-dasharray:1000;stroke-dashoffset:1000;animation:rtDraw 1.1s ease-out forwards;}"
         "@keyframes rtDraw{to{stroke-dashoffset:0;}}"
         ".rt-node{opacity:0;animation:rtFade .35s ease-out forwards;}"
+        ".rt-node{cursor:pointer;}"
+        ".rt-node:hover circle{filter:brightness(1.4);}"
         "@keyframes rtFade{to{opacity:1;}}"
         ".rt-pulse{animation:rtPulse 1.9s ease-out infinite;}"
         "@keyframes rtPulse{0%{r:11;opacity:.55}70%{r:24;opacity:0}100%{r:24;opacity:0}}"
@@ -697,16 +818,21 @@ def _route_svg(nodes, order_no="", width=1000, height=170):
     parts.append('<text class="rt-title" x="14" y="22">Route · %s</text>' % (order_no or ""))
     parts.append('<path class="rt-line" d="%s" />' % line_d)
 
+    import html as _html
     for i, nd in enumerate(nodes):
         last = (i == n - 1)
         delay = 0.35 + i * 0.16
         color = "#3DBE78" if last else "#4A8AF4"
         r = 11 if last else 8
+        # 悬停提示：SVG 原生 <title>，鼠标停上去就能看到这一站的完整信息
+        _tip = _html.escape("%s · %s" % ((nd.get("time") or "").strip(),
+                                         (nd.get("desc") or "").strip()))
         parts.append('<g class="rt-node" style="animation-delay:%.2fs">' % delay)
         if last:
             parts.append('<circle class="rt-pulse" cx="%.1f" cy="%d" r="11" fill="#3DBE78" />' % (xs[i], y))
-        parts.append('<circle cx="%.1f" cy="%d" r="%d" fill="%s" stroke="#fff" stroke-width="2" />'
-                     % (xs[i], y, r, color))
+        parts.append('<circle cx="%.1f" cy="%d" r="%d" fill="%s" stroke="#fff" stroke-width="2">'
+                     '<title>%s</title></circle>'
+                     % (xs[i], y, r, color, _tip))
         parts.append("</g>")
 
         tm = (nd.get("time") or "")[5:16]
@@ -896,29 +1022,29 @@ def _timeline_md(nodes):
 
 def render_trace(trace):
     if not trace:
-        st.caption("提交一条消息后，这里会显示每一层的输入输出。")
+        st.caption(td("empty"))
         return
 
     final = trace.get("final", {})
     verdict = final.get("verdict", "-")
     if verdict == "block":
-        st.error(f"判定：拦截（{final.get('level')}）")
+        st.error("%s（%s）" % (td("block"), final.get("level")))
     elif verdict == "rewrite":
-        st.warning(f"判定：改写（{final.get('level')}）")
+        st.warning("%s（%s）" % (td("rewrite"), final.get("level")))
     elif verdict == "ask":
-        st.info("判定：需要补充信息（追问订单号）")
+        st.info(td("ask"))
     else:
-        st.success("判定：放行（L3）")
+        st.success("%s（%s）" % (td("pass"), final.get("level") or "L3"))
 
     if final.get("clauses"):
-        st.markdown("**命中条款**")
+        st.markdown("**%s**" % td("clauses"))
         for c in final["clauses"]:
             st.markdown(f"- {c}")
 
-    st.markdown("**处理链路**")
+    st.markdown("**%s**" % td("chain"))
     for step in trace.get("steps", []):
         name = step["step"]
-        with st.expander(f"{STEP_ICON.get(name, '·')} {STEP_TITLE.get(name, name)}　{step['ms']}ms"):
+        with st.expander("%s %s　%sms" % (STEP_ICON.get(name, '·'), td("s_" + name), step['ms'])):
             if name == "intent":
                 out = step.get("output", {})
                 st.markdown(
@@ -937,10 +1063,11 @@ def render_trace(trace):
                         f"- 预计到达：`{order.get('eta_from')} ~ {order.get('eta_to')}`"
                     )
                     if order.get("nodes"):
-                        st.markdown("**物流路线**")
+                        st.markdown("**%s**" % t("route_detail"))
                         try:
-                            st.image(_route_image(order["nodes"], order["order_no"]),
-                                     use_container_width=True)
+                            # 用 SVG 而不是 Pillow 图：只有矢量这张才能悬停看每站详情
+                            st.markdown(_route_html(order["nodes"], order["order_no"]),
+                                        unsafe_allow_html=True)
                         except Exception:
                             pass
                         with st.expander(t("route_detail")):
@@ -967,8 +1094,9 @@ def render_trace(trace):
                 st.text(step.get("text", ""))
 
     st.caption(
-        f"总耗时 {trace.get('ms_total')}ms　"
-        f"模型调用 {trace.get('usage', {}).get('calls', 0)} 次"
+        "%s %sms　%s %s %s" % (td("total"), trace.get("ms_total"),
+                                td("calls"), trace.get("usage", {}).get("calls", 0),
+                                td("times"))
     )
 
 
@@ -1003,6 +1131,17 @@ FLOAT_CSS = """
     transform-origin: right center !important;
 }
 .st-key-lang_box [data-baseweb="select"] > div, .st-key-lang_box_login [data-baseweb="select"] > div {
+    background: transparent !important;
+    border-color: rgba(128,128,128,.25) !important;
+    border-radius: 8px !important;
+}
+/* 商家端的语言下拉不做浮层，只是右对齐、缩小一号 */
+.st-key-lang_box_shop [data-testid="stSelectbox"] {
+    transform: scale(.8) !important;
+    transform-origin: right center !important;
+    margin-bottom: 0 !important;
+}
+.st-key-lang_box_shop [data-baseweb="select"] > div {
     background: transparent !important;
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
@@ -1301,7 +1440,10 @@ def render_brand():
 
     if st.query_params.get("debug") == "1":
         with st.container(key="dbg_box"):
-            show_debug = st.toggle(t("debug"), value=False, help=t("debug_help"))
+            # 必须给固定 key：toggle 的 label 会跟着语言变，Streamlit 按 label
+            # 生成内部 id，切一次语言开关就被重置成关闭，面板看起来「消失」了。
+            show_debug = st.toggle(t("debug"), key="dbg_toggle",
+                                   help=t("debug_help"))
     # 语言下拉是 fixed 定位，单独放最外层
     with st.container(key="lang_box"):
         lang_picker()
@@ -1318,13 +1460,14 @@ def render_quick_pills():
 
 
 def render_debug_panel():
-    st.markdown("##### 处理过程")
+    st.markdown("##### " + td("panel"))
     render_trace(st.session_state.last_trace)
 
     st.divider()
-    st.markdown("##### 调试参数")
+    st.markdown("##### " + td("params"))
     used = load_usage()
-    st.progress(min(used / DAILY_LIMIT, 1.0), text=f"今日调用 {used} / {DAILY_LIMIT}")
+    st.progress(min(used / DAILY_LIMIT, 1.0),
+                text="%s %s / %s" % (td("usage"), used, DAILY_LIMIT))
 
     labels = ["自动（按订单/原文）", "US", "EU", "CN", "PH", "KR", "RU", "MN"]
     cur = st.session_state.get("dbg_market", labels[0])
@@ -1349,7 +1492,7 @@ def render_debug_panel():
     st.session_state["dbg_order"] = picked
 
     st.divider()
-    if st.button("清空对话", use_container_width=True):
+    if st.button(td("clear"), use_container_width=True):
         st.session_state.history = []
         st.session_state.last_trace = None
         st.rerun()
@@ -1737,6 +1880,13 @@ def render_merchant():
     _flash = st.session_state.pop("_flash", None)
     if _flash:
         st.success(_flash)
+
+    # 语言下拉：商家端也得有。页头是 fixed 的纯 HTML，塞不进组件，
+    # 所以放在 tab 行上方右对齐（不用 fixed，避免盖住页头的退出按钮）。
+    _sp, _lc = st.columns([8, 2])
+    with _lc:
+        with st.container(key="lang_box_shop"):
+            lang_picker()
 
     tab_handoff, tab_rules, tab_stats, tab_logs, tab_data, tab_store = st.tabs(
         ["待处理会话", "规则库", "判定看板", "会话记录", "商品与订单", "店铺设置"])
