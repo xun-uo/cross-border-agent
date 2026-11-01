@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #92 · 输入框恢复底纹"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #93 · 消息区加大 + 自动滚底"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1321,8 +1321,9 @@ def _handoff_tab():
     # ---- 下方：只渲染展开的那个会话 ----
     # 固定高度 + 内部滚动：消息再多也只在这个框里滚，页面总高度不变，
     # 底下的回复框就不会被顶出屏幕（tab 里的 chat_input 不会自动 sticky）。
-    # 高度由 CSS 按视口算（.st-key-msgbox），这里给的 400 只是兜底。
-    with st.container(border=True, height=400, key="msgbox"):
+    # 高度这里给一个较大的实参（CSS 覆盖不动 Streamlit 写的行内样式），
+    # 下面再用脚本按视口微调 + 滚到最新一条。
+    with st.container(border=True, height=520, key="msgbox"):
         msgs = cur.get("messages", [])
         if not msgs:
             st.caption("这个会话里还没有消息。")
@@ -1375,6 +1376,30 @@ def _handoff_tab():
         handoff.mark_handled(sid)
         st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
         st.rerun(scope="fragment")
+
+    # 消息区高度按视口算 + 每次重绘后滚到最新一条。
+    # 纯 CSS 改不动：Streamlit 给 height 容器写的是行内样式；滚动位置也得靠脚本。
+    import streamlit.components.v1 as _stc
+    _stc.html("""
+<script>
+(function () {
+  var go = function () {
+    try {
+      var doc = window.parent.document;
+      var box = doc.querySelector('.st-key-msgbox');
+      if (!box) return;
+      var h = Math.max(240, window.parent.innerHeight - 430);
+      if (Math.abs(box.getBoundingClientRect().height - h) > 6) {
+        box.style.height = h + 'px';
+      }
+      box.scrollTop = box.scrollHeight;
+    } catch (e) {}
+  };
+  setTimeout(go, 60);
+  setTimeout(go, 400);
+})();
+</script>
+""", height=0)
 
 
 def render_merchant():
