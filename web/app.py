@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #104 · 去掉重复转人工提示"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #105 · 会话记录补内容"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1681,13 +1681,29 @@ def render_merchant():
         try:
             from app import judge_log
             recs = judge_log.tail(30)
-            if recs:
-                for r in reversed(recs):
-                    st.markdown(
-                        f"`{r.get('ts','')}` **{r.get('market','-')}** · "
-                        f"{r.get('verdict','-')} · {(r.get('text','') or '')[:60]}")
+            if not recs:
+                st.info("还没有会话记录。去买家视角问几句就会有了。")
             else:
-                st.info("还没有判定记录。去买家视角问几句就会有了。")
+                st.caption(f"最近 {len(recs)} 轮问答 · 每轮都带判定结果")
+                for r in reversed(recs):
+                    _v = r.get("verdict", "-")
+                    _icon = {"pass": "🟢", "rewrite": "🟡",
+                             "block": "🔴", "handoff": "🔵"}.get(_v, "⚪")
+                    _who = r.get("customer") or "未绑定订单"
+                    _on = r.get("order_no") or ""
+                    _head = f"{_icon} **{_who}**"
+                    if _on:
+                        _head += f" · `{_on}`"
+                    _head += f" · {r.get('market', '-')} · {_v} · {r.get('ts', '')}"
+                    with st.container(border=True):
+                        st.markdown(_head)
+                        st.markdown(f"**问**：{(r.get('text') or '')[:200]}")
+                        _ans = (r.get("answer") or "").strip()
+                        if _ans:
+                            st.markdown(f"**答**：{_ans[:400]}")
+                        _cl = r.get("clauses") or []
+                        if _cl:
+                            st.caption("命中条款：" + "；".join(_cl))
         except Exception as e:
             st.info(f"暂无日志。{e}")
 
