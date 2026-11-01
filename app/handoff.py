@@ -32,6 +32,8 @@ def ensure(sid, market="", language="zh", buyer=""):
                 "comforted": False,
                 "messages": [],       # {role, text, ts, source}
                 "reply_idx": 0,       # 买家已消费到第几条人工回复
+                "owner": None,        # 接管这个会话的客服账号（None = 还没人接）
+                "last_activity": time.time(),  # 最后一次有人说话的时间，用于超时释放
             }
             _SESSIONS[sid] = s
         return s
@@ -44,6 +46,8 @@ def add_message(sid, role, text, source="ai", image=None):
         if image:
             msg["image"] = image
         s["messages"].append(msg)
+        # 任何一方说话都算「有活动」，超时释放要从这一刻重新计时
+        s["last_activity"] = time.time()
         if source == "human":
             s["status"] = "answered"
         elif source == "buyer" and s.get("mode") == "human":
@@ -88,7 +92,7 @@ def get(sid):
         return dict(s) if s else None
 
 
-def human_reply(sid, text, agent_name=""):
+def human_reply(sid, text, agent_name="", agent_key=""):
     s = ensure(sid)
     with _LOCK:
         # 第一次人工回复 = 真正接管的时刻，先插一条系统小字，
@@ -102,7 +106,37 @@ def human_reply(sid, text, agent_name=""):
         s["messages"].append({"role": "assistant", "text": text,
                               "ts": _now(), "source": "human"})
         s["status"] = "answered"
+        # 谁先回，会话就归谁：其他客服的列表里不再出现
+        if agent_key:
+            s["owner"] = agent_key
+        s["last_activity"] = time.time()
     return True
+
+
+def visible_to(agent_key, idle_seconds=600):
+    """某个客服能看到的会话。
+
+    规则（2026-11-01 用户定）：谁先回复谁接管，从其他人的列表里隐藏；
+    只有两种情况释放——① 双方都静默超过 idle_seconds（默认 10 分钟，只要有一方
+    还在发消息就不释放）② 客服主动点「结束会话（交还 AI）」。
+    """
+    now = time.time()
+    out = []
+    with _LOCK:
+        for s in _SESSIONS.values():
+            if s.get("mode") != "human":
+                continue
+            owner = s.get("owner")
+            idle = now - float(s.get("last_activity") or s.get("pending_since") or now)
+            if owner and owner != agent_key and idle < idle_seconds:
+                continue          # 被别人接着，且没静默够久 → 对当前客服隐藏
+            d = dict(s)
+            if owner and owner != agent_key:
+                d["stale_owner"] = owner   # 静默超时了，标记一下，界面上可以提示
+                s["owner"] = None          # 顺手释放，让现在打开的人可以接
+            out.append(d)
+    out.sort(key=lambda x: x.get("created"), reverse=True)
+    return out
 
 
 def pull_replies(sid):
@@ -146,6 +180,7 @@ def back_to_ai(sid):
     with _LOCK:
         s["mode"] = "ai"
         s["status"] = "handled"
+        s["owner"] = None      # 交还 AI 就释放接管，下次转人工谁都能接
 
 
 def is_human_mode(sid):
