@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #93 · 消息区加大 + 自动滚底"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #94 · 人工回复也过合规"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1249,6 +1249,20 @@ def _handoff_tab():
     if _pflash:
         st.success(_pflash)
 
+    # 人工回复被合规拦下来的提示（人工说的话同样要过合规引擎）。
+    # 不清空：这条提示要一直留着，直到商家成功发出一条合规的消息，
+    # 否则 6 秒自动刷新一过就消失，人会以为自己发出去了。
+    _blk = st.session_state.get("_handoff_block")
+    if _blk:
+        _hits = "；".join(
+            f"{h['market']} {'/'.join(h['clauses'])}"
+            for h in (_blk.get("hits") or [])[:4])
+        _kind = "红线拦截" if _blk.get("level") == "L1" else "需改写"
+        st.error(
+            f"**这句话没发出去**（{_kind}）。命中：{_hits or '—'}\n\n"
+            f"原话：{_blk.get('text', '')}\n\n"
+            "改掉表述再发一次。")
+
     # 上一轮点了「发送回复」：这一轮在输入框创建之前把它清空。
     # 直接在按钮里改 text_area 的 key 会抛异常（widget 已实例化），所以走标记延迟一步。
     for _k in [k for k in list(st.session_state.keys()) if k.startswith("_clear_")]:
@@ -1371,11 +1385,24 @@ def _handoff_tab():
     # 放在最后 = 钉在视口底部，消息再多也不会被顶走。
     txt = st.chat_input("以人工客服身份回复买家…", key=f"reply_{sid}")
     if txt:
-        nm = store_config.load().get("agent_name", "")
-        handoff.human_reply(sid, txt.strip(), agent_name=nm)
-        handoff.mark_handled(sid)
-        st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
-        st.rerun(scope="fragment")
+        _raw = txt.strip()
+        # 人工说的话也要过合规：任何市场 / 品类认定违规就不发出去。
+        # 这里是「AI 和人受同一套约束」的落点，不能只拦 AI。
+        try:
+            from app import compliance as _comp
+            _ev = _comp.evaluate_all(_raw)
+        except Exception:
+            _ev = {"verdict": "pass", "level": "L3", "clauses": [], "hits": []}
+        if _ev["verdict"] in ("block", "rewrite"):
+            st.session_state["_handoff_block"] = {"text": _raw, **_ev}
+            st.rerun(scope="fragment")
+        else:
+            nm = store_config.load().get("agent_name", "")
+            handoff.human_reply(sid, _raw, agent_name=nm)
+            handoff.mark_handled(sid)
+            st.session_state.pop("_handoff_block", None)   # 发成功了，清掉上次的拦截提示
+            st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
+            st.rerun(scope="fragment")
 
     # 消息区高度按视口算 + 每次重绘后滚到最新一条。
     # 纯 CSS 改不动：Streamlit 给 height 容器写的是行内样式；滚动位置也得靠脚本。
