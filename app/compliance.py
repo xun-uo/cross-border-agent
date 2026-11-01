@@ -252,7 +252,8 @@ def forbidden_brief(market, category, limit=8):
 
 # ---------------- 生成后：自动改写 + 复检 ----------------
 
-LANG_NAME = {"en": "English", "es": "Spanish", "de": "German", "fr": "French", "zh": "Chinese"}
+LANG_NAME = {"en": "English", "es": "Spanish", "de": "German", "fr": "French",
+             "zh": "Chinese", "vi": "Vietnamese", "th": "Thai", "id": "Indonesian"}
 
 _FALLBACK = {
     "en": "I'm sorry, I can't confirm that here. Let me have a colleague check it and get back to you shortly.",
@@ -260,6 +261,12 @@ _FALLBACK = {
     "de": "Es tut mir leid, das kann ich hier nicht bestätigen. Ein Kollege prüft es und meldet sich in Kürze.",
     "fr": "Je suis désolé, je ne peux pas le confirmer ici. Un collègue vérifie et vous répondra rapidement.",
     "zh": "很抱歉，这里无法确认这一点，我先请同事核实后尽快回复您。",
+    "vi": "Xin lỗi, tôi không thể xác nhận điều này ở đây. "
+          "Tôi sẽ nhờ đồng nghiệp kiểm tra và phản hồi bạn sớm.",
+    "th": "ขออภัยค่ะ ฉันยืนยันเรื่องนี้ที่นี่ไม่ได้ "
+          "จะให้เพื่อนร่วมงานตรวจสอบแล้วติดต่อกลับโดยเร็วค่ะ",
+    "id": "Maaf, saya tidak bisa memastikan hal itu di sini. "
+          "Saya akan minta rekan kami memeriksanya dan segera menghubungi Anda.",
 }
 
 
