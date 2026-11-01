@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #91 · 页头透明化"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #92 · 输入框恢复底纹"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -969,11 +969,7 @@ LAYOUT_CSS = """
     right: 5rem !important;
     z-index: 860 !important;
 }
-[data-testid="stChatInput"] > div {
-    background: transparent !important;
-    backdrop-filter: blur(14px) saturate(1.2) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
-}
+/* 输入框保留 Streamlit 自己的底纹：覆盖成透明就看不出哪里能输入 */
 /* 会话消息区按视口算高度，一屏正好放下 */
 .st-key-msgbox {
     height: calc(100vh - 430px) !important;
