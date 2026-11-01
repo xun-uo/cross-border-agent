@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #105 · 会话记录补内容"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #106 · 接管归属"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1314,11 +1314,14 @@ def _handoff_tab():
         st.session_state[_target] = ""
         st.session_state.pop(_k, None)
 
-    pend = handoff.pending()
+    # 谁先回谁接管：别的客服已经接走、且没静默超时的会话，这里不显示
+    _me = st.session_state.get("user") or ""
+    pend = handoff.visible_to(_me)
     if not pend:
         st.info("暂无进行中的人工会话。买家触发「转人工」后会出现在这里。")
         return
-    st.caption(f"{len(pend)} 个进行中的人工会话 · 每 6 秒自动刷新")
+    st.caption(f"{len(pend)} 个进行中的人工会话 · 每 6 秒自动刷新 · "
+               f"当前接管：{_me}")
 
     # 手风琴：同一时间只展开一个会话。每个会话各记一个开关的话，
     # 开第二个时第一个还开着，页面会越拉越长。
@@ -1343,7 +1346,9 @@ def _handoff_tab():
         c1, c2 = st.columns([5, 1])
         with c1:
             dot = "🔵 " if is_open else ""
-            st.markdown(f"{dot}**{stt}** · 会话 `{sid}` · "
+            _own = s.get("owner")
+            _own_txt = f" · 👤 已由 **{_own}** 接管" if _own else ""
+            st.markdown(f"{dot}**{stt}**{_own_txt} · 会话 `{sid}` · "
                         f"{s.get('created', '')} · {len(s.get('messages', []))} 条消息")
         with c2:
             if st.button("收起" if is_open else "查看", key=f"_htog_{sid}",
@@ -1442,7 +1447,7 @@ def _handoff_tab():
             st.rerun(scope="fragment")
         else:
             nm = store_config.load().get("agent_name", "")
-            handoff.human_reply(sid, _raw, agent_name=nm)
+            handoff.human_reply(sid, _raw, agent_name=nm, agent_key=_me)
             handoff.mark_handled(sid)
             st.session_state.pop("_handoff_block", None)   # 发成功了，清掉上次的拦截提示
             st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
