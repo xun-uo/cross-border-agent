@@ -27,7 +27,8 @@
    "perfect",
    "the only"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "CN-ADL-17",
@@ -61,7 +62,8 @@
    "not intended to",
    "cannot treat",
    "does not treat"
-  ]
+  ],
+  "unverified": false
  },
  {
   "id": "CN-COS-22",
@@ -83,7 +85,8 @@
    "anti-allergy repair",
    "instant effect"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "CN-COS-23",
@@ -105,7 +108,8 @@
    "medicated",
    "treat acne"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "CN-FOOD-73",
@@ -126,7 +130,8 @@
    "prevent cancer",
    "detox"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "CN-ADL-28",
@@ -150,7 +155,8 @@
    "next-day guaranteed",
    "always arrives in 3 days"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "CN-ADL-11",
@@ -169,7 +175,8 @@
    "better than other brands",
    "beats competitors"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "CN-POLICY-01",
@@ -191,7 +198,8 @@
    "no questions asked return",
    "lifetime warranty"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-COS-20",
@@ -215,7 +223,8 @@
    "fine lines",
    "disappear"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-COS-655",
@@ -235,7 +244,8 @@
    "clinically proven",
    "doctor recommended no.1"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-MDR-745",
@@ -261,7 +271,8 @@
    "已取得 CE",
    "CE certified",
    "not a medical device"
-  ]
+  ],
+  "unverified": false
  },
  {
   "id": "EU-GPSR-01",
@@ -283,7 +294,8 @@
    "100% safe",
    "completely safe"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-UCPD-02",
@@ -307,7 +319,8 @@
    "price will double",
    "last chance"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-COS-ANX",
@@ -327,7 +340,8 @@
    "no side effects at all",
    "zero irritation"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-DELIV-01",
@@ -348,7 +362,8 @@
    "is guaranteed",
    "are guaranteed"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "EU-RETURN-01",
@@ -367,7 +382,8 @@
    "return anytime forever",
    "unlimited return period"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "US-FDA-DSHEA",
@@ -401,7 +417,8 @@
    "does not cure",
    "not a treatment",
    "not a cure"
-  ]
+  ],
+  "unverified": false
  },
  {
   "id": "US-FDA-101",
@@ -431,7 +448,8 @@
   "requires": [
    "not intended to diagnose",
    "not evaluated by the fda"
-  ]
+  ],
+  "unverified": false
  },
  {
   "id": "US-FTC-5",
@@ -459,7 +477,8 @@
   "patterns_regex": [
    "\\b(?:faster|better|cheaper|stronger|safer)\\s+than\\s+(?:any|every|all)\\b"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "US-FTC-TEST",
@@ -478,7 +497,8 @@
    "lab tested 100%",
    "clinically tested and proven"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "US-FDA-COS",
@@ -507,7 +527,8 @@
    "cosmetic only",
    "not a drug",
    "not for medical use"
-  ]
+  ],
+  "unverified": false
  },
  {
   "id": "US-REFUND-01",
@@ -529,7 +550,8 @@
    "refund before",
    "refund without inspection"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "US-SHIP-01",
@@ -551,7 +573,8 @@
    "delivery in 2 days",
    "delivery in 3 days"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "US-ENDORSE-01",
@@ -570,7 +593,8 @@
    "100% positive reviews",
    "every customer loves it"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "PH-FDA-01",
@@ -596,7 +620,8 @@
    "not intended",
    "cannot treat",
    "no claim"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "PH-ADL-01",
@@ -617,7 +642,8 @@
    "100% safe",
    "guaranteed"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "PH-SHIP-01",
@@ -637,7 +663,8 @@
    "definitely arrive",
    "no delays"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "PH-RETURN-01",
@@ -656,7 +683,8 @@
    "refund anytime",
    "no inspection needed"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "PH-SUPPL-01",
@@ -678,7 +706,8 @@
   "exempt": [
    "not intended",
    "cannot"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "KR-ADL-01",
@@ -700,7 +729,8 @@
    "perfect",
    "no.1"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "KR-COS-01",
@@ -723,7 +753,8 @@
   "exempt": [
    "미승인",
    "not approved"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "KR-DRUG-01",
@@ -744,8 +775,14 @@
   ],
   "exempt": [
    "치료 목적이 아닌",
-   "not for treatment"
-  ]
+   "not for treatment",
+   "의약품이 아닙니다",
+   "의약품이 아니라는",
+   "의약품이 아님",
+   "not a medicine",
+   "не является лекарством"
+  ],
+  "unverified": true
  },
  {
   "id": "KR-SHIP-01",
@@ -763,7 +800,8 @@
    "guaranteed delivery",
    "definitely arrive"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "KR-REFUND-01",
@@ -782,7 +820,8 @@
    "no returns",
    "final sale no exchange"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "RU-ADL-01",
@@ -802,7 +841,8 @@
    "the best",
    "no.1"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "RU-MED-01",
@@ -824,7 +864,8 @@
   "exempt": [
    "не является лекарством",
    "not a medicine"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "RU-SUPPL-01",
@@ -844,7 +885,8 @@
   ],
   "exempt": [
    "не является лекарством"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "RU-SHIP-01",
@@ -862,7 +904,8 @@
    "guaranteed delivery",
    "will definitely arrive"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "RU-REFUND-01",
@@ -880,7 +923,8 @@
    "no returns",
    "no exchange"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "MN-ADL-01",
@@ -898,7 +942,8 @@
    "the best",
    "no.1"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "MN-MED-01",
@@ -919,7 +964,8 @@
   "exempt": [
    "эм биш",
    "not a medicine"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "MN-SUPPL-01",
@@ -939,7 +985,8 @@
   ],
   "exempt": [
    "эм биш"
-  ]
+  ],
+  "unverified": true
  },
  {
   "id": "MN-SHIP-01",
@@ -955,7 +1002,8 @@
   "patterns_en": [
    "guaranteed delivery"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "MN-REFUND-01",
@@ -972,7 +1020,8 @@
    "no refunds",
    "no returns"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": true
  },
  {
   "id": "CN-MD-16-1",
@@ -1008,7 +1057,8 @@
    "no guarantee",
    "not guaranteed",
    "cannot guarantee"
-  ]
+  ],
+  "unverified": false
  },
  {
   "id": "CN-MD-16-2",
@@ -1033,7 +1083,8 @@
    "success rate",
    "efficacy rate"
   ],
-  "exempt": []
+  "exempt": [],
+  "unverified": false
  },
  {
   "id": "US-MD-801-109",
@@ -1063,6 +1114,84 @@
    "prescription required",
    "by prescription only",
    "rx only"
-  ]
+  ],
+  "unverified": false
+ },
+ {
+  "id": "KR-SUP-8-1",
+  "market": "KR",
+  "category": "supplement",
+  "level": "L1",
+  "action": "block",
+  "clause": "식품 등의 표시·광고에 관한 법률 제8조 · 시행령 별표1 제1호",
+  "trigger": "健康功能食品宣称疾病治疗、治愈功效",
+  "patterns": [
+   "치료",
+   "완치",
+   "항암",
+   "항암효과",
+   "비만치료",
+   "질병치료",
+   "치료효과",
+   "치유"
+  ],
+  "patterns_en": [
+   "cure",
+   "cures",
+   "anti-cancer",
+   "anticancer",
+   "treats disease",
+   "disease treatment",
+   "heals"
+  ],
+  "exempt": [
+   "의약품이 아닙니다",
+   "의약품이 아니라는",
+   "치료 목적이 아닌",
+   "not intended to treat",
+   "not a medicine",
+   "не является лекарством"
+  ],
+  "unverified": false
+ },
+ {
+  "id": "KR-SUP-8-2",
+  "market": "KR",
+  "category": "supplement",
+  "level": "L1",
+  "action": "block",
+  "clause": "식품 등의 표시·광고에 관한 법률 시행령 별표1 제1호",
+  "trigger": "健康功能食品宣称疾病预防或直接干预生理指标",
+  "patterns": [
+   "질병예방",
+   "질병 예방",
+   "예방효과",
+   "혈압강하",
+   "혈당조절",
+   "혈당 조절",
+   "당뇨개선",
+   "당뇨 개선",
+   "염증완화",
+   "염증 완화",
+   "콜레스테롤 저하",
+   "면역력 치료"
+  ],
+  "patterns_en": [
+   "prevents disease",
+   "lowers blood pressure",
+   "blood sugar control",
+   "treats diabetes",
+   "reduces inflammation",
+   "lowers cholesterol"
+  ],
+  "exempt": [
+   "도움을 줄 수 있",
+   "도움이 될 수 있",
+   "도움을 줄 수 있다는",
+   "may help",
+   "helps maintain",
+   "immune support"
+  ],
+  "unverified": false
  }
 ]
