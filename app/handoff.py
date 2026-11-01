@@ -86,6 +86,28 @@ def all_sessions():
         return [dict(s) for s in _SESSIONS.values()]
 
 
+def finished(limit=30):
+    """已经处理完的会话：交还 AI 的（mode == "ai"），供商家在「会话记录」里回看。
+
+    这些会话没有从 _SESSIONS 里删掉，只是不再进待处理池，
+    所以原样能取出来重新展示——买家说的话、AI 的回复、人工的回复都在 messages 里。
+    额外标一个 had_human，方便界面上区分「纯 AI 服务」和「人工处理过」。
+    """
+    with _LOCK:
+        out = []
+        for s in _SESSIONS.values():
+            if s.get("mode") != "ai":
+                continue
+            if not s.get("messages"):
+                continue
+            d = dict(s)
+            d["had_human"] = any(m.get("source") == "human"
+                                 for m in s.get("messages") or [])
+            out.append(d)
+    out.sort(key=lambda x: x.get("created") or "", reverse=True)
+    return out[:limit]
+
+
 def get(sid):
     with _LOCK:
         s = _SESSIONS.get(sid)
