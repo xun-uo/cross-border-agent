@@ -153,18 +153,20 @@ def is_human_mode(sid):
     return bool(s and s.get("mode") == "human")
 
 COMFORT = {
-    "zh": "您好，人工客服当前接待较多。您的对话已进入优先处理队列，稍后会有专人与您联系。感谢您的耐心等待。",
-    "en": "Hi, our team is currently handling a high volume of chats. "
-          "Your conversation has been queued with priority and an agent will reach out shortly. "
-          "Thank you for your patience.",
-    "es": "Hola, nuestro equipo está atendiendo un volumen alto de consultas. "
-          "Su conversación está en cola con prioridad y un agente le contactará en breve. "
-          "Gracias por su paciencia.",
+    # 只用来兜住「真的没人回」，所以话要短、说人话，别客套
+    "zh": "人工客服还没回复。你的消息已经排上队，回过来会直接出现在这里。",
+    "en": "No one from our team has replied yet. Your chat is queued — "
+          "the reply will appear right here.",
+    "es": "Nuestro equipo aún no ha respondido. Su consulta está en cola — "
+          "la respuesta aparecerá justo aquí.",
 }
 
 
-def need_comfort(sid, wait_seconds=10):
-    """是否需要发安抚话术：已转人工、超时未回、且还没安抚过。"""
+def need_comfort(sid, wait_seconds=60):
+    """是否需要发安抚话术：已转人工、超时未回、且还没安抚过。
+
+    之前是 10 秒，商家刚点开会话就跳出一条长话术，像机器人在抢话。
+    """
     with _LOCK:
         s = _SESSIONS.get(sid)
         if not s:
