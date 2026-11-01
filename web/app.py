@@ -531,12 +531,29 @@ def gear(key_suffix=""):
 
 def _after_login(user, role, bound_order=None):
     """登录成功后统一收尾。调用方负责 st.rerun()。"""
+    import uuid as _uuid
+    _sid = _uuid.uuid4().hex[:10]
+
     st.session_state.authed = True
     st.session_state.user = user
     st.session_state.role = role
     st.session_state.bound_order = bound_order
+    st.session_state["sid"] = _sid
     st.session_state.history = []
     st.session_state.last_trace = None
+
+    # 会话标识写进 URL：session_state 不跨刷新，URL 可以。
+    # 买家刷新后靠这组参数自动还原登录态 + 按 sid 捞回聊天记录。
+    try:
+        st.query_params["sid"] = _sid
+        st.query_params["r"] = role
+        if bound_order:
+            st.query_params["o"] = bound_order
+        if role == "merchant":
+            st.query_params["m"] = user
+    except Exception:
+        pass
+
     # 先清掉登录区再重绘，避免旧表单闪一下
     _ph = st.session_state.pop("_login_ph", None)
     if _ph is not None:
@@ -561,6 +578,26 @@ def _verify_buyer(order_no, tail):
 def login_gate():
     if st.session_state.get("authed"):
         return True
+
+    # 刷新页面后 session_state 是空的，但 URL 里还留着 sid / 订单号。
+    # 买家靠这组参数自动还原登录态，聊天记录再按 sid 从服务端捞回来。
+    # 不还原商家：URL 里带个账号就能进后台太松了，商家刷新请重新登录。
+    try:
+        _q = st.query_params
+        if _q.get("r") == "buyer" and _q.get("sid") and _q.get("o"):
+            from app import agent as _agent
+            _o = _agent.find_order(_q.get("o"))
+            if _o:
+                st.session_state.authed = True
+                st.session_state.user = "buyer"
+                st.session_state.role = "buyer"
+                st.session_state.bound_order = _o["order_no"]
+                st.session_state["sid"] = _q.get("sid")
+                st.session_state.setdefault("history", [])
+                return True
+    except Exception:
+        pass
+
     st.session_state.setdefault("ui_lang", "zh")
     st.markdown(FLOAT_CSS, unsafe_allow_html=True)
     st.markdown(FLOATING_STATUS_CSS, unsafe_allow_html=True)
@@ -611,7 +648,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #108 · 加越/泰/印尼语"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #109 · 刷新不丢会话"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -2118,6 +2155,35 @@ def main():
             })
             st.session_state["handoff_active"] = False
             _hs = None
+
+        # 刷新页面后 history 是空的，但这段对话还在服务端（sid 就在 URL 里）。
+        # 按 sid 把整段捞回来，同一个账号重新进来能看到之前聊过什么。
+        # 注意顺序：必须在下面 pull_replies 之前恢复，并把游标推到末尾，
+        # 否则人工回复会被重复加一遍。
+        if not st.session_state.history and st.session_state.get("sid") and _hs:
+            try:
+                _restored = []
+                for _m in (_hs.get("messages") or []):
+                    _src = _m.get("source")
+                    _txt = _m.get("text", "")
+                    if _src in ("buyer", "user"):
+                        _restored.append({"role": "user", "content": _txt,
+                                          "ts": _m.get("ts", ""),
+                                          "image": _m.get("image")})
+                    elif _src == "note":
+                        _restored.append({"role": "note", "content": _txt,
+                                          "ts": _m.get("ts", "")})
+                    else:
+                        _restored.append({"role": "assistant", "content": _txt,
+                                          "ts": _m.get("ts", ""),
+                                          "human": (_src == "human"),
+                                          "image": _m.get("image")})
+                if _restored:
+                    st.session_state.history = _restored
+                    _ho.pull_replies(st.session_state["sid"])   # 游标推到末尾
+                    st.session_state["handoff_active"] = (_hs.get("mode") == "human")
+            except Exception:
+                pass
 
         if st.session_state.get("sid"):
             try:
