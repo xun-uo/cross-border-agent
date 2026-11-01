@@ -197,6 +197,18 @@ GEN_SYS = """你是跨境电商客服，用买家使用的语言回复，简洁�
 5. 只输出给买家的话，不解释过程。"""
 
 
+_LANG_ORDER = {
+    "zh": "Reply language: Simplified Chinese only. 只用简体中文写回复。",
+    "en": "Reply language: English only.",
+    "es": "Reply language: Spanish only. Responde solo en español.",
+    "de": "Reply language: German only. Antworte ausschließlich auf Deutsch.",
+    "fr": "Reply language: French only. Répondez uniquement en français.",
+    "vi": "Reply language: Vietnamese only. Chỉ trả lời bằng tiếng Việt.",
+    "th": "Reply language: Thai only. ตอบเป็นภาษาไทยเท่านั้น ห้ามใช้ภาษาจีนหรืออังกฤษ",
+    "id": "Reply language: Indonesian only. Jawab hanya dalam bahasa Indonesia.",
+}
+
+
 def generate_draft(text, intent, order, kb_items, market, category, language):
     ctx = []
     if order:
@@ -207,11 +219,15 @@ def generate_draft(text, intent, order, kb_items, market, category, language):
     forbidden = compliance.forbidden_brief(market, category)
     if forbidden:
         ctx.append("本市场红线清单（不得违反）：\n" + forbidden)
-    ctx.append(f"买家使用语言：{language}")
+    ctx.append(f"买家界面语言代码：{language}")
 
+    # 只写「买家使用语言：th」模型会当没看见——实测切泰语后 4 次里 3 次回中文。
+    # 必须在最后一条消息末尾用命令句再钉一次，并把语言名写出来。
+    _order = _LANG_ORDER.get(language, "")
     messages = [
         {"role": "system", "content": GEN_SYS},
-        {"role": "user", "content": "\n\n".join(ctx) + f"\n\n买家消息：{text}\n\n请直接给出回复。"},
+        {"role": "user", "content": "\n\n".join(ctx)
+         + f"\n\n买家消息：{text}\n\n{_order}\n请直接给出回复。"},
     ]
     return llm.chat_hedged(messages, temperature=0.3, max_tokens=500).strip()
 
@@ -495,3 +511,47 @@ def _ask_order_no(language):
 
 def _handoff_note(language):
     return _HANDOFF.get(language, _HANDOFF["en"])
+
+
+_TRANSLATE_NAME = {
+    "zh": "Simplified Chinese", "en": "English", "es": "Spanish",
+    "de": "German", "fr": "French", "vi": "Vietnamese",
+    "th": "Thai", "id": "Indonesian",
+}
+
+
+def translate_batch(texts, target):
+    """把若干条已有的回复翻成 target 语言，返回同长度列表；失败返回 []。
+
+    用途：买家在界面上切换语言后，历史气泡跟着变。
+    聊天记录本身不该「冻结在当时的语言」——演示时切了泰语还满屏中文，
+    看起来就是没生效。买家自己说的话不翻，只翻 AI 说过的。
+    """
+    if not texts:
+        return []
+    _name = _TRANSLATE_NAME.get(target, "English")
+    messages = [
+        {"role": "system",
+         "content": "You are a translation engine. You output only a JSON array."},
+        {"role": "user",
+         "content": ("Translate every string in this JSON array into %s. "
+                     "Keep the same order and the same array length. Keep order numbers, "
+                     "tracking numbers, dates and product names unchanged. "
+                     "Output ONLY the JSON array, no prose, no code fence.\n\n%s"
+                     % (_name, json.dumps(texts, ensure_ascii=False)))},
+    ]
+    try:
+        raw = llm.chat_hedged(messages, temperature=0.1, max_tokens=1600).strip()
+    except Exception:
+        return []
+    s = raw.strip()
+    if s.startswith("```"):
+        s = re.sub(r"^```[a-zA-Z]*\n?", "", s)
+        s = re.sub(r"\n?```$", "", s).strip()
+    try:
+        out = json.loads(s)
+    except Exception:
+        return []
+    if isinstance(out, list) and len(out) == len(texts):
+        return [str(x) for x in out]
+    return []
