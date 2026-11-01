@@ -427,11 +427,15 @@ def process(text, market="US", category="*", history=None, force_category_from_o
     if display_verdict == "block" and rewritten and not handoff:
         display_verdict = "rewrite"   # 已改写成安全话术，对外说「改写」而不是「拦截」
 
-    # 判定日志（供商家看板统计）—— 必须在 display_verdict 算好之后
+    # 判定日志（供商家「会话记录」和判定看板）—— 必须在 display_verdict 算好之后。
+    # 除了判定结果，也把这一轮的问答完整记下来，商家才能复盘「买家问什么、我们答什么」。
     try:
         from . import judge_log
         judge_log.append({
             "text": text,
+            "answer": final_text,
+            "order_no": (order or {}).get("order_no") or (bound_order or ""),
+            "customer": (order or {}).get("customer") or "",
             "market": evaluation.get("market") or market,
             "category": category,
             "verdict": display_verdict,
