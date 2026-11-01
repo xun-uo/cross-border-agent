@@ -1,184 +1,254 @@
 [
-  {
-    "id": "KB-01",
-    "market": "*",
-    "topic": "return_policy",
-    "title": "退货政策（总则）",
-    "text": "签收后 14 天内可申请退货，需商品未使用、包装完整。破损或错发需提供外包装与商品照片，确认后可补发或退款。　关键词：退货 return refund 退换 exchange 退回"
-  },
-  {
-    "id": "KB-02",
-    "market": "EU",
-    "topic": "return_policy",
-    "title": "EU 14 天冷静期",
-    "text": "欧盟消费者享有无理由退货权，期限为收到商品起 14 天。商家不得以政策条款缩短该期限。　关键词：换货 exchange 尺寸 size 错发 wrong item"
-  },
-  {
-    "id": "KB-03",
-    "market": "US",
-    "topic": "return_policy",
-    "title": "US 退货政策",
-    "text": "美国站执行商家统一政策：签收后 30 天内可申请退货。运费承担按责任方判定。"
-  },
-  {
-    "id": "KB-04",
-    "market": "*",
-    "topic": "shipping",
-    "title": "物流时效",
-    "text": "默认发 YunExpress / DHL eCommerce，平均 7-15 个工作日送达。清关高峰期可能延长。运费按重量与目的地结算。"
-  },
-  {
-    "id": "KB-05",
-    "market": "*",
-    "topic": "compliance",
-    "title": "绝对化用语禁用清单",
-    "text": "禁止使用 best / No.1 / 100% safe / perfect 等绝对化表述，无论是否附加说明。"
-  },
-  {
-    "id": "KB-06",
-    "market": "US",
-    "topic": "compliance",
-    "title": "膳食补充剂免责声明",
-    "text": "任何结构功能声明必须同时附上：This statement has not been evaluated by the FDA. This product is not intended to diagnose, treat, cure, or prevent any disease."
-  },
-  {
-    "id": "KB-07",
-    "market": "EU",
-    "topic": "compliance",
-    "title": "化妆品功效宣称",
-    "text": "宣称须满足透明、真实、有证据支持、诚实、公平、消费者知情六项通用标准，且需备有功效证据文件。"
-  },
-  {
-    "id": "KB-08",
-    "market": "*",
-    "topic": "damage",
-    "title": "破损处理",
-    "text": "买家提供照片后，48 小时内确认。确认属实可免费补发或全额退款。不得在确认前承诺退款。　关键词：物流查询 tracking 运单号 tracking number 查快递 package parcel 包裹 单号"
-  },
-  {
-    "id": "KB-09",
-    "market": "*",
-    "topic": "handover",
-    "title": "转人工规则",
-    "text": "涉及平台处罚、大额赔付、法律争议、买家明确要求人工的，一律转人工，不自行承诺。"
-  },
-  {
-    "id": "KB-10",
-    "market": "*",
-    "topic": "customs",
-    "title": "清关异常处理",
-    "text": "清关扣留需买家提供身份证明或补充申报材料，商家协助提交。不得承诺一定能放行。"
-  },
-  {
-    "id": "KB-11",
-    "market": "*",
-    "topic": "shipping",
-    "title": "发货时效与时效说明",
-    "text": "现货商品在付款后 1-2 个工作日内发出。跨境物流分为干线段与目的国派送段，总时长通常 7-15 个工作日。旺季（11-12 月）与清关高峰期可能延长 3-5 个工作日，不构成对具体到货日期的保证。　关键词：什么时候到 delivery time 到货 delivery 时效 lead time 多久 arrive arrival ETA"
-  },
-  {
-    "id": "KB-12",
-    "market": "*",
-    "topic": "shipping",
-    "title": "物流轨迹更新频率",
-    "text": "包裹在跨境干线段（如国际分拣、航班运输）期间，轨迹可能 2-4 天不更新，属正常情况。到达目的国并完成清关后会恢复更新。若超过 7 天无任何更新，可申请物流核查。 package parcel 包裹"
-  },
-  {
-    "id": "KB-13",
-    "market": "*",
-    "topic": "shipping",
-    "title": "无法投递与退回",
-    "text": "因买家地址错误、长期未签收或拒收导致退回的，包裹退回后会通知重新安排发货，需补付二次运费。若再次无法投递，按退货处理，运费不退。"
-  },
-  {
-    "id": "KB-14",
-    "market": "US",
-    "topic": "shipping",
-    "title": "美国市场承运与派送",
-    "text": "美国方向常用 YunExpress、4PX 等跨境承运商，入境后一般交由 USPS 或 UPS 完成末端派送。清关放行后通常 3-5 个工作日送达。"
-  },
-  {
-    "id": "KB-15",
-    "market": "EU",
-    "topic": "shipping",
-    "title": "欧盟市场承运与 VAT",
-    "text": "欧盟方向入境后由当地邮政或 DPD、DHL 派送。VAT 按目的国税率处理，B2C 订单在售价中已含 VAT，买家无需额外支付。"
-  },
-  {
-    "id": "KB-16",
-    "market": "*",
-    "topic": "customs",
-    "title": "清关与关税",
-    "text": "跨境包裹需经目的国海关查验，查验期间轨迹停在清关节点属正常。若产生关税或清关费用，由买家承担。卖家不得承诺包税，除非商品页明确标注 DDP。　关键词：关税 customs duty tax 清关 clearance 税费"
-  },
-  {
-    "id": "KB-17",
-    "market": "*",
-    "topic": "return_policy",
-    "title": "退货流程",
-    "text": "买家提退货申请并提供照片 → 客服确认符合条件 → 买家寄回并填写运单号 → 仓库签收验货 → 3 个工作日内退款。寄回运费由买家承担，商品质量问题由卖家承担。　关键词：退货流程 return process 怎么退 how to return"
-  },
-  {
-    "id": "KB-18",
-    "market": "EU",
-    "topic": "return_policy",
-    "title": "欧盟 14 天撤回权",
-    "text": "欧盟消费者享有收貨后 14 天内无理由撤回权，签收起算。定制商品、已拆封的个护与化妆品不在无理由退货范围内。撤回权不得被商家条款排除。"
-  },
-  {
-    "id": "KB-19",
-    "market": "US",
-    "topic": "return_policy",
-    "title": "美国市场退货惯例",
-    "text": "美国市场常见 30 天退货政策，具体以商品页标注为准。部分州对开封个护商品有卫生限制。"
-  },
-  {
-    "id": "KB-20",
-    "market": "*",
-    "topic": "damage",
-    "title": "破损赔付标准",
-    "text": "到货破损需在签收后 48 小时内提供外包装、内包装与商品三张照片。确认破损可补发或退款，不额外收费。"
-  },
-  {
-    "id": "KB-21",
-    "market": "*",
-    "topic": "handover",
-    "title": "转人工规则",
-    "text": "涉及法律威胁、大额赔付、媒体曝光或多次未解决的对话，自动转人工处理，不在自动回复中承诺具体赔付金额。"
-  },
-  {
-    "id": "KB-22",
-    "market": "*",
-    "topic": "product",
-    "title": "产品成分与适用人群",
-    "text": "产品成分与适用人群以商品页与随附说明书为准。孕妇、哺乳期、儿童及有慢性疾病人群，建议使用前咨询医生。　关键词：成分 ingredient 成分表 适用 suitable 孕妇 pregnant"
-  },
-  {
-    "id": "KB-23",
-    "market": "*",
-    "topic": "product",
-    "title": "功效宣称边界",
-    "text": "化妆品不得宣称医疗作用。膳食补充剂可做结构功能声明，但必须附「本声明未经 FDA 评估，本产品不用于诊断、治疗、治愈或预防任何疾病」。客服话术不得超出商品页已批准的宣称范围。"
-  },
-  {
-    "id": "KB-24",
-    "market": "*",
-    "topic": "product",
-    "title": "过敏与不良反应",
-    "text": "使用后出现红肿、瘙痒等不适，建议立即停用并咨询医生。客服不得判断症状或建议继续使用。　关键词：副作用 side effect reaction 过敏 allergic 不适 irritation 红肿"
-  },
-  {
-    "id": "KB-25",
-    "market": "*",
-    "topic": "product",
-    "title": "产品使用期限与储存",
-    "text": "未开封保质期见包装标注，开封后建议在 6 个月内用完。存放于阴凉干燥处，避免阳光直射。"
-  },
-  {
-    "id": "KB-26",
-    "market": "*",
-    "topic": "payment",
-    "title": "支付与退款到账",
-    "text": "支持信用卡与主流钱包。退款原路返回，信用卡通常 3-7 个工作日到账，受发卡行处理时间影响。　关键词：退款到账 refund timing 多久到账 payout"
-  }
+ {
+  "id": "KB-01",
+  "market": "*",
+  "topic": "return_policy",
+  "title": "退货政策（总则）",
+  "text": "签收后 14 天内可申请退货，需商品未使用、包装完整。破损或错发需提供外包装与商品照片，确认后可补发或退款。　关键词：退货 return refund 退换 exchange 退回"
+ },
+ {
+  "id": "KB-02",
+  "market": "EU",
+  "topic": "return_policy",
+  "title": "EU 14 天冷静期",
+  "text": "欧盟消费者享有无理由退货权，期限为收到商品起 14 天。商家不得以政策条款缩短该期限。　关键词：换货 exchange 尺寸 size 错发 wrong item"
+ },
+ {
+  "id": "KB-03",
+  "market": "US",
+  "topic": "return_policy",
+  "title": "US 退货政策",
+  "text": "美国站执行商家统一政策：签收后 30 天内可申请退货。运费承担按责任方判定。"
+ },
+ {
+  "id": "KB-04",
+  "market": "*",
+  "topic": "shipping",
+  "title": "物流时效",
+  "text": "默认发 YunExpress / DHL eCommerce，平均 7-15 个工作日送达。清关高峰期可能延长。运费按重量与目的地结算。"
+ },
+ {
+  "id": "KB-05",
+  "market": "*",
+  "topic": "compliance",
+  "title": "绝对化用语禁用清单",
+  "text": "禁止使用 best / No.1 / 100% safe / perfect 等绝对化表述，无论是否附加说明。"
+ },
+ {
+  "id": "KB-06",
+  "market": "US",
+  "topic": "compliance",
+  "title": "膳食补充剂免责声明",
+  "text": "任何结构功能声明必须同时附上：This statement has not been evaluated by the FDA. This product is not intended to diagnose, treat, cure, or prevent any disease."
+ },
+ {
+  "id": "KB-07",
+  "market": "EU",
+  "topic": "compliance",
+  "title": "化妆品功效宣称",
+  "text": "宣称须满足透明、真实、有证据支持、诚实、公平、消费者知情六项通用标准，且需备有功效证据文件。"
+ },
+ {
+  "id": "KB-08",
+  "market": "*",
+  "topic": "damage",
+  "title": "破损处理",
+  "text": "买家提供照片后，48 小时内确认。确认属实可免费补发或全额退款。不得在确认前承诺退款。　关键词：物流查询 tracking 运单号 tracking number 查快递 package parcel 包裹 单号"
+ },
+ {
+  "id": "KB-09",
+  "market": "*",
+  "topic": "handover",
+  "title": "转人工规则",
+  "text": "涉及平台处罚、大额赔付、法律争议、买家明确要求人工的，一律转人工，不自行承诺。"
+ },
+ {
+  "id": "KB-10",
+  "market": "*",
+  "topic": "customs",
+  "title": "清关异常处理",
+  "text": "清关扣留需买家提供身份证明或补充申报材料，商家协助提交。不得承诺一定能放行。"
+ },
+ {
+  "id": "KB-11",
+  "market": "*",
+  "topic": "shipping",
+  "title": "发货时效与时效说明",
+  "text": "现货商品在付款后 1-2 个工作日内发出。跨境物流分为干线段与目的国派送段，总时长通常 7-15 个工作日。旺季（11-12 月）与清关高峰期可能延长 3-5 个工作日，不构成对具体到货日期的保证。　关键词：什么时候到 delivery time 到货 delivery 时效 lead time 多久 arrive arrival ETA"
+ },
+ {
+  "id": "KB-12",
+  "market": "*",
+  "topic": "shipping",
+  "title": "物流轨迹更新频率",
+  "text": "包裹在跨境干线段（如国际分拣、航班运输）期间，轨迹可能 2-4 天不更新，属正常情况。到达目的国并完成清关后会恢复更新。若超过 7 天无任何更新，可申请物流核查。 package parcel 包裹"
+ },
+ {
+  "id": "KB-13",
+  "market": "*",
+  "topic": "shipping",
+  "title": "无法投递与退回",
+  "text": "因买家地址错误、长期未签收或拒收导致退回的，包裹退回后会通知重新安排发货，需补付二次运费。若再次无法投递，按退货处理，运费不退。"
+ },
+ {
+  "id": "KB-14",
+  "market": "US",
+  "topic": "shipping",
+  "title": "美国市场承运与派送",
+  "text": "美国方向常用 YunExpress、4PX 等跨境承运商，入境后一般交由 USPS 或 UPS 完成末端派送。清关放行后通常 3-5 个工作日送达。"
+ },
+ {
+  "id": "KB-15",
+  "market": "EU",
+  "topic": "shipping",
+  "title": "欧盟市场承运与 VAT",
+  "text": "欧盟方向入境后由当地邮政或 DPD、DHL 派送。VAT 按目的国税率处理，B2C 订单在售价中已含 VAT，买家无需额外支付。"
+ },
+ {
+  "id": "KB-16",
+  "market": "*",
+  "topic": "customs",
+  "title": "清关与关税",
+  "text": "跨境包裹需经目的国海关查验，查验期间轨迹停在清关节点属正常。若产生关税或清关费用，由买家承担。卖家不得承诺包税，除非商品页明确标注 DDP。　关键词：关税 customs duty tax 清关 clearance 税费"
+ },
+ {
+  "id": "KB-17",
+  "market": "*",
+  "topic": "return_policy",
+  "title": "退货流程",
+  "text": "买家提退货申请并提供照片 → 客服确认符合条件 → 买家寄回并填写运单号 → 仓库签收验货 → 3 个工作日内退款。寄回运费由买家承担，商品质量问题由卖家承担。　关键词：退货流程 return process 怎么退 how to return"
+ },
+ {
+  "id": "KB-18",
+  "market": "EU",
+  "topic": "return_policy",
+  "title": "欧盟 14 天撤回权",
+  "text": "欧盟消费者享有收貨后 14 天内无理由撤回权，签收起算。定制商品、已拆封的个护与化妆品不在无理由退货范围内。撤回权不得被商家条款排除。"
+ },
+ {
+  "id": "KB-19",
+  "market": "US",
+  "topic": "return_policy",
+  "title": "美国市场退货惯例",
+  "text": "美国市场常见 30 天退货政策，具体以商品页标注为准。部分州对开封个护商品有卫生限制。"
+ },
+ {
+  "id": "KB-20",
+  "market": "*",
+  "topic": "damage",
+  "title": "破损赔付标准",
+  "text": "到货破损需在签收后 48 小时内提供外包装、内包装与商品三张照片。确认破损可补发或退款，不额外收费。"
+ },
+ {
+  "id": "KB-21",
+  "market": "*",
+  "topic": "handover",
+  "title": "转人工规则",
+  "text": "涉及法律威胁、大额赔付、媒体曝光或多次未解决的对话，自动转人工处理，不在自动回复中承诺具体赔付金额。"
+ },
+ {
+  "id": "KB-22",
+  "market": "*",
+  "topic": "product",
+  "title": "产品成分与适用人群",
+  "text": "产品成分与适用人群以商品页与随附说明书为准。孕妇、哺乳期、儿童及有慢性疾病人群，建议使用前咨询医生。　关键词：成分 ingredient 成分表 适用 suitable 孕妇 pregnant"
+ },
+ {
+  "id": "KB-23",
+  "market": "*",
+  "topic": "product",
+  "title": "功效宣称边界",
+  "text": "化妆品不得宣称医疗作用。膳食补充剂可做结构功能声明，但必须附「本声明未经 FDA 评估，本产品不用于诊断、治疗、治愈或预防任何疾病」。客服话术不得超出商品页已批准的宣称范围。"
+ },
+ {
+  "id": "KB-24",
+  "market": "*",
+  "topic": "product",
+  "title": "过敏与不良反应",
+  "text": "使用后出现红肿、瘙痒等不适，建议立即停用并咨询医生。客服不得判断症状或建议继续使用。　关键词：副作用 side effect reaction 过敏 allergic 不适 irritation 红肿"
+ },
+ {
+  "id": "KB-25",
+  "market": "*",
+  "topic": "product",
+  "title": "产品使用期限与储存",
+  "text": "未开封保质期见包装标注，开封后建议在 6 个月内用完。存放于阴凉干燥处，避免阳光直射。"
+ },
+ {
+  "id": "KB-26",
+  "market": "*",
+  "topic": "payment",
+  "title": "支付与退款到账",
+  "text": "支持信用卡与主流钱包。退款原路返回，信用卡通常 3-7 个工作日到账，受发卡行处理时间影响。　关键词：退款到账 refund timing 多久到账 payout"
+ },
+ {
+  "id": "KB-27",
+  "market": "PH",
+  "topic": "return_policy",
+  "title": "菲律宾 · 退换货依商家公示政策",
+  "text": "菲律宾没有统一的无理由退货冷静期。法律要求线上商家遵守自己在网站公示的退换货政策；商品有缺陷、与描述不符或发错货时，商家必须退换。买家主张退货时，以公示政策为准。　关键词：退货 return refund 退款 退换 exchange 菲律宾 Philippines"
+ },
+ {
+  "id": "KB-28",
+  "market": "PH",
+  "topic": "customs",
+  "title": "菲律宾 · 进口免税额 1 万比索",
+  "text": "菲律宾关税现代化法案（RA 10863）规定，离岸价 1 万比索及以下的进口物品免征关税和税款，超过该金额需按正式或非正式报关程序缴税。金额以比索计价，折算人民币随汇率浮动。　关键词：关税 customs duty 清关 免税 免税额 菲律宾 Philippines"
+ },
+ {
+  "id": "KB-29",
+  "market": "KR",
+  "topic": "return_policy",
+  "title": "韩国 · 7 天冷静期（청약철회）",
+  "text": "韩国电子商务消费者保护法第 17 条规定，消费者自收到商品或收到合同内容书面文件之日（以较晚者为准）起 7 日内可无理由撤回签约。例外：因消费者原因导致商品价值显著下降、开封后无法复原的卫生类商品、定制商品等，且商家须事先告知。　关键词：退货 return refund 환불 반품 退换 교환 청약철회 韩国 Korea"
+ },
+ {
+  "id": "KB-30",
+  "market": "KR",
+  "topic": "customs",
+  "title": "韩国 · PCCC 与 150 美元免税额",
+  "text": "韩国对个人自用进口物品的免税额度为 150 美元（到岸价），超出部分需缴纳关税与增值税。海外直购必须提供个人通关唯一号码（PCCC），否则无法清关。　关键词：关税 customs 관세 清关 통관 PCCC 免税额 韩国 Korea"
+ },
+ {
+  "id": "KB-31",
+  "market": "RU",
+  "topic": "return_policy",
+  "title": "俄罗斯 · 远程销售 7 天退货",
+  "text": "俄罗斯消费者权益保护法第 26.1 条规定，远程销售（网购）的商品，消费者可在收货前随时拒收，收货后 7 日内可无理由退货。定制类商品除外。　关键词：退货 return возврат 退款 退换 обмен 俄罗斯 Russia"
+ },
+ {
+  "id": "KB-32",
+  "market": "RU",
+  "topic": "customs",
+  "title": "俄罗斯 · 200 欧元免税额",
+  "text": "自 2024 年 4 月 1 日起，俄罗斯个人自用进口包裹的免税额为 200 欧元且单件重量不超过 31 公斤。超出部分按超额部分的 30% 征收关税，且不低于每公斤 4 欧元。该额度调整频繁，以欧亚经济委员会最新决定为准。　关键词：关税 customs пошлина 清关 免税额 俄罗斯 Russia"
+ },
+ {
+  "id": "KB-33",
+  "market": "MN",
+  "topic": "return_policy",
+  "title": "蒙古 · 退换货规定",
+  "text": "蒙古消费者权益保护法规定，商品不符合质量要求或与合同约定不符时，消费者有权要求更换或退货。具体期限与例外以蒙古现行法规及商家公示政策为准。　关键词：退货 return буцаах 退换 солилцох 蒙古 Mongolia"
+ },
+ {
+  "id": "KB-34",
+  "market": "MN",
+  "topic": "customs",
+  "title": "蒙古 · 个人进口免税额",
+  "text": "蒙古对个人自用进口物品设有免税额，金额以蒙古国海关总署公布的当期标准为准（以图格里克计价，随汇率浮动）。超过免税额需缴纳关税与增值税。　关键词：关税 customs гааль 清关 免税额 蒙古 Mongolia"
+ },
+ {
+  "id": "KB-35",
+  "market": "CN",
+  "topic": "return_policy",
+  "title": "中国 · 7 天无理由退货",
+  "text": "消费者权益保护法第 25 条规定，网络等方式销售的商品，消费者自收到商品之日起 7 日内可无理由退货。例外：定制商品、鲜活易腐、在线下载或拆封的数字化商品、交付的报纸期刊，以及经消费者购买时确认不宜退货的商品。　关键词：退货 return refund 退款 七天 无理由 退换 exchange 中国"
+ },
+ {
+  "id": "KB-36",
+  "market": "CN",
+  "topic": "customs",
+  "title": "中国 · 跨境电商零售进口限额",
+  "text": "跨境电商零售进口单次交易限值 5000 元、个人年度限值 26000 元。限值内关税税率暂设为 0%，进口环节增值税与消费税按法定应纳税额的 70% 征收；超过限值按一般贸易全额征税。买家需提供身份证信息用于清关申报。　关键词：关税 customs 清关 限额 跨境电商 身份证 中国"
+ }
 ]
