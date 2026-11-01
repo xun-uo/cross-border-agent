@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #102 · 高度退回安全值"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #103 · 消息区560"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1016,14 +1016,8 @@ a.shop-link:hover { border-bottom-color: rgba(201,168,130,.85); }
     z-index: auto !important;
 }
 /* 输入框保留 Streamlit 自己的底纹：覆盖成透明就看不出哪里能输入 */
-/* 会话消息区：高度按视口算，撑满一屏，按钮和回复框自然落在底部。
-   关键是 st.container 不能传 height 参数——Streamlit 会把它写成行内样式，
-   任何 CSS 都覆盖不掉，结果永远卡在固定高度、底部留一大块空白。 */
-.st-key-msgbox {
-    height: calc(100vh - 400px) !important;
-    min-height: 260px !important;
-    overflow-y: auto !important;
-}
+/* 消息区高度不要在这里写！任何 height !important 都会压掉下面脚本按视口算的高度，
+   而且 Streamlit 自己给的是行内样式，两边打架最后谁都不对。高度统一由脚本设置。 */
 </style>
 """
 
@@ -1390,7 +1384,7 @@ def _handoff_tab():
     # 底下的回复框就不会被顶出屏幕（tab 里的 chat_input 不会自动 sticky）。
     # 高度这里给一个较大的实参（CSS 覆盖不动 Streamlit 写的行内样式），
     # 下面再用脚本按视口微调 + 滚到最新一条。
-    with st.container(border=True, height=520, key="msgbox"):
+    with st.container(border=True, height=560, key="msgbox"):
         msgs = cur.get("messages", [])
         if not msgs:
             st.caption("这个会话里还没有消息。")
