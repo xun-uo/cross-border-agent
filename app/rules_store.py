@@ -21,6 +21,14 @@ def _ensure():
     VERSIONS.mkdir(exist_ok=True)
     if not RUNTIME.exists():
         shutil.copyfile(RULES, RUNTIME)
+        return
+    # 出厂规则（rules.json）比运行时副本新 —— 说明代码/数据发过新版本，
+    # 以出厂为准覆盖一次。商家编辑只会更新 runtime 的 mtime，不会被这里盖掉。
+    try:
+        if RULES.stat().st_mtime > RUNTIME.stat().st_mtime + 1:
+            shutil.copyfile(RULES, RUNTIME)
+    except OSError:
+        pass
 
 
 def load():
