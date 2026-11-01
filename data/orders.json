@@ -1406,5 +1406,235 @@
   "partial": false,
   "refund_status": "done",
   "phone": "13800000030"
+ },
+ {
+  "order_no": "ORDER20261021031",
+  "market": "UK",
+  "language": "en",
+  "customer": "Emma Wilson",
+  "items": [
+   {
+    "sku": "SKU-SKIN-03",
+    "name": "Vitamin C Serum",
+    "qty": 1,
+    "category": "cosmetic"
+   }
+  ],
+  "status": "in_transit",
+  "status_cn": "在途",
+  "tracking_no": "UK20261021031",
+  "carrier": "Royal Mail",
+  "warehouse": "Shanghai",
+  "shipped_at": "2026-10-28",
+  "eta_from": "2026-11-05",
+  "eta_to": "2026-11-09",
+  "nodes": [
+   {
+    "time": "2026-10-28 09:30",
+    "desc": "Order confirmed",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-28 18:15",
+    "desc": "Picked up by carrier (Shanghai warehouse)",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-30 07:40",
+    "desc": "Departed origin facility",
+    "lat": 22.54,
+    "lng": 114.06
+   },
+   {
+    "time": "2026-11-02 11:20",
+    "desc": "Arrived at London Heathrow clearance hub",
+    "lat": 51.51,
+    "lng": -0.13
+   }
+  ],
+  "cancellable": false,
+  "returnable": true,
+  "partial": false,
+  "refund_status": "none",
+  "phone": "13800000031"
+ },
+ {
+  "order_no": "ORDER20261021032",
+  "market": "UK",
+  "language": "en",
+  "customer": "James Taylor",
+  "items": [
+   {
+    "sku": "SKU-SUP-01",
+    "name": "Calm Sleep Supplement",
+    "qty": 2,
+    "category": "supplement"
+   }
+  ],
+  "status": "customs_hold",
+  "status_cn": "清关滞留",
+  "tracking_no": "UK20261021032",
+  "carrier": "Royal Mail",
+  "warehouse": "Shanghai",
+  "shipped_at": "2026-10-24",
+  "eta_from": "2026-11-04",
+  "eta_to": "2026-11-10",
+  "nodes": [
+   {
+    "time": "2026-10-24 10:05",
+    "desc": "Order confirmed",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-24 19:30",
+    "desc": "Picked up by carrier",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-27 08:50",
+    "desc": "Departed origin facility",
+    "lat": 22.54,
+    "lng": 114.06
+   },
+   {
+    "time": "2026-10-31 14:10",
+    "desc": "Arrived at London Heathrow clearance hub",
+    "lat": 51.51,
+    "lng": -0.13
+   },
+   {
+    "time": "2026-11-01 09:25",
+    "desc": "Held by HMRC — awaiting importer documentation",
+    "lat": 51.51,
+    "lng": -0.13
+   }
+  ],
+  "cancellable": false,
+  "returnable": true,
+  "partial": false,
+  "refund_status": "none",
+  "phone": "13800000032"
+ },
+ {
+  "order_no": "ORDER20261021033",
+  "market": "JP",
+  "language": "en",
+  "customer": "佐藤 美咲",
+  "items": [
+   {
+    "sku": "SKU-SKIN-01",
+    "name": "Hydra Repair Cream",
+    "qty": 1,
+    "category": "cosmetic"
+   }
+  ],
+  "status": "in_transit",
+  "status_cn": "在途",
+  "tracking_no": "JP20261021033",
+  "carrier": "Sagawa Express",
+  "warehouse": "Shanghai",
+  "shipped_at": "2026-10-29",
+  "eta_from": "2026-11-02",
+  "eta_to": "2026-11-05",
+  "nodes": [
+   {
+    "time": "2026-10-29 09:15",
+    "desc": "Order confirmed",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-29 17:45",
+    "desc": "Picked up by carrier (Shanghai warehouse)",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-31 06:30",
+    "desc": "Departed on cross-border flight PVG → NRT",
+    "lat": 22.54,
+    "lng": 114.06
+   },
+   {
+    "time": "2026-11-01 08:20",
+    "desc": "Arrived at Tokyo customs",
+    "lat": 35.68,
+    "lng": 139.69
+   },
+   {
+    "time": "2026-11-01 16:40",
+    "desc": "Customs cleared",
+    "lat": 35.68,
+    "lng": 139.69
+   }
+  ],
+  "cancellable": false,
+  "returnable": true,
+  "partial": false,
+  "refund_status": "none",
+  "phone": "13800000033"
+ },
+ {
+  "order_no": "ORDER20261021034",
+  "market": "JP",
+  "language": "en",
+  "customer": "田中 健太",
+  "items": [
+   {
+    "sku": "SKU-SUP-01",
+    "name": "Calm Sleep Supplement",
+    "qty": 1,
+    "category": "supplement"
+   }
+  ],
+  "status": "customs_hold",
+  "status_cn": "清关滞留",
+  "tracking_no": "JP20261021034",
+  "carrier": "Sagawa Express",
+  "warehouse": "Shanghai",
+  "shipped_at": "2026-10-23",
+  "eta_from": "2026-11-03",
+  "eta_to": "2026-11-08",
+  "nodes": [
+   {
+    "time": "2026-10-23 09:40",
+    "desc": "Order confirmed",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-23 18:20",
+    "desc": "Picked up by carrier",
+    "lat": 31.23,
+    "lng": 121.47
+   },
+   {
+    "time": "2026-10-26 07:10",
+    "desc": "Departed origin facility",
+    "lat": 22.54,
+    "lng": 114.06
+   },
+   {
+    "time": "2026-10-29 10:35",
+    "desc": "Arrived at Osaka customs",
+    "lat": 34.69,
+    "lng": 135.5
+   },
+   {
+    "time": "2026-10-30 15:50",
+    "desc": "Held by customs — ingredient documentation required",
+    "lat": 34.69,
+    "lng": 135.5
+   }
+  ],
+  "cancellable": false,
+  "returnable": true,
+  "partial": false,
+  "refund_status": "none",
+  "phone": "13800000034"
  }
 ]
