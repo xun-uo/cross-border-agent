@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #94 · 人工回复也过合规"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #95 · 回复框跟随按钮"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -961,13 +961,14 @@ LAYOUT_CSS = """
 }
 .shop-site:hover { border-color: rgba(201,168,130,.85); opacity: 1; }
 
-/* 回复框固定在屏幕底部（tab 里的 chat_input 不会自己贴底） */
-[data-testid="stChatInput"] {
-    position: fixed !important;
-    bottom: 14px !important;
-    left: 5rem !important;
-    right: 5rem !important;
-    z-index: 860 !important;
+/* 商家端的回复框跟在「结束会话/收起会话」下面正常排版：
+   不要 fixed 到窗口底部——内容一长就盖住按钮，一短就中间空一大块。
+   消息区已是固定高度，页面高度稳定，不固定也不会被顶走。
+   只作用于 tab 里的那个，买家端的 sticky 保持 Streamlit 默认行为。 */
+[data-testid="stTabs"] [data-testid="stChatInput"] {
+    position: static !important;
+    bottom: auto !important;
+    z-index: auto !important;
 }
 /* 输入框保留 Streamlit 自己的底纹：覆盖成透明就看不出哪里能输入 */
 /* 会话消息区按视口算高度，一屏正好放下 */
