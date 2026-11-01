@@ -7,6 +7,7 @@ from .config import DATA_DIR
 from . import llm
 
 _RULES = None
+_RULES_MTIME = None
 _MARKET_FALLBACK = {"LATAM": "US", "*": "US"}
 _KNOWN_MARKETS = None
 
@@ -14,10 +15,28 @@ _KNOWN_MARKETS = None
 _BOUNDARY = re.compile(r"(?<=[。！？])|(?<=[.!?])(?=\s)")
 
 
+def _rules_path():
+    """商家后台编辑写的是 rules_runtime.json；合规引擎必须读同一份。
+
+    曾经这里只读 rules.json，导致后台改了规则、启停了规则，判定结果一点不变——
+    界面上说「改一处全店立即生效」，实际改了个寂寞。两边必须指向同一个文件。
+    """
+    p = DATA_DIR / "rules_runtime.json"
+    return p if p.exists() else DATA_DIR / "rules.json"
+
+
 def load_rules():
-    global _RULES
-    if _RULES is None:
-        _RULES = json.loads((DATA_DIR / "rules.json").read_text(encoding="utf-8"))
+    """带 mtime 的缓存：后台保存后文件变了就重载，不需要重启服务。"""
+    global _RULES, _RULES_MTIME, _KNOWN_MARKETS
+    p = _rules_path()
+    try:
+        mt = p.stat().st_mtime
+    except OSError:
+        mt = None
+    if _RULES is None or mt != _RULES_MTIME:
+        _RULES = json.loads(p.read_text(encoding="utf-8"))
+        _RULES_MTIME = mt
+        _KNOWN_MARKETS = None
     return _RULES
 
 
