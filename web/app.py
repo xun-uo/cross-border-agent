@@ -762,12 +762,12 @@ def login_gate():
                     st.error(t("wrong"))
             st.caption(t("cred_hint"))
 
-        st.caption(t("wake_hint"))
+        st.caption("%s · build %s" % (t("wake_hint"), BUILD))
     return False
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #116 · 物流图浅色适配 + 固定浅色主题"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #117 · build 号移到登录页"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
