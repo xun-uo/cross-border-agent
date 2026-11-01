@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #100 · 商家页头纯HTML + tabs固定"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #101 · tabs sticky 选择器修正"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -937,7 +937,7 @@ LAYOUT_CSS = """
 .logout-link:hover { border-color: rgba(201,168,130,.85); }
 /* tabs 滚到页头下面就不动了。sticky 的父级是 tab 内容容器（高度=全部内容），
    有行程所以能粘住——页头那个之所以不能用 sticky，是它的包裹层高度正好等于自身。 */
-[data-testid="stTabs"] [data-baseweb="tab-list"] {
+[role="tablist"] {
     position: sticky !important;
     top: 56px !important;
     z-index: 880 !important;
@@ -1016,9 +1016,14 @@ a.shop-link:hover { border-bottom-color: rgba(201,168,130,.85); }
     z-index: auto !important;
 }
 /* 输入框保留 Streamlit 自己的底纹：覆盖成透明就看不出哪里能输入 */
-/* 会话消息区的高度交给下面那段脚本按视口算。
-   这里千万别写 height !important —— 它会压过脚本设的行内样式，
-   结果就是消息区永远卡在 Streamlit 的固定高度、按钮和回复框浮在页面中间。 */
+/* 会话消息区：高度按视口算，撑满一屏，按钮和回复框自然落在底部。
+   关键是 st.container 不能传 height 参数——Streamlit 会把它写成行内样式，
+   任何 CSS 都覆盖不掉，结果永远卡在固定高度、底部留一大块空白。 */
+.st-key-msgbox {
+    height: calc(100vh - 400px) !important;
+    min-height: 260px !important;
+    overflow-y: auto !important;
+}
 </style>
 """
 
