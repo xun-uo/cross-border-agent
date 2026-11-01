@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #103 · 消息区560"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #104 · 去掉重复转人工提示"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1143,11 +1143,8 @@ def _run_turn(text):
         if st.session_state.get("sid") and handoff.is_human_mode(st.session_state["sid"]):
             handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
             st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
-            st.session_state.history.append({
-                "role": "note",
-                "content": "已转接人工客服，您的问题会由人工同事跟进，请稍候。",
-                "ts": _now(),
-            })
+            # 这里不要再插「已转接人工客服」的提示：买家页头上已经有持续的
+            # 「已转人工，正在等待商家回复…」，每发一句都插一条会把对话淹掉。
             st.session_state["handoff_active"] = True   # 继续轮询
             st.rerun()
     except Exception:
