@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #98 · 商家页头修裁切"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #99 · 消息区撑满一屏"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1006,11 +1006,9 @@ a.shop-link:hover { border-bottom-color: rgba(201,168,130,.85); }
     z-index: auto !important;
 }
 /* 输入框保留 Streamlit 自己的底纹：覆盖成透明就看不出哪里能输入 */
-/* 会话消息区按视口算高度，一屏正好放下 */
-.st-key-msgbox {
-    height: calc(100vh - 430px) !important;
-    min-height: 240px !important;
-}
+/* 会话消息区的高度交给下面那段脚本按视口算。
+   这里千万别写 height !important —— 它会压过脚本设的行内样式，
+   结果就是消息区永远卡在 Streamlit 的固定高度、按钮和回复框浮在页面中间。 */
 </style>
 """
 
