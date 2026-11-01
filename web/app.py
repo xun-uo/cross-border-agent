@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #97 · 窄屏页头避让"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #98 · 商家页头修裁切"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -921,20 +921,18 @@ LAYOUT_CSS = """
     padding: 0 0 0 5rem !important;
     border-bottom: 1px solid rgba(128,128,128,.12);
 }
-/* 商家端页头整块容器 */
+/* 商家端页头整块容器。这里不能用 display:flex —— 里面是 Streamlit 的 st.columns，
+   再套一层 flex 会让列宽算错，「退出登录」按钮会被挤出右边界。 */
 .st-key-mhead {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    right: 190px !important;
-    height: 60px !important;
-    display: flex !important;
-    align-items: center !important;
+    right: 0 !important;
     z-index: 1000001 !important;
     background: transparent !important;
     backdrop-filter: blur(14px) saturate(1.2) !important;
     -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
-    padding: 0 0 0 5rem !important;
+    padding: 8px 5rem 6px !important;
     border-bottom: 1px solid rgba(128,128,128,.12);
 }
 /* debug 开关：宽屏时放在顶栏右侧（语言下拉左边），跟页头同一排。
