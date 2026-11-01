@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-10-31 #86 · handoff-ui + image"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #87 · 手风琴 + 回车发送"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1150,71 +1150,77 @@ def _handoff_tab():
         return
     st.caption(f"{len(pend)} 个进行中的人工会话 · 每 6 秒自动刷新")
 
+    # 手风琴：同一时间只展开一个会话。每个会话各记一个开关的话，
+    # 开第二个时第一个还开着，页面会越拉越长。
+    open_sid = st.session_state.get("_hopen")
+
     for s in pend:
         sid = s["sid"]
         stt = {"pending": "待回复", "answered": "已回复",
                "handled": "已回复"}.get(s.get("status"), "-")
-        open_key = f"_hopen_{sid}"
-        is_open = st.session_state.get(open_key, False)
+        is_open = (open_sid == sid)
 
         # 不用 st.expander：面板每 6 秒重绘，expander 的展开状态会被重置，
         # 商家正在看对话时被强行收起一次。展开状态存进 session_state 才稳。
-        cc1, cc2 = st.columns([5, 1])
-        with cc1:
-            st.markdown(f"**{stt}** · 会话 `{sid}` · {s.get('created', '')} · "
-                        f"{len(s.get('messages', []))} 条消息")
-        with cc2:
-            if st.button("收起" if is_open else "查看", key=f"_htog_{sid}",
-                         use_container_width=True):
-                st.session_state[open_key] = not is_open
-                st.rerun(scope="fragment")
-
-        if is_open:
-            # 商家视角：自己这边发的（AI 和人工）靠右，买家靠左——和买家端正好相反
-            for m in s.get("messages", []):
-                src = m.get("source")
-                if src == "note":
-                    st.markdown(
-                        f'<div class="sys-note">{m.get("text", "")}</div>',
-                        unsafe_allow_html=True)
-                    continue
-                is_buyer = src in ("buyer", "user") or m.get("role") in ("buyer", "user")
-                with st.chat_message("assistant" if is_buyer else "user"):
-                    if is_buyer:
-                        # 买家的话在商家视角靠左，但它不是 AI 说的，不能挂 AI 徽章
-                        st.markdown('<span class="no-badge"></span>', unsafe_allow_html=True)
-                    st.markdown(m.get("text", ""))
-                    if m.get("image"):
-                        try:
-                            st.image(m["image"], use_container_width=True)
-                        except Exception:
-                            st.caption("（图片已失效）")
-                    if m.get("ts"):
-                        who = {"buyer": "买家", "human": "人工"}.get(src, "AI")
-                        st.caption(f"{who} · {m['ts']}")
-
-            txt = st.text_area("人工回复", key=f"reply_{sid}",
-                               placeholder="以人工客服身份回复买家…")
-            b1, b2 = st.columns(2)
-            with b1:
-                if st.button("发送回复", key=f"send_{sid}", type="primary",
+        with st.container(border=True):
+            cc1, cc2 = st.columns([5, 1])
+            with cc1:
+                st.markdown(f"**{stt}** · 会话 `{sid}` · {s.get('created', '')} · "
+                            f"{len(s.get('messages', []))} 条消息")
+            with cc2:
+                if st.button("收起" if is_open else "查看", key=f"_htog_{sid}",
                              use_container_width=True):
-                    if txt.strip():
-                        nm = store_config.load().get("agent_name", "")
-                        handoff.human_reply(sid, txt.strip(), agent_name=nm)
-                        handoff.mark_handled(sid)
-                        st.session_state[f"_clear_reply_{sid}"] = True
-                        st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
-                        st.rerun(scope="fragment")
-                    else:
-                        st.warning("回复内容不能为空")
-            with b2:
-                if st.button("结束会话（交还 AI）", key=f"done_{sid}",
-                             use_container_width=True,
-                             help="结束后该买家的问题重新由 AI 处理"):
-                    handoff.back_to_ai(sid)
+                    st.session_state["_hopen"] = None if is_open else sid
                     st.rerun(scope="fragment")
-        st.divider()
+
+            if is_open:
+                # 商家视角：自己这边发的（AI 和人工）靠右，买家靠左——和买家端正好相反
+                for m in s.get("messages", []):
+                    src = m.get("source")
+                    if src == "note":
+                        st.markdown(
+                            f'<div class="sys-note">{m.get("text", "")}</div>',
+                            unsafe_allow_html=True)
+                        continue
+                    is_buyer = src in ("buyer", "user") or m.get("role") in ("buyer", "user")
+                    with st.chat_message("assistant" if is_buyer else "user"):
+                        if is_buyer:
+                            # 买家的话在商家视角靠左，但它不是 AI 说的，不能挂 AI 徽章
+                            st.markdown('<span class="no-badge"></span>', unsafe_allow_html=True)
+                        st.markdown(m.get("text", ""))
+                        if m.get("image"):
+                            try:
+                                st.image(m["image"], use_container_width=True)
+                            except Exception:
+                                st.caption("（图片已失效）")
+                        if m.get("ts"):
+                            who = {"buyer": "买家", "human": "人工"}.get(src, "AI")
+                            st.caption(f"{who} · {m['ts']}")
+
+                # 用 chat_input 而不是 text_area：只有它能「回车即发送」，
+                # 而且提交后自动清空，不用再手动清 widget 状态。
+                txt = st.chat_input("以人工客服身份回复买家…", key=f"reply_{sid}")
+                if txt:
+                    nm = store_config.load().get("agent_name", "")
+                    handoff.human_reply(sid, txt.strip(), agent_name=nm)
+                    handoff.mark_handled(sid)
+                    st.session_state["_panel_flash"] = "已发送。买家会在 4 秒内自动收到。"
+                    st.rerun(scope="fragment")
+
+                # 结束会话和收起并排，不用上下两行
+                b1, b2 = st.columns(2)
+                with b1:
+                    if st.button("结束会话（交还 AI）", key=f"done_{sid}",
+                                 use_container_width=True,
+                                 help="结束后该买家的问题重新由 AI 处理"):
+                        handoff.back_to_ai(sid)
+                        st.session_state["_hopen"] = None
+                        st.rerun(scope="fragment")
+                with b2:
+                    if st.button("收起会话", key=f"_hclose_{sid}",
+                                 use_container_width=True):
+                        st.session_state["_hopen"] = None
+                        st.rerun(scope="fragment")
 
 
 def render_merchant():
