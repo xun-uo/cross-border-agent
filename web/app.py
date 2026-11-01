@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #99 · 消息区撑满一屏"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #100 · 商家页头纯HTML + tabs固定"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -921,19 +921,29 @@ LAYOUT_CSS = """
     padding: 0 0 0 5rem !important;
     border-bottom: 1px solid rgba(128,128,128,.12);
 }
-/* 商家端页头整块容器。这里不能用 display:flex —— 里面是 Streamlit 的 st.columns，
-   再套一层 flex 会让列宽算错，「退出登录」按钮会被挤出右边界。 */
-.st-key-mhead {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 1000001 !important;
+/* 商家端页头也用同一个纯 HTML 固定块（fixed 容器里放 st.columns / st.button
+   会让组件按原始父宽度算位置，退出按钮直接被挤出边界）。 */
+.shop-sub { font-size: .78rem; opacity: .6; white-space: nowrap; }
+.logout-link {
+    margin-left: auto;
+    padding: 5px 14px;
+    font-size: .8rem;
+    color: inherit !important;
+    text-decoration: none !important;
+    border: 1px solid rgba(128,128,128,.35);
+    border-radius: 8px;
+    white-space: nowrap;
+}
+.logout-link:hover { border-color: rgba(201,168,130,.85); }
+/* tabs 滚到页头下面就不动了。sticky 的父级是 tab 内容容器（高度=全部内容），
+   有行程所以能粘住——页头那个之所以不能用 sticky，是它的包裹层高度正好等于自身。 */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    position: sticky !important;
+    top: 56px !important;
+    z-index: 880 !important;
     background: transparent !important;
     backdrop-filter: blur(14px) saturate(1.2) !important;
     -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
-    padding: 8px 5rem 6px !important;
-    border-bottom: 1px solid rgba(128,128,128,.12);
 }
 /* debug 开关：宽屏时放在顶栏右侧（语言下拉左边），跟页头同一排。
    窗口窄的时候顶栏放不下，会压在订单号上，所以往下挪到页头下面。 */
@@ -1471,21 +1481,19 @@ def render_merchant():
     from app import rules_store  # noqa: F401
     import json as _json
 
-    # 页头钉在顶部；tabs 和下面的分组各占一行，顺序就是店铺名 → 账号 → tabs → 分组
-    with st.container(key="mhead"):
-        c1, c2 = st.columns([6, 1.4])
-        with c1:
-            st.markdown(
-                f'<div class="shop-head">'
-                f'<span class="shop-name">🏪 {STORE_NAME} · 商家后台</span>'
-                f'<span class="shop-online">🟢 在线</span>'
-                f'</div>',
-                unsafe_allow_html=True)
-            st.caption(f"当前账号：{st.session_state.get('user', '-')} · 规则引擎与判定统计")
-        with c2:
-            if st.button("退出登录", use_container_width=True):
-                st.session_state.clear()
-                st.rerun()
+    # 页头：纯 HTML 固定块，和买家端同一套样式。
+    # 不在 fixed 容器里放 st.columns / st.button —— 组件会按原始父宽度算位置，
+    # 退出按钮会被挤出边界、还会盖住右上角那排平台图标。
+    # 退出登录改成 ?logout=1 链接，由 main() 开头统一处理。
+    _who = st.session_state.get("user", "-")
+    st.markdown(
+        f'<div class="shop-head-fixed">'
+        f'<span class="shop-name">🏪 {STORE_NAME} · 商家后台</span>'
+        f'<span class="shop-online">🟢 在线</span>'
+        f'<span class="shop-sub">当前账号：{_who} · 规则引擎与判定统计</span>'
+        f'<a class="logout-link" href="?logout=1">退出登录</a>'
+        f'</div>',
+        unsafe_allow_html=True)
 
     # 操作成功提示：rerun 会吃掉当轮的 st.success，所以存下来下一轮再显示
     _flash = st.session_state.pop("_flash", None)
@@ -1768,6 +1776,16 @@ def _poll_human_replies():
 
 
 def main():
+    # 退出登录走 ?logout=1 链接：fixed 页头里放不了 st.button，
+    # 用 query 参数触发一次 rerun 把会话清掉。
+    try:
+        if st.query_params.get("logout"):
+            st.session_state.clear()
+            st.query_params.clear()
+            st.rerun()
+    except Exception:
+        pass
+
     if not login_gate():
         return
 
