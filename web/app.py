@@ -411,7 +411,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #96 · 买家端页头重做"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #97 · 窄屏页头避让"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -937,7 +937,8 @@ LAYOUT_CSS = """
     padding: 0 0 0 5rem !important;
     border-bottom: 1px solid rgba(128,128,128,.12);
 }
-/* debug 开关：右上角，语言下拉左边，跟页头同一排 */
+/* debug 开关：宽屏时放在顶栏右侧（语言下拉左边），跟页头同一排。
+   窗口窄的时候顶栏放不下，会压在订单号上，所以往下挪到页头下面。 */
 .st-key-dbg_box {
     position: fixed !important;
     top: 12px !important;
@@ -945,6 +946,13 @@ LAYOUT_CSS = """
     width: 210px !important;
     z-index: 1000002 !important;
     margin: 0 !important;
+}
+@media (max-width: 1180px) {
+    .st-key-dbg_box {
+        top: 66px !important;
+        right: 1.5rem !important;
+        width: 200px !important;
+    }
 }
 .st-key-dbg_box [data-testid="stWidgetLabel"] { font-size: .8rem !important; }
 .st-key-dbg_box [data-testid="stWidgetLabel"] p { font-size: .8rem !important; }
