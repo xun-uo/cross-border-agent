@@ -767,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #110 · 语言全链路"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-01 #111 · 五市场订单 + 医疗器械 SKU"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -783,14 +783,14 @@ def _load_font(size):
         return ImageFont.load_default()
 
 
-def _route_svg(nodes, order_no="", width=1000, height=170):
+def _route_svg(nodes, order_no="", width=1000, height=180):
     """物流路线 SVG：线条长出来 + 节点依次亮 + 当前节点脉冲。"""
     if not nodes:
         return ""
     n = len(nodes)
     pad_l, pad_r = 70, 70
     usable = width - pad_l - pad_r
-    y = 74
+    y = 104
     step = usable / max(n - 1, 1)
     xs = [pad_l + i * step for i in range(n)]
     line_d = "M %.1f %.1f L %.1f %.1f" % (xs[0], y, xs[-1], y)
@@ -803,6 +803,8 @@ def _route_svg(nodes, order_no="", width=1000, height=170):
         ".rt-node{opacity:0;animation:rtFade .35s ease-out forwards;}"
         ".rt-node{cursor:pointer;}"
         ".rt-node:hover circle{filter:brightness(1.4);}"
+        ".rt-tip{opacity:0;transition:opacity .12s;pointer-events:none;}"
+        ".rt-node:hover .rt-tip{opacity:1;}"
         "@keyframes rtFade{to{opacity:1;}}"
         ".rt-pulse{animation:rtPulse 1.9s ease-out infinite;}"
         "@keyframes rtPulse{0%{r:11;opacity:.55}70%{r:24;opacity:0}100%{r:24;opacity:0}}"
@@ -824,15 +826,25 @@ def _route_svg(nodes, order_no="", width=1000, height=170):
         delay = 0.35 + i * 0.16
         color = "#3DBE78" if last else "#4A8AF4"
         r = 11 if last else 8
-        # 悬停提示：SVG 原生 <title>，鼠标停上去就能看到这一站的完整信息
-        _tip = _html.escape("%s · %s" % ((nd.get("time") or "").strip(),
-                                         (nd.get("desc") or "").strip()))
+        # 悬停提示自己画，放在节点上方。原生 <title> 的弹窗永远吊在鼠标右下，
+        # 正好盖住节点和下面那行时间，看着很别扭，位置也改不了。
+        _tip_txt = "%s · %s" % ((nd.get("time") or "").strip(),
+                                (nd.get("desc") or "").strip())
+        if len(_tip_txt) > 36:
+            _tip_txt = _tip_txt[:35] + "…"
+        _tw = min(300.0, 8.4 * len(_tip_txt) + 20)
+        _tx = min(max(xs[i] - _tw / 2, 4.0), width - _tw - 4)
         parts.append('<g class="rt-node" style="animation-delay:%.2fs">' % delay)
+        parts.append(
+            '<g class="rt-tip">'
+            '<rect x="%.1f" y="%d" width="%.1f" height="22" rx="6" '
+            'fill="#0B1220" stroke="rgba(74,110,170,.55)" stroke-width="1"/>'
+            '<text x="%.1f" y="%d" text-anchor="middle" font-size="11" fill="#DCE5F2">%s</text>'
+            '</g>' % (_tx, y - 48, _tw, _tx + _tw / 2, y - 33, _html.escape(_tip_txt)))
         if last:
             parts.append('<circle class="rt-pulse" cx="%.1f" cy="%d" r="11" fill="#3DBE78" />' % (xs[i], y))
-        parts.append('<circle cx="%.1f" cy="%d" r="%d" fill="%s" stroke="#fff" stroke-width="2">'
-                     '<title>%s</title></circle>'
-                     % (xs[i], y, r, color, _tip))
+        parts.append('<circle cx="%.1f" cy="%d" r="%d" fill="%s" stroke="#fff" stroke-width="2" />'
+                     % (xs[i], y, r, color))
         parts.append("</g>")
 
         tm = (nd.get("time") or "")[5:16]
@@ -2128,15 +2140,17 @@ def render_merchant():
 
         st.divider()
 
-        # ===== 问答流水：每轮问了什么、答了什么、判定结果 =====
-        st.markdown("##### 问答流水")
+        # ===== 高危对话：只保留被拦截或改写的轮次 =====
+        # 全部问答铺在这里既长又没重点，客服真正要看的是"哪几句踩线了"。
+        st.markdown("##### 高危对话")
         try:
             from app import judge_log
-            recs = judge_log.tail(30)
+            _all = judge_log.tail(200)
+            recs = [r for r in _all if r.get("verdict") in ("block", "rewrite")]
             if not recs:
-                st.info("还没有会话记录。去买家视角问几句就会有了。")
+                st.info("暂无高危对话。最近 %d 轮回复都过了合规判定。" % len(_all))
             else:
-                st.caption(f"最近 {len(recs)} 轮问答 · 每轮都带判定结果")
+                st.caption("最近 %d 轮里，%d 条回复被拦截或改写" % (len(_all), len(recs)))
                 for r in reversed(recs):
                     _v = r.get("verdict", "-")
                     _icon = {"pass": "🟢", "rewrite": "🟡",
