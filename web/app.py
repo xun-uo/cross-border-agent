@@ -767,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-01 #117 · build 号移到登录页"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-02 #118 · 两端退出登录"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1323,6 +1323,8 @@ LAYOUT_CSS = """
     white-space: nowrap;
 }
 .logout-link:hover { border-color: rgba(201,168,130,.85); }
+/* 买家端的退出不靠最右（右上角是语言下拉，会叠），紧跟订单号 */
+.logout-inline { margin-left: 12px; }
 /* tabs 滚到页头下面就不动了。sticky 的父级是 tab 内容容器（高度=全部内容），
    有行程所以能粘住——页头那个之所以不能用 sticky，是它的包裹层高度正好等于自身。 */
 [role="tablist"] {
@@ -1413,6 +1415,19 @@ a.shop-link:hover { border-bottom-color: rgba(201,168,130,.85); }
 STORE_NAME = "Niao Store"
 
 
+def _do_logout():
+    """退出登录：清掉会话与 URL 参数，回到登录页。"""
+    st.session_state.clear()
+    st.query_params.clear()
+    st.rerun()
+
+
+def _logout_txt():
+    return {"zh": "退出登录", "en": "Sign out", "es": "Cerrar sesión",
+            "vi": "Đăng xuất", "th": "ออกจากระบบ", "id": "Keluar"}.get(
+                st.session_state.get("ui_lang", "zh"), "Sign out")
+
+
 def render_brand():
     """买家端固定页头：店名 / 在线 / 当前订单排成一行，和右上角工具栏同高。
 
@@ -1449,6 +1464,13 @@ def render_brand():
         f'{_order}'
         f'</div>',
         unsafe_allow_html=True)
+
+    # 退出登录：只能用真按钮。页头里放 <a href="?logout=1"> 实测点不动——
+    # Streamlit 会拦截站内链接的点击，导航不完整，会话清不掉。
+    _, _lo_col = st.columns([9, 1])
+    with _lo_col:
+        if st.button(_logout_txt(), key="buyer_logout", use_container_width=True):
+            _do_logout()
 
     if st.query_params.get("debug") == "1":
         with st.container(key="dbg_box"):
@@ -1884,7 +1906,6 @@ def render_merchant():
         f'<span class="shop-name">🏪 {STORE_NAME} · 商家后台</span>'
         f'<span class="shop-online">🟢 在线</span>'
         f'<span class="shop-sub">当前账号：{_who} · 规则引擎与判定统计</span>'
-        f'<a class="logout-link" href="?logout=1">退出登录</a>'
         f'</div>',
         unsafe_allow_html=True)
 
@@ -1895,10 +1916,13 @@ def render_merchant():
 
     # 语言下拉：商家端也得有。页头是 fixed 的纯 HTML，塞不进组件，
     # 所以放在 tab 行上方右对齐（不用 fixed，避免盖住页头的退出按钮）。
-    _sp, _lc = st.columns([8, 2])
+    _sp, _lc, _lo_col = st.columns([7, 2, 1])
     with _lc:
         with st.container(key="lang_box_shop"):
             lang_picker()
+    with _lo_col:
+        if st.button(_logout_txt(), key="shop_logout", use_container_width=True):
+            _do_logout()
 
     tab_handoff, tab_rules, tab_stats, tab_logs, tab_data, tab_store = st.tabs(
         ["待处理会话", "规则库", "判定看板", "会话记录", "商品与订单", "店铺设置"])
@@ -2286,9 +2310,7 @@ def main():
     # 用 query 参数触发一次 rerun 把会话清掉。
     try:
         if st.query_params.get("logout"):
-            st.session_state.clear()
-            st.query_params.clear()
-            st.rerun()
+            _do_logout()
     except Exception:
         pass
 
