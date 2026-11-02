@@ -767,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-02 #118 · 两端退出登录"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-02 #119 · 页头让位工具栏 + 语言下拉移位"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1125,8 +1125,8 @@ FLOATING_STATUS_CSS = """
 
 FLOAT_CSS = """
 <style>
-/* 语言下拉浮到右上角，位于平台工具栏（Share/星标/编辑/⋮）左侧 */
-.st-key-lang_box, .st-key-lang_box_login {
+/* 登录页的语言下拉浮在右上角（那页没有我们的页头，不会冲突） */
+.st-key-lang_box_login {
     position: fixed !important;
     top: 13px !important;
     right: 132px !important;
@@ -1135,14 +1135,33 @@ FLOAT_CSS = """
     margin: 0 !important;
     padding: 0 !important;
 }
-.st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
+.st-key-lang_box_login [data-testid="stSelectbox"] {
     margin-bottom: 0 !important;
-}
-.st-key-lang_box [data-testid="stSelectbox"], .st-key-lang_box_login [data-testid="stSelectbox"] {
     transform: scale(.78) !important;
     transform-origin: right center !important;
 }
-.st-key-lang_box [data-baseweb="select"] > div, .st-key-lang_box_login [data-baseweb="select"] > div {
+.st-key-lang_box_login [data-baseweb="select"] > div {
+    background: transparent !important;
+    border-color: rgba(128,128,128,.25) !important;
+    border-radius: 8px !important;
+}
+/* 登录后的语言下拉：仍浮在右上角，但位置往左挪到工具栏（占 W-216 起）之外。
+   原来 right:132 时实占 W-249~W-132，正好压在 Share/星标/编辑/GitHub 上。 */
+.st-key-lang_box {
+    position: fixed !important;
+    top: 13px !important;
+    right: 224px !important;
+    width: 150px !important;
+    z-index: 1000003 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.st-key-lang_box [data-testid="stSelectbox"] {
+    margin-bottom: 0 !important;
+    transform: scale(.78) !important;
+    transform-origin: right center !important;
+}
+.st-key-lang_box [data-baseweb="select"] > div {
     background: transparent !important;
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
@@ -1295,7 +1314,9 @@ LAYOUT_CSS = """
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    right: 190px !important;
+    /* 230 是实测出来的：右上角工具栏容器从窗口右边缘往左占 216px（Share/星标/编辑/GitHub/⋮ 全在里面），
+       原来写 190 会把最左边的 Share 压掉一截。 */
+    right: 230px !important;
     height: 60px !important;
     display: flex !important;
     align-items: center !important;
@@ -1311,6 +1332,11 @@ LAYOUT_CSS = """
 }
 /* 商家端页头也用同一个纯 HTML 固定块（fixed 容器里放 st.columns / st.button
    会让组件按原始父宽度算位置，退出按钮直接被挤出边界）。 */
+/* 页头是 fixed、不占文档流，Streamlit 默认给内容区留了约 6rem 的顶部空白，
+   结果第一行控件离页头还有 140px 空当。压到 4rem：比页头(60px)高一点，不会撞上。 */
+.block-container, [data-testid="stMainBlockContainer"] {
+    padding-top: 1.2rem !important;
+}
 .shop-sub { font-size: .78rem; opacity: .6; white-space: nowrap; }
 .logout-link {
     margin-left: auto;
@@ -1478,7 +1504,7 @@ def render_brand():
             # 生成内部 id，切一次语言开关就被重置成关闭，面板看起来「消失」了。
             show_debug = st.toggle(t("debug"), key="dbg_toggle",
                                    help=t("debug_help"))
-    # 语言下拉是 fixed 定位，单独放最外层
+    # 语言下拉浮在右上角（位置见 .st-key-lang_box 的 CSS）
     with st.container(key="lang_box"):
         lang_picker()
     return show_debug
