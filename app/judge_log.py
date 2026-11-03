@@ -5,7 +5,7 @@ Streamlit Cloud 的文件系统在重启后清空、且可能被多进程隔离�
 因此判定记录放在模块级列表里 —— 同一进程内商家后台一定看得到。
 代价：实例重启后清空（演示够用，正式产品应落数据库）。
 """
-import time
+from app import clock
 
 MAX = 500
 _LOGS = []
@@ -14,7 +14,8 @@ _LOGS = []
 def append(record):
     try:
         r = dict(record)
-        r.setdefault("ts", time.strftime("%Y-%m-%d %H:%M:%S"))
+        # 北京时间（#44）：线上容器是 UTC，原来会慢 8 小时
+        r.setdefault("ts", clock.full())
         _LOGS.append(r)
         if len(_LOGS) > MAX:
             del _LOGS[: len(_LOGS) - MAX]
