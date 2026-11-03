@@ -4,6 +4,7 @@
 启动：
   .venv\\Scripts\\python.exe -m streamlit run web\\app.py --server.port 8501
 """
+import html as _html
 import json
 import os
 import sys
@@ -653,6 +654,18 @@ def _after_login(user, role, bound_order=None):
     import uuid as _uuid
     _sid = _uuid.uuid4().hex[:10]
 
+    # 买家退出后重新登录，接着用同一个会话（#42 用户定的方案）：
+    # 只要服务端内存里还留着这个订单的会话，就把它的 sid 接上；
+    # 进程重启后自然找不到，生成新 sid —— 这个「丢」是可接受的，不做落盘。
+    if role == "buyer" and bound_order:
+        try:
+            from app import handoff as _ho
+            _old = _ho.by_order(bound_order)
+            if _old and _old.get("sid"):
+                _sid = _old["sid"]
+        except Exception:
+            pass
+
     st.session_state.authed = True
     st.session_state.user = user
     st.session_state.role = role
@@ -660,6 +673,15 @@ def _after_login(user, role, bound_order=None):
     st.session_state["sid"] = _sid
     st.session_state.history = []
     st.session_state.last_trace = None
+
+    # 把订单号写进会话，下次登录才查得到
+    if role == "buyer" and bound_order:
+        try:
+            from app import handoff as _ho2
+            _ho2.ensure(_sid, order_no=bound_order,
+                        language=st.session_state.get("ui_lang", "zh"))
+        except Exception:
+            pass
 
     # 会话标识写进 URL：session_state 不跨刷新，URL 可以。
     # 买家刷新后靠这组参数自动还原登录态 + 按 sid 捞回聊天记录。
@@ -775,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-03 #121 · 退出按钮进页头 + 待处理红点 + 商家端中文对照"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-03 #122 · 手机端并排+置顶 · 物流图放大 · 重登续聊 · 时间改北京时间"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -828,7 +850,6 @@ def _route_svg(nodes, order_no="", width=1000, height=180):
     parts.append('<text class="rt-title" x="14" y="22">Route · %s</text>' % (order_no or ""))
     parts.append('<path class="rt-line" d="%s" />' % line_d)
 
-    import html as _html
     for i, nd in enumerate(nodes):
         last = (i == n - 1)
         delay = 0.35 + i * 0.16
@@ -879,6 +900,49 @@ def _route_html(nodes, order_no=""):
         return ""
     return ('<div style="background:#F4F7FC;border-radius:12px;padding:14px 16px 6px;'
             'border:1px solid rgba(74,110,170,.22);">%s</div>' % svg)
+
+
+def _node_now(nodes):
+    """最新一个物流节点 + 归一化好的显示字段（#40「现在到哪了」用）。
+
+    数据里节点只有 time / desc（英文），没有 place/status，所以这里统一兜一层，
+    别在调用方各写一遍 get("place") 之类不存在的字段。
+    """
+    if not nodes:
+        return None
+    nd = nodes[-1]
+    t = (nd.get("time") or "").strip()
+    return {"desc": (nd.get("desc") or "").strip(),
+            "time": t[5:16] if len(t) >= 16 else t}
+
+
+def _route_now_html(nodes):
+    """物流图下面那行「现在到哪了」。"""
+    cur = _node_now(nodes)
+    if not cur:
+        return ""
+    bits = []
+    if cur["desc"]:
+        bits.append("<b>%s</b>" % _html.escape(cur["desc"]))
+    if cur["time"]:
+        bits.append('<span class="route-when">%s</span>' % _html.escape(cur["time"]))
+    return ('<div class="route-now">📍 现在到哪了：%s</div>' % " · ".join(bits))
+
+
+@st.dialog("物流进度", width="large")
+def _route_dialog(nodes, order_no=""):
+    """点击放大：大图 + 下面一行当前进度 + 完整轨迹。
+
+    气泡里那张图被列宽压得很小（手机尤其），放大只能另开弹窗——
+    Streamlit 会拦站内 <a> 点击，所以不能用链接，必须走按钮 + dialog。
+    """
+    st.markdown(_route_html(nodes, order_no), unsafe_allow_html=True)
+    cur = _node_now(nodes)
+    if cur:
+        st.markdown("**现在到哪了**：%s" % (cur["desc"] or "-"))
+        if cur["time"]:
+            st.caption(cur["time"])
+    st.markdown(_timeline_md(nodes))
 
 
 def _route_image(nodes, order_no="", width=1000, height=150):
@@ -1153,14 +1217,24 @@ FLOAT_CSS = """
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
 }
-/* 登录后的语言下拉：仍浮在右上角，但位置往左挪到工具栏（占 W-216 起）之外。
-   原来 right:132 时实占 W-249~W-132，正好压在 Share/星标/编辑/GitHub 上。 */
-.st-key-lang_box {
-    position: fixed !important;
-    top: 13px !important;
-    right: 224px !important;
-    width: 150px !important;
+/* 语言下拉 + 退出登录：装进同一个容器（key=topbar_right / topbar_right_shop），
+   再由 CSS 把它摆成一行。这样窄屏才能并排（#39）：
+   原来两者分属两条独立的流（一个 container、一个 st.columns），
+   窄屏下 Streamlit 把 columns 堆叠，CSS 再怎么 float 也拼不到一起。 */
+.st-key-topbar_right,
+.st-key-topbar_right_shop {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
     z-index: 1000003 !important;
+}
+.st-key-lang_box {
+    width: 150px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -1174,13 +1248,9 @@ FLOAT_CSS = """
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
 }
-/* 商家端的语言下拉：和买家端同一个位置（页头这一排），只是标签不显示 */
+/* 商家端的语言下拉：同样的位置，只是缩放比买家端略大一点 */
 .st-key-lang_box_shop {
-    position: fixed !important;
-    top: 13px !important;
-    right: 224px !important;
     width: 150px !important;
-    z-index: 1000003 !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -1194,9 +1264,6 @@ FLOAT_CSS = """
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
 }
-/* 退出按钮：原来在正常流里，被内容区的 padding-top 顶到页头下方 110px 处，
-   看着像「掉下来了」。改成和语言下拉同一排（页头右侧、语言下拉左边）。
-   语言下拉右边界 = 224+150 = 374，所以按钮 right 取 384，留 10px 间隙。 */
 .st-key-buyer_logout,
 .st-key-shop_logout {
     width: auto !important;
@@ -1210,13 +1277,14 @@ FLOAT_CSS = """
     height: 32px !important;
     white-space: nowrap !important;
 }
+/* 桌面：这一整组浮在页头右侧（工具栏占 W-216，所以 right 取 224） */
 @media (min-width: 769px) {
-    .st-key-buyer_logout,
-    .st-key-shop_logout {
+    .st-key-topbar_right,
+    .st-key-topbar_right_shop {
         position: fixed !important;
         top: 13px !important;
-        right: 384px !important;
-        z-index: 1000003 !important;
+        right: 224px !important;
+        flex-wrap: nowrap !important;
     }
 }
 
@@ -1337,6 +1405,22 @@ CHAT_CSS = """
     line-height: 1.6;
     color: rgba(122, 122, 132, .98);
 }
+/* ===== 物流图下面那行「现在到哪了」（#40） ===== */
+.route-now {
+    margin: 6px 0 2px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(61, 190, 120, .10);
+    border-left: 3px solid #3DBE78;
+    font-size: .84rem;
+    line-height: 1.5;
+    color: rgba(52, 60, 72, .96);
+}
+.route-now .route-when {
+    color: rgba(140, 148, 160, .95);
+    font-size: .78rem;
+    margin-left: 2px;
+}
 /* 对话里的图片：气泡是 fit-content，不撑开的话图片会被压成缩略图 */
 [data-testid="stChatMessage"] [data-testid="stImage"] {
     width: 100% !important;
@@ -1414,12 +1498,13 @@ LAYOUT_CSS = """
     backdrop-filter: blur(14px) saturate(1.2) !important;
     -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
 }
-/* debug 开关：宽屏时放在顶栏右侧（语言下拉左边），跟页头同一排。
+/* debug 开关：宽屏时放在顶栏右侧（语言下拉 + 退出那组左边），跟页头同一排。
+   那组控件现在占右边缘 224~466（语言 150 + 间隙 10 + 退出 ~82），所以这里要给到 480。
    窗口窄的时候顶栏放不下，会压在订单号上，所以往下挪到页头下面。 */
 .st-key-dbg_box {
     position: fixed !important;
     top: 12px !important;
-    right: 296px !important;
+    right: 480px !important;
     width: 210px !important;
     z-index: 1000002 !important;
     margin: 0 !important;
@@ -1432,55 +1517,80 @@ LAYOUT_CSS = """
     }
 }
 /* ---------- 窄屏（手机 / 竖屏平板）----------
-   768px 以下**放弃 fixed 页头**：fixed 一占 60px，再加一行控件，屏幕顶部三分之一就没了；
-   而且页头用的是 right:230 这种按桌面算的固定值，窄屏必然和语言下拉、平台工具栏互撞
-   （店名被压、点不到、退出按钮占满一行，都是这一个根因）。
-   改成 position: static 回到正常流，跟着页面一起滚。 */
+   #41（用户 2026-11-03 要的）：页头重新置顶。原来 #120 为了省竖屏空间改成正常流，
+   但用户实测「一滚店名/语言/退出就没了」，所以要固定。
+   做法是把桌面那套 60px 高栏压成**两条窄带**：
+     第 1 条 0–58px：店铺名 + 在线 + 当前订单（右侧留 130px 给平台工具栏 Fork/GitHub/⋮，
+                     它们在父页面里，永远盖在我们的 iframe 之上，只能让开）；
+     第 2 条 62–102px：语言下拉 + 退出登录并排（#39）。
+   合计占顶部 102px，比 #120 正常流时的 206px 还省，而且一直可见。 */
 @media (max-width: 768px) {
     .shop-head-fixed {
-        position: static !important;
-        left: auto !important;
-        right: auto !important;
-        height: auto !important;
-        padding: 10px 12px !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 56px !important;
+        padding: 4px 130px 4px 12px !important;
         flex-wrap: wrap !important;
-        row-gap: 4px !important;
-        background: transparent !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+        align-content: center !important;
+        row-gap: 0 !important;
+        column-gap: 8px !important;
+        background: rgba(252, 251, 249, .92) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
         border-bottom: 1px solid rgba(128,128,128,.12) !important;
     }
-    .shop-name { font-size: .98rem; }
-    /* 语言下拉回到正常流，取消缩放（商家端同一个位置，一起回落） */
+    .shop-head-fixed .shop-name { font-size: .9rem !important; }
+    .shop-head-fixed .shop-online { font-size: .78rem !important; }
+    .shop-head-fixed .shop-order { font-size: .72rem !important; }
+    .shop-head-fixed .shop-order code { font-size: .7rem !important; }
+    /* 语言下拉 + 退出：第 2 条窄带，并排（#39）*/
+    .st-key-topbar_right,
+    .st-key-topbar_right_shop {
+        position: fixed !important;
+        top: 60px !important;
+        left: 12px !important;
+        right: 12px !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        z-index: 1000003 !important;
+    }
     .st-key-lang_box,
     .st-key-lang_box_shop {
-        position: static !important;
+        width: 138px !important;
+        margin: 0 !important;
+    }
+    .st-key-buyer_logout,
+    .st-key-shop_logout {
         width: auto !important;
-        margin: 2px 0 0 0 !important;
+        flex: 0 0 auto !important;
     }
     .st-key-lang_box [data-testid="stSelectbox"],
     .st-key-lang_box_shop [data-testid="stSelectbox"] {
-        transform: none !important;
+        transform: scale(.9) !important;
+        transform-origin: left center !important;
     }
-    /* debug 开关也回到流 */
+    /* debug 开关：窄屏放到第 2 条窄带下面，仍在流里 */
     .st-key-dbg_box {
         position: static !important;
         width: auto !important;
         right: auto !important;
         margin: 2px 0 0 0 !important;
     }
-    /* 页头不再 fixed，顶部不再需要留 60px 以上的空白 */
+    /* 内容区给两条窄带让位：56 + 4 + 40 ≈ 104 */
     [data-testid="stMainBlockContainer"] {
-        padding-top: .6rem !important;
+        padding-top: 6.6rem !important;
         padding-left: .7rem !important;
         padding-right: .7rem !important;
     }
-    /* 语言下拉和退出按钮别撑满整行：缩成正常控件宽度，各自靠左 */
-    .st-key-lang_box { width: 148px !important; }
-    .st-key-buyer_logout { width: 132px !important; right: auto !important; }
-    /* 商家端同一行里的两个控件 */
-    .st-key-lang_box_shop { width: 148px !important; }
-    .st-key-shop_logout { width: 132px !important; right: auto !important; }
+    /* main() 注入的几段空 <style> 在窄屏同样会撑出 gap，一起清零 */
+    [data-testid="stMainBlockContainer"] > div:first-child:has(.shop-head-fixed) {
+        gap: 0 !important;
+    }
+    /* tab 行也往下让，否则会钻到第 2 条窄带底下 */
+    [role="tablist"] { top: 104px !important; }
 }
 .st-key-dbg_box [data-testid="stWidgetLabel"] { font-size: .8rem !important; }
 .st-key-dbg_box [data-testid="stWidgetLabel"] p { font-size: .8rem !important; }
@@ -1611,14 +1721,12 @@ def render_brand():
             # 生成内部 id，切一次语言开关就被重置成关闭，面板看起来「消失」了。
             show_debug = st.toggle(t("debug"), key="dbg_toggle",
                                    help=t("debug_help"))
-    # 语言下拉浮在右上角（位置见 .st-key-lang_box 的 CSS；窄屏下回正常流）
-    with st.container(key="lang_box"):
-        lang_picker()
-    # 退出登录：只能用真按钮。页头里放 <a href="?logout=1"> 实测点不动——
+    # 语言下拉 + 退出登录装进同一个容器，CSS 把它摆成一行（窄屏也并排，见 #39）。
+    # 退出登录只能用真按钮：页头里放 <a href="?logout=1"> 实测点不动——
     # Streamlit 会拦截站内链接的点击，导航不完整，会话清不掉。
-    # 放在语言下拉之后，窄屏回落成正常流时顺序才是「页头 → 语言 → 退出」。
-    _, _lo_col = st.columns([9, 1])
-    with _lo_col:
+    with st.container(key="topbar_right"):
+        with st.container(key="lang_box"):
+            lang_picker()
         if st.button(_logout_txt(), key="buyer_logout"):
             _do_logout()
     return show_debug
@@ -1676,8 +1784,9 @@ def render_debug_panel():
 
 
 def _now():
-    import datetime
-    return datetime.datetime.now().strftime("%H:%M")
+    """气泡时间：北京时间。线上容器是 UTC，直接用 datetime.now() 会慢 8 小时（#44）。"""
+    from app import clock
+    return clock.hhmm()
 
 
 def _run_turn(text):
@@ -1705,7 +1814,9 @@ def _run_turn(text):
         pass
 
     try:
-        handoff.ensure(st.session_state["sid"], language=st.session_state.get("ui_lang", "zh"))
+        handoff.ensure(st.session_state["sid"],
+                       order_no=st.session_state.get("bound_order") or "",
+                       language=st.session_state.get("ui_lang", "zh"))
         handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
     except Exception:
         pass
@@ -1812,7 +1923,9 @@ def _run_image_turn(text, files):
         "ts": _now(),
     })
     try:
-        handoff.ensure(sid, language=st.session_state.get("ui_lang", "zh"))
+        handoff.ensure(sid,
+                       order_no=st.session_state.get("bound_order") or "",
+                       language=st.session_state.get("ui_lang", "zh"))
         handoff.add_message(sid, "user", text or "买家发来一张图片",
                             source="buyer", image=path)
         handoff.mark_pending(sid, reason="buyer_image")
@@ -2143,11 +2256,10 @@ def render_merchant():
 
     # 语言下拉：商家端也得有。页头是 fixed 的纯 HTML，塞不进组件，
     # 所以放在 tab 行上方右对齐（不用 fixed，避免盖住页头的退出按钮）。
-    _sp, _lc, _lo_col = st.columns([7, 2, 1])
-    with _lc:
+    # 语言下拉 + 退出登录：同一个容器摆成一行（和买家端同一套，#39）
+    with st.container(key="topbar_right_shop"):
         with st.container(key="lang_box_shop"):
             lang_picker()
-    with _lo_col:
         if st.button(_logout_txt(), key="shop_logout"):
             _do_logout()
 
@@ -2657,7 +2769,7 @@ def main():
                 st.markdown(t("welcome"))
                 st.caption(t("lang_hint"))
             render_quick_pills()
-        for msg in st.session_state.history:
+        for _mi, msg in enumerate(st.session_state.history):
             # 系统提示（如「人工客服已接入」）：居中灰字，不套气泡
             if msg.get("role") == "note":
                 st.markdown(
@@ -2679,14 +2791,20 @@ def main():
                     st.caption(_ts)
                 # 有物流节点就直接画路线图，买家视角也能看到进度
                 if msg.get("nodes"):
+                    _nodes = msg["nodes"]
                     try:
-                        st.markdown(_route_html(msg["nodes"], msg.get("order_no") or ""),
+                        st.markdown(_route_html(_nodes, msg.get("order_no") or ""),
                                     unsafe_allow_html=True)
+                        st.markdown(_route_now_html(_nodes), unsafe_allow_html=True)
+                        # 手机上气泡里的图被压得很小，给一个放大入口（#40）
+                        if st.button("🔍 点开放大", key=f"zoom_route_{_mi}",
+                                     use_container_width=True):
+                            _route_dialog(_nodes, msg.get("order_no") or "")
                         with st.expander(t("route_detail")):
-                            st.markdown(_timeline_md(msg["nodes"]))
+                            st.markdown(_timeline_md(_nodes))
                     except Exception:
                         try:
-                            st.image(_route_image(msg["nodes"], msg.get("order_no") or ""),
+                            st.image(_route_image(_nodes, msg.get("order_no") or ""),
                                      use_container_width=True)
                         except Exception:
                             pass
