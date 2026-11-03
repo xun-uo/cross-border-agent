@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-04 #123 · 处理中提示 + 交还AI后重新待处理 + 不再追问订单号"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #124 · 长文本/图片/假订单号的转人工与追问判据"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1815,8 +1815,11 @@ def _now():
     return clock.hhmm()
 
 
-def _run_turn(text):
-    """执行一轮问答并写回历史。"""
+def _run_turn(text, image=None):
+    """执行一轮问答并写回历史。
+
+    image：买家随这条消息附的图片路径（#49 起「图 + 文字」走正常 AI 流程）。
+    """
     market_label = st.session_state.get("dbg_market", "自动（按订单/原文）")
     market = None if market_label.startswith("自动") else market_label
     category = st.session_state.get("dbg_category", "cosmetic")
@@ -1830,8 +1833,11 @@ def _run_turn(text):
     # 人工接管中：买家说啥都不进 AI，只存档等人工回
     try:
         if st.session_state.get("sid") and handoff.is_human_mode(st.session_state["sid"]):
-            handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
-            st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
+            handoff.add_message(st.session_state["sid"], "user",
+                                text or "买家发来一张图片",
+                                source="buyer", image=image)
+            st.session_state.history.append({"role": "user", "content": text,
+                                             "ts": _now(), "image": image})
             # 这里不要再插「已转接人工客服」的提示：买家页头上已经有持续的
             # 「已转人工，正在等待商家回复…」，每发一句都插一条会把对话淹掉。
             st.session_state["handoff_active"] = True   # 继续轮询
@@ -1843,13 +1849,22 @@ def _run_turn(text):
         handoff.ensure(st.session_state["sid"],
                        order_no=st.session_state.get("bound_order") or "",
                        language=st.session_state.get("ui_lang", "zh"))
-        handoff.add_message(st.session_state["sid"], "user", text, source="buyer")
+        handoff.add_message(st.session_state["sid"], "user",
+                            text or "买家发来一张图片",
+                            source="buyer", image=image)
     except Exception:
         pass
 
-    st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
+    st.session_state.history.append({"role": "user", "content": text,
+                                     "ts": _now(), "image": image})
     with st.chat_message("user"):
-        st.markdown(text)
+        if text:
+            st.markdown(text)
+        if image:
+            try:
+                st.image(image, use_container_width=True)
+            except Exception:
+                pass
     # 「正在处理」必须**固定可见**：原来只是画在聊天流里的 caption，手机上气泡一多就被
     # 滚出视口，用户以为没发出去、又发一遍，于是出现两条重复回复（#46①）。
     # 现在做成贴在输入框上方的固定小条（样式见 LAYOUT_CSS 的 .st-key-busy_bar）。
@@ -1929,10 +1944,12 @@ def _save_upload(uploaded, sid):
 
 
 def _run_image_turn(text, files):
-    """买家发图：图片落地 → 记进双方对话 → 直接转人工。
+    """买家发图（#49 用户 2026-11-03 定的规则）。
 
-    图片在客服场景里基本都是证据（破损、错发、漏发），该由人看、由人定，
-    所以不送进模型做识别，直接进人工队列。
+    - **图 + 文字**：图片落地存档后，按文字走正常 AI 流程 ——
+      文字里有「退 / 换 / 破损 / 漏发 / 赔偿」这类，照样会转人工；
+    - **纯图没文字**：只回一句「补一句说明」，**不转人工**。
+      原来是无条件 `enter_human`，结果买家发个表情包也进人工池，人工被垃圾图占满。
     """
     from app import handoff
     sid = st.session_state.get("sid")
@@ -1945,26 +1962,26 @@ def _run_image_turn(text, files):
         st.warning("图片保存失败，请重试。")
         return
 
-    st.session_state.history.append({
-        "role": "user",
-        "content": text or "",
-        "image": path,
-        "ts": _now(),
-    })
+    text = (text or "").strip()
+    if text:
+        # 图 + 文字：交给正常流程（含意图识别、合规、转人工判据）
+        _run_turn(text, image=path)
+        return
+
     try:
         handoff.ensure(sid,
                        order_no=st.session_state.get("bound_order") or "",
                        language=st.session_state.get("ui_lang", "zh"))
-        handoff.add_message(sid, "user", text or "买家发来一张图片",
+        handoff.add_message(sid, "user", "买家发来一张图片",
                             source="buyer", image=path)
-        handoff.mark_pending(sid, reason="buyer_image")
-        handoff.enter_human(sid)
-        st.session_state["handoff_active"] = True
     except Exception:
         pass
+    st.session_state.history.append({"role": "user", "content": "",
+                                     "image": path, "ts": _now()})
 
-    note = "图片已收到，已转人工客服处理，请稍候。"
-    st.session_state.history.append({"role": "note", "content": note, "ts": _now()})
+    note = ("图片收到了。方便补一句说明吗？"
+            "（比如：外包装破损 / 漏发少件 / 尺寸或颜色不对 / 想退货）")
+    st.session_state.history.append({"role": "assistant", "content": note, "ts": _now()})
     try:
         handoff.add_message(sid, "assistant", note, source="ai")
     except Exception:
