@@ -13,10 +13,12 @@ _SESSIONS = {}  # sid -> dict
 
 
 def _now():
-    return time.strftime("%H:%M")
+    """会话消息/时间戳一律北京时间（#44：线上容器是 UTC，原来会慢 8 小时）。"""
+    from app import clock
+    return clock.hhmm()
 
 
-def ensure(sid, market="", language="zh", buyer=""):
+def ensure(sid, market="", language="zh", buyer="", order_no=""):
     with _LOCK:
         s = _SESSIONS.get(sid)
         if s is None:
@@ -26,6 +28,9 @@ def ensure(sid, market="", language="zh", buyer=""):
                 "market": market,
                 "language": language,
                 "buyer": buyer,
+                # 绑定的订单号：买家退出重登时靠它找回旧会话（#42）。
+                # 只做「内存里还在就复用」，服务重启后自然清空 —— 用户定的口径。
+                "order_no": order_no or "",
                 "status": "ai",       # ai / pending / answered / closed
                 "mode": "ai",         # ai = AI 处理；human = 人工接管中
                 "pending_since": None,
@@ -40,7 +45,31 @@ def ensure(sid, market="", language="zh", buyer=""):
                 "agent_viewed_ts": 0.0,
             }
             _SESSIONS[sid] = s
+        elif order_no and not s.get("order_no"):
+            # 老会话是 #42 之前建的、没记订单号：补上，下次登录才找得到
+            s["order_no"] = order_no
         return s
+
+
+def by_order(order_no, limit_age=None):
+    """按订单号找回最近一条会话（#42：买家退出重登后接着聊）。
+
+    只在进程内存里找 —— 服务重启就没了，这是用户明确接受的行为（不落盘）。
+    limit_age 给一个秒数可以只认「最近这么久之内」的会话，默认不限。
+    """
+    order_no = (order_no or "").strip()
+    if not order_no:
+        return None
+    now = time.time()
+    with _LOCK:
+        cands = [dict(s) for s in _SESSIONS.values() if s.get("order_no") == order_no]
+    if limit_age:
+        cands = [c for c in cands if now - float(c.get("last_activity") or 0) <= limit_age]
+    if not cands:
+        return None
+    # 优先「最后有人说的话」最新的那条；都空就按创建时间
+    cands.sort(key=lambda c: float(c.get("last_activity") or 0), reverse=True)
+    return cands[0]
 
 
 def add_message(sid, role, text, source="ai", image=None):
