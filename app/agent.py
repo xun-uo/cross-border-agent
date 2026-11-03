@@ -197,7 +197,9 @@ GEN_SYS = """你是跨境电商客服，用买家使用的语言回复，简洁�
 5. 只输出给买家的话，不解释过程。
 6. 只回答买家这一句问的内容。订单状态、物流、运单号、预计送达**只有在买家问物流、
    问到哪了、进度，或明确要办理退换货/报修时才提**；问商品功效、用法、政策等别的问题时
-   一律不要主动汇报物流，也不要重复上一轮已经说过的物流信息。"""
+   一律不要主动汇报物流，也不要重复上一轮已经说过的物流信息。
+7. 资料里已经给出订单号时（买家是凭订单号登录的），**绝对不要反过来问买家要订单号**；
+   直接按这一单回答，需要更多信息就问「商品名 / 签收时间 / 照片」这类买家真能提供的东西。"""
 
 
 _LANG_ORDER = {
@@ -246,6 +248,9 @@ def generate_draft(text, intent, order, kb_items, market, category, language):
         ctx.append("订单资料（只在与本次提问相关时使用）：\n"
                    + json.dumps(_order_brief(order, (intent or {}).get("intent")),
                                 ensure_ascii=False, indent=1))
+        # 买家是凭「订单号 + 手机尾号」登录的：这一单就是他自己，别再问订单号（#46）
+        ctx.append("注意：买家已绑定本单（订单号来自他登录时的验证），"
+                   "不要再向他索要订单号。")
     if kb_items:
         ctx.append("可用政策与手册：\n" + "\n".join(
             f"- [{i['title']}] {i['text']}" for i in kb_items))
@@ -337,7 +342,13 @@ def process(text, market="US", category="*", history=None, force_category_from_o
                  "给我退款", "我要退款", "要退款", "申请退款",
                  "报修", "要保修", "申请保修", "修一下",
                  "补发", "漏发", "少件", "错发",
-                 "要求赔偿", "要赔偿", "我要投诉")
+                 "要求赔偿", "要赔偿", "我要投诉",
+                 # 「能退吗 / 怎么退」这类是在问「能不能办」，不是问政策条文。
+                 # 模型经常判成 return_exchange 但 need_human=False，于是 AI 直接回一句
+                 # 「不在无理由范围内，无法办理退货」把人顶回去——该转人工的（#46 补充）
+                 "能退吗", "能不能退", "可以退吗", "可不可以退", "怎么退", "如何退",
+                 "能换吗", "能不能换", "可以换吗", "怎么换", "如何换",
+                 "能退不", "能换不")
     if intent.get("intent") in ("return_exchange", "complaint") and any(w in text for w in _DO_WORDS):
         intent["need_human"] = True
 
@@ -470,6 +481,9 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         if evaluation["verdict"] == "block" and not passed:
             handoff = True
     if handoff and not rewritten:
+        # 拼转人工提示前先把草稿结尾的残留符号清掉：模型有时会以「·」「-」「*」结尾，
+        # 直接 + "\n\n" 会留下一个孤零零的项目符号（#46④ 实测截图里就有）。
+        final_text = final_text.rstrip(" \t\r\n·•-*—–")
         final_text = final_text + "\n\n" + _handoff_note(language)
     step("action", {
         "verdict": evaluation["verdict"],
