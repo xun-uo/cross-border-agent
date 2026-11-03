@@ -349,8 +349,21 @@ def process(text, market="US", category="*", history=None, force_category_from_o
                  "能退吗", "能不能退", "可以退吗", "可不可以退", "怎么退", "如何退",
                  "能换吗", "能不能换", "可以换吗", "怎么换", "如何换",
                  "能退不", "能换不")
-    if intent.get("intent") in ("return_exchange", "complaint") and any(w in text for w in _DO_WORDS):
+    # 兜底不再看 intent：超长/多主题输入时分类会飘到 product_inquiry，一飘就漏转（#48）
+    _hit = [w for w in _DO_WORDS if w in text]
+    if _hit:
         intent["need_human"] = True
+        intent["_do_words"] = _hit[:3]
+
+    # 超长文本（≥1500 字）里只要提到办理类的事，就直接按「要办的事」处理。
+    # 8000 字的投诉信一条里塞六个主题，分类结果在 return_exchange / complaint /
+    # product_inquiry 之间摆动，靠分类不稳（#48 实测：同一条文本线上漏转、本地转）。
+    _LONG_ACTION = ("退货", "退换", "换货", "退款", "退钱", "退掉", "报修", "维修",
+                    "保修", "赔偿", "投诉", "补发", "漏发", "少件", "错发",
+                    "破损", "损坏", "坏了", "有问题", "不合格")
+    if len(text) >= 1500 and any(w in text for w in _LONG_ACTION):
+        intent["need_human"] = True
+        intent["_long_action"] = True
 
     language = intent.get("language")
     if not has_language_signal(text) and history:
@@ -383,7 +396,23 @@ def process(text, market="US", category="*", history=None, force_category_from_o
         return trace
     # 品类：订单优先，其次从买家原话推断，最后才用界面传入的默认值
     inferred = infer_category(text, fallback=category)
-    order = find_order(intent.get("order_no") or bound_order)
+    # 先按买家话里写的号查；**查不到再退回他登录时绑定的那一单**。
+    # 原来写的是 `find_order(intent.get("order_no") or bound_order)`：买家在话里写个
+    # 库里不存在的号（打错、测试、伪造），or 直接短路掉 bound_order，整轮没有订单资料，
+    # 模型只能自由发挥、反复要运单号（#50 实测五张截图都是这个）。
+    order = find_order(intent.get("order_no") or "")
+    if order is None:
+        _said = intent.get("order_no") or ""
+        if bound_order:
+            order = find_order(bound_order)
+        if order is not None:
+            if _said:
+                intent["_order_no_ignored"] = _said      # 他用了一个查不到的号
+                intent["order_no"] = order["order_no"]
+        elif _said:
+            # 假号且没有绑定订单：清掉，让下面「缺订单号 → 追问」的分支用固定话术问
+            intent["_order_no_not_found"] = _said
+            intent["order_no"] = ""
     if order:
         market = order["market"]
         # 买家语言优先，订单记录的语言只作兜底——买家说中文就用中文回
