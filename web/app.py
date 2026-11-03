@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-03 #122 · 手机端并排+置顶 · 物流图放大 · 重登续聊 · 时间改北京时间"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #123 · 处理中提示 + 交还AI后重新待处理 + 不再追问订单号"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1421,6 +1421,32 @@ CHAT_CSS = """
     font-size: .78rem;
     margin-left: 2px;
 }
+/* ===== 「正在处理…」固定小条（#46①）=====
+   画在聊天流里的提示会被气泡挤出视口，用户以为没发出去。
+   这里固定在输入框上方，任何滚动位置都看得见。 */
+.st-key-busy_bar {
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 138px !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 1000010 !important;
+    pointer-events: none !important;
+}
+.busy-pill {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 999px;
+    background: rgba(255, 253, 250, .97);
+    border: 1px solid rgba(201, 168, 130, .65);
+    box-shadow: 0 3px 14px rgba(60, 50, 40, .12);
+    color: #7a5c2e;
+    font-size: .82rem;
+    line-height: 1.5;
+    white-space: nowrap;
+}
 /* 对话里的图片：气泡是 fit-content，不撑开的话图片会被压成缩略图 */
 [data-testid="stChatMessage"] [data-testid="stImage"] {
     width: 100% !important;
@@ -1824,8 +1850,12 @@ def _run_turn(text):
     st.session_state.history.append({"role": "user", "content": text, "ts": _now()})
     with st.chat_message("user"):
         st.markdown(text)
-    status = st.empty()
-    status.caption(t("processing"))
+    # 「正在处理」必须**固定可见**：原来只是画在聊天流里的 caption，手机上气泡一多就被
+    # 滚出视口，用户以为没发出去、又发一遍，于是出现两条重复回复（#46①）。
+    # 现在做成贴在输入框上方的固定小条（样式见 LAYOUT_CSS 的 .st-key-busy_bar）。
+    with st.container(key="busy_bar"):
+        st.markdown(f'<div class="busy-pill">⏳ {t("processing")}</div>',
+                    unsafe_allow_html=True)
 
     with st.spinner(t("processing")):
         try:
@@ -1877,7 +1907,6 @@ def _run_turn(text):
     except Exception:
         pass
     bump_usage()
-    status.empty()
     st.rerun()
 
 
