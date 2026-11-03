@@ -98,9 +98,17 @@ def add_message(sid, role, text, source="ai", image=None):
 def mark_pending(sid, reason=""):
     s = ensure(sid)
     with _LOCK:
-        if s["status"] == "ai":
+        # 只要不是「未回复」就拉回未回复。
+        # 原来写的是 `if status == "ai"`，结果「结束会话（交还 AI）」把 status 置成
+        # "handled" 之后，买家第二次转人工时这里不生效 —— 会话一直挂在「已回复」分组里，
+        # 红点却照样亮（#47）。
+        if s["status"] != "pending":
             s["status"] = "pending"
             s["reason"] = reason
+            # 重新回到待处理：安抚计时也从头开始，否则上一轮的 pending_since
+            # 会让「人工客服还没回复」那句安抚话术立刻蹦出来
+            s["pending_since"] = time.time()
+            s["comforted"] = False
 
 
 def pending():
@@ -254,8 +262,13 @@ def enter_human(sid):
     s = ensure(sid)
     with _LOCK:
         s["mode"] = "human"
-        if s["status"] == "ai":
+        # 同 #47：不能只在 status == "ai" 时才改。交还 AI 后 status 是 "handled"，
+        # 再次转人工必须重新回到「未回复」，否则商家的分组是错的。
+        if s["status"] != "pending":
             s["status"] = "pending"
+            # 安抚计时从头开始（理由同 mark_pending）
+            s["pending_since"] = time.time()
+            s["comforted"] = False
         if not s.get("pending_since"):
             s["pending_since"] = time.time()
 
