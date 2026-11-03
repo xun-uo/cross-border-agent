@@ -194,7 +194,10 @@ GEN_SYS = """你是跨境电商客服，用买家使用的语言回复，简洁�
 2. 不得使用绝对化用语（best / No.1 / 100% safe / perfect 等）。
 3. 不得作任何疾病治疗、预防、治愈的宣称。
 4. 不得承诺任何超出政策的时效、退款、赔偿。
-5. 只输出给买家的话，不解释过程。"""
+5. 只输出给买家的话，不解释过程。
+6. 只回答买家这一句问的内容。订单状态、物流、运单号、预计送达**只有在买家问物流、
+   问到哪了、进度，或明确要办理退换货/报修时才提**；问商品功效、用法、政策等别的问题时
+   一律不要主动汇报物流，也不要重复上一轮已经说过的物流信息。"""
 
 
 _LANG_ORDER = {
@@ -209,10 +212,40 @@ _LANG_ORDER = {
 }
 
 
+def _order_brief(order, intent_name=""):
+    """给模型看的订单资料：按意图裁剪（#43 的根因就在这里）。
+
+    原来整份订单 JSON 直接塞进 prompt —— 含 7 个轨迹节点、经纬度、退款状态…
+    模型看到物流字段，就会在无关问题里主动报物流：
+    问「那能干嘛」回了一段「订单在途 / YunExpress / 预计 11-01 至 11-03 送达」。
+    所以：
+      - 物流 / 订单进度类意图：给状态、承运商、运单号、预计送达、最新一个节点；
+      - 其他意图：只给订单号和商品，**一个物流字段都不给**。
+    """
+    items = ["%s ×%s（%s）" % (i.get("name") or "-", i.get("qty", 1), i.get("category", ""))
+             for i in (order.get("items") or [])]
+    brief = {"订单号": order.get("order_no"), "商品": items}
+    if intent_name in ("logistics_query", "order_query", "order_change"):
+        nodes = order.get("nodes") or []
+        last = nodes[-1] if nodes else {}
+        brief.update({
+            "状态": order.get("status_cn") or order.get("status") or "",
+            "承运商": order.get("carrier") or "",
+            "运单号": order.get("tracking_no") or "",
+            "预计送达": "%s 至 %s" % (order.get("eta_from") or "", order.get("eta_to") or ""),
+            "最新轨迹": "%s %s" % (last.get("time") or "", last.get("desc") or ""),
+        })
+        if len(nodes) > 1:
+            brief["轨迹条数"] = len(nodes)
+    return brief
+
+
 def generate_draft(text, intent, order, kb_items, market, category, language):
     ctx = []
     if order:
-        ctx.append("订单资料：\n" + json.dumps(order, ensure_ascii=False, indent=2))
+        ctx.append("订单资料（只在与本次提问相关时使用）：\n"
+                   + json.dumps(_order_brief(order, (intent or {}).get("intent")),
+                                ensure_ascii=False, indent=1))
     if kb_items:
         ctx.append("可用政策与手册：\n" + "\n".join(
             f"- [{i['title']}] {i['text']}" for i in kb_items))
