@@ -767,7 +767,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-02 #119 · 页头让位工具栏 + 语言下拉移位"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-03 #120 · 窄屏响应式（页头回正常流）"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1378,12 +1378,64 @@ LAYOUT_CSS = """
         width: 200px !important;
     }
 }
+/* ---------- 窄屏（手机 / 竖屏平板）----------
+   768px 以下**放弃 fixed 页头**：fixed 一占 60px，再加一行控件，屏幕顶部三分之一就没了；
+   而且页头用的是 right:230 这种按桌面算的固定值，窄屏必然和语言下拉、平台工具栏互撞
+   （店名被压、点不到、退出按钮占满一行，都是这一个根因）。
+   改成 position: static 回到正常流，跟着页面一起滚。 */
+@media (max-width: 768px) {
+    .shop-head-fixed {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        height: auto !important;
+        padding: 10px 12px !important;
+        flex-wrap: wrap !important;
+        row-gap: 4px !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: 1px solid rgba(128,128,128,.12) !important;
+    }
+    .shop-name { font-size: .98rem; }
+    /* 语言下拉回到正常流，取消缩放 */
+    .st-key-lang_box {
+        position: static !important;
+        width: auto !important;
+        margin: 2px 0 0 0 !important;
+    }
+    .st-key-lang_box [data-testid="stSelectbox"] {
+        transform: none !important;
+    }
+    /* debug 开关也回到流 */
+    .st-key-dbg_box {
+        position: static !important;
+        width: auto !important;
+        right: auto !important;
+        margin: 2px 0 0 0 !important;
+    }
+    /* 页头不再 fixed，顶部不再需要留 60px 以上的空白 */
+    [data-testid="stMainBlockContainer"] {
+        padding-top: .6rem !important;
+        padding-left: .7rem !important;
+        padding-right: .7rem !important;
+    }
+    /* 语言下拉和退出按钮别撑满整行：缩成正常控件宽度，各自靠左 */
+    .st-key-lang_box { width: 148px !important; }
+    .st-key-buyer_logout { width: 132px !important; }
+    /* 商家端同一行里的两个控件 */
+    .st-key-lang_box_shop { width: 148px !important; }
+    .st-key-shop_logout { width: 132px !important; }
+}
 .st-key-dbg_box [data-testid="stWidgetLabel"] { font-size: .8rem !important; }
 .st-key-dbg_box [data-testid="stWidgetLabel"] p { font-size: .8rem !important; }
-/* 给固定页头让出空间，内容不从它底下钻出来 */
-[data-testid="stMainBlockContainer"] {
-    padding-top: 4.6rem !important;
-    padding-bottom: 7rem !important;
+/* 给固定页头让出空间，内容不从它底下钻出来。
+   只对桌面生效——窄屏页头已经回到正常流，不需要这段留白（而且这段写在后面会盖掉窄屏规则）。 */
+@media (min-width: 769px) {
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 4.6rem !important;
+        padding-bottom: 7rem !important;
+    }
 }
 /* 页头一行：店名 / 在线 / 当前订单 */
 .shop-head {
@@ -1491,22 +1543,22 @@ def render_brand():
         f'</div>',
         unsafe_allow_html=True)
 
-    # 退出登录：只能用真按钮。页头里放 <a href="?logout=1"> 实测点不动——
-    # Streamlit 会拦截站内链接的点击，导航不完整，会话清不掉。
-    _, _lo_col = st.columns([9, 1])
-    with _lo_col:
-        if st.button(_logout_txt(), key="buyer_logout", use_container_width=True):
-            _do_logout()
-
     if st.query_params.get("debug") == "1":
         with st.container(key="dbg_box"):
             # 必须给固定 key：toggle 的 label 会跟着语言变，Streamlit 按 label
             # 生成内部 id，切一次语言开关就被重置成关闭，面板看起来「消失」了。
             show_debug = st.toggle(t("debug"), key="dbg_toggle",
                                    help=t("debug_help"))
-    # 语言下拉浮在右上角（位置见 .st-key-lang_box 的 CSS）
+    # 语言下拉浮在右上角（位置见 .st-key-lang_box 的 CSS；窄屏下回正常流）
     with st.container(key="lang_box"):
         lang_picker()
+    # 退出登录：只能用真按钮。页头里放 <a href="?logout=1"> 实测点不动——
+    # Streamlit 会拦截站内链接的点击，导航不完整，会话清不掉。
+    # 放在语言下拉之后，窄屏回落成正常流时顺序才是「页头 → 语言 → 退出」。
+    _, _lo_col = st.columns([9, 1])
+    with _lo_col:
+        if st.button(_logout_txt(), key="buyer_logout", use_container_width=True):
+            _do_logout()
     return show_debug
 
 
