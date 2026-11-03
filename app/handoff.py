@@ -34,6 +34,10 @@ def ensure(sid, market="", language="zh", buyer=""):
                 "reply_idx": 0,       # 买家已消费到第几条人工回复
                 "owner": None,        # 接管这个会话的客服账号（None = 还没人接）
                 "last_activity": time.time(),  # 最后一次有人说话的时间，用于超时释放
+                # 未读红点用：买家最后说话的时刻 / 客服最后打开这个会话的时刻。
+                # 红点数 = last_buyer_ts > agent_viewed_ts 的会话数（见 unread_count）。
+                "last_buyer_ts": 0.0,
+                "agent_viewed_ts": 0.0,
             }
             _SESSIONS[sid] = s
         return s
@@ -48,6 +52,9 @@ def add_message(sid, role, text, source="ai", image=None):
         s["messages"].append(msg)
         # 任何一方说话都算「有活动」，超时释放要从这一刻重新计时
         s["last_activity"] = time.time()
+        if source == "buyer":
+            # 买家说话 = 有未读（商家还没打开看过）
+            s["last_buyer_ts"] = s["last_activity"]
         if source == "human":
             s["status"] = "answered"
         elif source == "buyer" and s.get("mode") == "human":
@@ -132,6 +139,8 @@ def human_reply(sid, text, agent_name="", agent_key=""):
         if agent_key:
             s["owner"] = agent_key
         s["last_activity"] = time.time()
+        # 回过了就等于看过了，红点撤掉
+        s["agent_viewed_ts"] = s["last_activity"]
     return True
 
 
@@ -184,6 +193,32 @@ def mark_handled(sid):
     with _LOCK:
         if s["status"] in ("pending", "answered"):
             s["status"] = "handled"
+
+
+def mark_viewed(sid):
+    """客服打开/回复了这个会话：把「看过的时刻」推到买家最后一条之后。
+
+    只做时间戳比较，不动 status —— 买家再说话时 last_buyer_ts 会超过它，
+    红点自然又亮起来（「打开过」不等于「处理完」）。
+    """
+    with _LOCK:
+        s = _SESSIONS.get(sid)
+        if not s:
+            return
+        s["agent_viewed_ts"] = max(time.time(), float(s.get("last_buyer_ts") or 0))
+
+
+def unread_count(agent_key="", idle_seconds=600):
+    """「待处理会话」红点的数字：需要人工、且买家最后一条比客服看过的晚。
+
+    和「未回复 / 已回复」两个折叠组不是一回事：分组看最后一条是不是人工回的，
+    红点看有没有新消息没看（用户 2026-11-02 定的规则）。
+    """
+    n = 0
+    for s in visible_to(agent_key, idle_seconds):
+        if float(s.get("last_buyer_ts") or 0) > float(s.get("agent_viewed_ts") or 0):
+            n += 1
+    return n
 
 def enter_human(sid):
     """转入人工模式：此后买家消息都不走 AI。"""
