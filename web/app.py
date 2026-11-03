@@ -591,20 +591,27 @@ def _friendly_error(e):
 
 
 def _retranslate_history(lang):
-    """切语言后把 AI 说过的话重译一遍；买家自己的话保持原样。
+    """切语言后把整段对话重译一遍：AI 的回复和买家自己说的话都翻。
 
-    一次调用批量翻译，不逐条请求——聊了 5 轮也只多花一次模型调用。
-    翻失败就原样留着，不能让历史记录凭空消失。
+    2026-11-02 用户明确要求「已经发出去的消息也要跟着变」——原来只翻 AI 的、
+    买家原话保持不动，切完语言还能看到一屏旧语言，看着像没生效。
+
+    两个要点：
+    1. 一次调用批量翻译，聊了 5 轮也只多花一次模型调用。
+    2. **始终从原文翻**（`_raw`），不从上一次的译文翻——否则切三次语言会层层失真。
+       翻失败就原样留着，不能让历史记录凭空消失。
     """
     h = st.session_state.get("history") or []
     idx = [i for i, m in enumerate(h)
-           if m.get("role") == "assistant" and not m.get("human") and not m.get("error")
+           if m.get("role") in ("assistant", "user")
+           and not m.get("human") and not m.get("error")   # 人工客服的话本来就是中文，不翻
            and m.get("content") and m.get("language") != lang]
     if not idx:
         return
+    src = [h[i].get("_raw") or h[i]["content"] for i in idx]
     try:
         from app import agent as _agent
-        out = _agent.translate_batch([h[i]["content"] for i in idx], lang)
+        out = _agent.translate_batch(src, lang)
     except Exception:
         return
     if len(out) != len(idx):
@@ -612,6 +619,7 @@ def _retranslate_history(lang):
     for i, txt in zip(idx, out):
         txt = (txt or "").strip()
         if txt:
+            h[i].setdefault("_raw", h[i]["content"])   # 首次翻译时留住原文
             h[i]["content"] = txt
             h[i]["language"] = lang
     st.session_state["history"] = h
@@ -767,7 +775,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-03 #120 · 窄屏响应式（页头回正常流）"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-03 #121 · 退出按钮进页头 + 待处理红点 + 商家端中文对照"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1166,7 +1174,16 @@ FLOAT_CSS = """
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
 }
-/* 商家端的语言下拉不做浮层，只是右对齐、缩小一号 */
+/* 商家端的语言下拉：和买家端同一个位置（页头这一排），只是标签不显示 */
+.st-key-lang_box_shop {
+    position: fixed !important;
+    top: 13px !important;
+    right: 224px !important;
+    width: 150px !important;
+    z-index: 1000003 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
 .st-key-lang_box_shop [data-testid="stSelectbox"] {
     transform: scale(.8) !important;
     transform-origin: right center !important;
@@ -1176,6 +1193,31 @@ FLOAT_CSS = """
     background: transparent !important;
     border-color: rgba(128,128,128,.25) !important;
     border-radius: 8px !important;
+}
+/* 退出按钮：原来在正常流里，被内容区的 padding-top 顶到页头下方 110px 处，
+   看着像「掉下来了」。改成和语言下拉同一排（页头右侧、语言下拉左边）。
+   语言下拉右边界 = 224+150 = 374，所以按钮 right 取 384，留 10px 间隙。 */
+.st-key-buyer_logout,
+.st-key-shop_logout {
+    width: auto !important;
+    margin: 0 !important;
+}
+.st-key-buyer_logout button,
+.st-key-shop_logout button {
+    padding: 2px 12px !important;
+    font-size: .8rem !important;
+    min-height: 0 !important;
+    height: 32px !important;
+    white-space: nowrap !important;
+}
+@media (min-width: 769px) {
+    .st-key-buyer_logout,
+    .st-key-shop_logout {
+        position: fixed !important;
+        top: 13px !important;
+        right: 384px !important;
+        z-index: 1000003 !important;
+    }
 }
 
 /* 登录卡片：不要白底，跟页面背景同色，只留一圈细边 */
@@ -1283,6 +1325,17 @@ CHAT_CSS = """
     font-size: 12.5px;
     line-height: 1.6;
     margin: 16px 0 12px;
+}
+/* ===== 商家端「翻译成中文」：译文用浅色小字挂在原文下方，不替换原文 ===== */
+.zh-trans {
+    margin-top: 4px;
+    padding: 4px 9px;
+    border-left: 2px solid rgba(201, 168, 130, .75);
+    background: rgba(201, 168, 130, .09);
+    border-radius: 4px;
+    font-size: .82rem;
+    line-height: 1.6;
+    color: rgba(122, 122, 132, .98);
 }
 /* 对话里的图片：气泡是 fit-content，不撑开的话图片会被压成缩略图 */
 [data-testid="stChatMessage"] [data-testid="stImage"] {
@@ -1398,13 +1451,15 @@ LAYOUT_CSS = """
         border-bottom: 1px solid rgba(128,128,128,.12) !important;
     }
     .shop-name { font-size: .98rem; }
-    /* 语言下拉回到正常流，取消缩放 */
-    .st-key-lang_box {
+    /* 语言下拉回到正常流，取消缩放（商家端同一个位置，一起回落） */
+    .st-key-lang_box,
+    .st-key-lang_box_shop {
         position: static !important;
         width: auto !important;
         margin: 2px 0 0 0 !important;
     }
-    .st-key-lang_box [data-testid="stSelectbox"] {
+    .st-key-lang_box [data-testid="stSelectbox"],
+    .st-key-lang_box_shop [data-testid="stSelectbox"] {
         transform: none !important;
     }
     /* debug 开关也回到流 */
@@ -1422,10 +1477,10 @@ LAYOUT_CSS = """
     }
     /* 语言下拉和退出按钮别撑满整行：缩成正常控件宽度，各自靠左 */
     .st-key-lang_box { width: 148px !important; }
-    .st-key-buyer_logout { width: 132px !important; }
+    .st-key-buyer_logout { width: 132px !important; right: auto !important; }
     /* 商家端同一行里的两个控件 */
     .st-key-lang_box_shop { width: 148px !important; }
-    .st-key-shop_logout { width: 132px !important; }
+    .st-key-shop_logout { width: 132px !important; right: auto !important; }
 }
 .st-key-dbg_box [data-testid="stWidgetLabel"] { font-size: .8rem !important; }
 .st-key-dbg_box [data-testid="stWidgetLabel"] p { font-size: .8rem !important; }
@@ -1435,6 +1490,13 @@ LAYOUT_CSS = """
     [data-testid="stMainBlockContainer"] {
         padding-top: 4.6rem !important;
         padding-bottom: 7rem !important;
+    }
+    /* 页头下面那段空白：main() 每注入一段 <style> 都会生成一个 0 高度的元素，
+       而内容区是 flex + gap:16px，6 个 0 高度子元素硬是撑出 96px 空隙。
+       带我们页头的页面（买家/商家）把这一层的 gap 清零，内容紧贴页头。
+       登录页没有 .shop-head-fixed，不受影响（:has 不支持时也只是回到旧间距）。 */
+    [data-testid="stMainBlockContainer"] > div:first-child:has(.shop-head-fixed) {
+        gap: 0 !important;
     }
 }
 /* 页头一行：店名 / 在线 / 当前订单 */
@@ -1557,7 +1619,7 @@ def render_brand():
     # 放在语言下拉之后，窄屏回落成正常流时顺序才是「页头 → 语言 → 退出」。
     _, _lo_col = st.columns([9, 1])
     with _lo_col:
-        if st.button(_logout_txt(), key="buyer_logout", use_container_width=True):
+        if st.button(_logout_txt(), key="buyer_logout"):
             _do_logout()
     return show_debug
 
@@ -1846,6 +1908,12 @@ def _handoff_tab():
             if st.button("收起" if is_open else "查看", key=f"_htog_{sid}",
                          use_container_width=True):
                 st.session_state["_hopen"] = None if is_open else sid
+                if not is_open:
+                    # 打开会话 = 看过了，红点从这一刻起撤掉（买家再说话会重新亮）
+                    try:
+                        handoff.mark_viewed(sid)
+                    except Exception:
+                        pass
                 st.rerun(scope="fragment")
 
     for gkey, gtitle, items, dflt in (("pending", "未回复", _unread, True),
@@ -1873,6 +1941,45 @@ def _handoff_tab():
 
     sid = cur["sid"]
 
+    # ---- 中文对照（#35）：商家多半看不懂西/越/泰语，按需翻译，结果缓存 ----
+    # 只翻「买家原话」和「AI 的外文回复」；人工客服说的本来就是中文，
+    # 系统提示（已接入 / 安抚话术）也不翻，否则会变得不伦不类。
+    _zhmap = st.session_state.setdefault("_zh_map", {}).get(sid) or {}
+    _zc1, _zc2 = st.columns([4, 1])
+    with _zc1:
+        if _zhmap:
+            st.caption("已翻译成中文：译文以浅色小字放在原文下方，原文保留。")
+        else:
+            st.caption("会话是外文？点右边「翻译成中文」，只翻一次，之后一直有缓存。")
+    with _zc2:
+        if st.button("取消翻译" if _zhmap else "翻译成中文",
+                     key=f"_zhbtn_{sid}", use_container_width=True):
+            if _zhmap:
+                st.session_state.setdefault("_zh_map", {}).pop(sid, None)
+            else:
+                _need = []
+                for _i, _m in enumerate(cur.get("messages") or []):
+                    _src = _m.get("source")
+                    _t = (_m.get("text") or "").strip()
+                    if not _t or _src in ("note", "human", "system"):
+                        continue
+                    if any("\u4e00" <= _c <= "\u9fff" for _c in _t):
+                        continue          # 本来就含中文，不用翻
+                    _need.append((_i, _t))
+                if _need:
+                    try:
+                        from app import agent as _ag
+                        _out = _ag.translate_batch([x[1] for x in _need], "zh")
+                    except Exception:
+                        _out = []
+                    if len(_out) == len(_need):
+                        st.session_state.setdefault("_zh_map", {})[sid] = {
+                            str(_i): _t for (_i, _), _t in zip(_need, _out) if _t}
+                        _zhmap = st.session_state["_zh_map"][sid]
+                    else:
+                        st.session_state["_panel_flash"] = "翻译没成功，模型这次没返回结果，再点一次试试。"
+            st.rerun(scope="fragment")
+
     # ---- 下方：只渲染展开的那个会话 ----
     # 固定高度 + 内部滚动：消息再多也只在这个框里滚，页面总高度不变，
     # 底下的回复框就不会被顶出屏幕（tab 里的 chat_input 不会自动 sticky）。
@@ -1883,7 +1990,7 @@ def _handoff_tab():
         if not msgs:
             st.caption("这个会话里还没有消息。")
         # 商家视角：自己这边发的（AI 和人工）靠右，买家靠左——和买家端正好相反
-        for m in msgs:
+        for _mi, m in enumerate(msgs):
             src = m.get("source")
             if src == "note":
                 st.markdown(
@@ -1896,6 +2003,11 @@ def _handoff_tab():
                     # 买家的话在商家视角靠左，但它不是 AI 说的，不能挂 AI 徽章
                     st.markdown('<span class="no-badge"></span>', unsafe_allow_html=True)
                 st.markdown(m.get("text", ""))
+                _zh_txt = (_zhmap or {}).get(str(_mi))
+                if _zh_txt:
+                    st.markdown(
+                        f'<div class="zh-trans">中文：{_zh_txt}</div>',
+                        unsafe_allow_html=True)
                 if m.get("image"):
                     try:
                         st.image(m["image"], use_container_width=True)
@@ -1970,6 +2082,43 @@ def _handoff_tab():
 """, height=0)
 
 
+@st.fragment(run_every=6)
+def _tab_unread_dot():
+    """「待处理会话」标签右上角的未读红点（QQ/微信那种圆形红底白数字）。
+
+    为什么不用页头：页头是 fixed 的纯 HTML，不参与 Streamlit 的数据刷新；
+    tab 行是 sticky 的，切到任何 tab 都看得见，所以红点挂在这里最可靠。
+    数 = 买家最后一条比商家看过的晚的会话数（handoff.unread_count）。
+    """
+    from app import handoff
+    try:
+        n = handoff.unread_count(st.session_state.get("user") or "")
+    except Exception:
+        return
+    # 注意：n=0 时也必须渲染一条「content:none」的样式。
+    # 否则 fragment 这一轮什么都不产出，上一轮注入的 <style> 会留在 DOM 里，
+    # 红点就会一直挂着不肯消失（实测踩过一次）。
+    txt = "99+" if n > 99 else (str(n) if n else None)
+    if txt is None:
+        st.markdown(
+            '<style>[role="tablist"] [role="tab"]:first-child::after'
+            '{content:none !important;}</style>', unsafe_allow_html=True)
+        return
+    st.markdown(
+        "<style>"
+        # 这个版本的 tab 是 div（不是 button），按 [role="tab"] 选，别按 button 选。
+        # 注意 tab 那条横杠（tablist）是 overflow:auto clip，红点只要超出它的上边界
+        # 就会被裁掉（实测 top:-6px 只剩一条红边），所以必须落在 tab 自己的框里。
+        '[role="tablist"] [role="tab"]:first-child{position:relative !important;}'
+        '[role="tablist"] [role="tab"]:first-child::after{'
+        f'content:"{txt}";position:absolute;top:1px;right:-4px;'
+        "min-width:16px;height:16px;padding:0 4px;border-radius:8px;"
+        "background:#e53935;color:#fff;font-size:10.5px;line-height:16px;"
+        "text-align:center;font-weight:700;font-family:Arial,sans-serif;"
+        "box-shadow:0 0 0 1.5px rgba(255,255,255,.95);}"
+        "</style>", unsafe_allow_html=True)
+
+
 def render_merchant():
     from app import rules_store  # noqa: F401
     import json as _json
@@ -1999,8 +2148,11 @@ def render_merchant():
         with st.container(key="lang_box_shop"):
             lang_picker()
     with _lo_col:
-        if st.button(_logout_txt(), key="shop_logout", use_container_width=True):
+        if st.button(_logout_txt(), key="shop_logout"):
             _do_logout()
+
+    # 待处理会话红点：每 6 秒按「买家最后说话 > 客服最后看过」重算
+    _tab_unread_dot()
 
     tab_handoff, tab_rules, tab_stats, tab_logs, tab_data, tab_store = st.tabs(
         ["待处理会话", "规则库", "判定看板", "会话记录", "商品与订单", "店铺设置"])
