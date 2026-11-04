@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-04 #128 · 页头配色：AI/等待=橙，真人已接入=绿"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #129 · 换回原生主题切换（⋮ 里 System/Light/Dark），金色主色改由 CSS 上"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1656,6 +1656,41 @@ LAYOUT_CSS = """
 .shop-online.is-ai,
 .shop-online.is-waiting { color: #C9784A !important; font-weight: 600; }
 .shop-online.is-human { color: #2FA96A !important; font-weight: 700; }
+/* 品牌金主色（2026-11-04：换回原生主题切换）。
+   原来靠 .streamlit/config.toml 的 [theme] primaryColor 上色，但实测 config.toml
+   里只要出现 [theme]，Streamlit 就把右上角 ⋮ 菜单里的 System/Light/Dark 主题切换
+   整块藏掉（三个变体都验过）。所以把 config.toml 删了，主色改用 CSS 补。 */
+[data-testid="stBaseButton-primary"] {
+    background-color: #C9A882 !important;
+    border-color: #C9A882 !important;
+    color: #2B2118 !important;
+    font-weight: 600;
+}
+[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stBaseButton-primary"]:focus {
+    background-color: #BD9868 !important;
+    border-color: #BD9868 !important;
+    color: #2B2118 !important;
+}
+[data-testid="stBaseButton-primaryFormSubmit"] {
+    background-color: #C9A882 !important;
+    border-color: #C9A882 !important;
+    color: #2B2118 !important;
+    font-weight: 600;
+}
+[data-testid="stBaseButton-primaryFormSubmit"]:hover,
+[data-testid="stBaseButton-primaryFormSubmit"]:focus {
+    background-color: #BD9868 !important;
+    border-color: #BD9868 !important;
+    color: #2B2118 !important;
+}
+/* tab 选中那条横杠 + 文字：默认是 primaryColor 的红，改成品牌金（与删 config.toml 前一致） */
+.react-aria-SelectionIndicator { background-color: #C9A882 !important; }
+[data-testid="stTab"][aria-selected="true"] {
+    border-bottom-color: #C9A882 !important;
+    color: #C9A882 !important;
+}
+[data-testid="stTab"][aria-selected="true"] * { color: #C9A882 !important; }
 /* 店名即官网入口：点了直接跳店铺，不再单设「前往店铺官网」按钮 */
 a.shop-link {
     color: inherit !important;
