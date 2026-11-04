@@ -15,6 +15,77 @@ RULES = DATA / "rules.json"
 RUNTIME = DATA / "rules_runtime.json"
 VERSIONS = DATA / "rule_versions"
 
+# 支持的市场码。以前漏了 UK / JP，导致库里明明有这两国规则、商家却加不了新的（2026-11-04 修）。
+MARKETS = ("CN", "EU", "US", "UK", "JP", "KR", "PH", "RU", "MN", "*")
+
+# 编辑表格里，列表型字段用分隔符拼成一格给人改
+_SEPS = (",", "，", "、", ";", "；")
+
+
+def _split(value):
+    """把「最佳、第一，唯一」这种一格文本拆回列表。"""
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return [str(x).strip() for x in value if str(x).strip()]
+    text = str(value)
+    for sep in _SEPS[1:]:
+        text = text.replace(sep, ",")
+    return [part.strip() for part in text.split(",") if part.strip()]
+
+
+def _join(value):
+    return "、".join(str(x) for x in (value or []))
+
+
+def to_editor_rows(rules):
+    """规则对象 -> 后台可编辑表格的行（列表字段拼成文本，方便直接改/新增）。"""
+    rows = []
+    for r in rules:
+        rows.append({
+            "id": r.get("id", ""),
+            "market": r.get("market", ""),
+            "category": r.get("category", "*"),
+            "level": r.get("level", "L1"),
+            "action": r.get("action", "block"),
+            "clause": r.get("clause", ""),
+            "trigger": r.get("trigger", ""),
+            "触发词·中文": _join(r.get("patterns")),
+            "触发词·英文": _join(r.get("patterns_en")),
+            "豁免情形": _join(r.get("exempt")),
+            "verified": "示例·待核实" if r.get("unverified") else "已核对",
+        })
+    return rows
+
+
+def from_editor_rows(rows, original=None):
+    """编辑表格的行 -> 规则对象。
+
+    original 是保存前的旧规则列表：表格里看不到的字段（patterns_regex / requires 等）
+    按 id 原样保留，避免改一条规则时把正则丢了。
+    """
+    orig = {}
+    for r in (original or []):
+        orig[str(r.get("id", "")).strip()] = r
+    out = []
+    for row in rows:
+        rid = str(row.get("id") or "").strip()
+        rule = dict(orig.get(rid, {}))
+        for key in ("id", "clause", "trigger", "category"):
+            val = row.get(key)
+            rule[key] = "" if val is None else str(val).strip()
+        rule["id"] = rid
+        rule["market"] = str(row.get("market") or "").strip().upper()
+        rule["level"] = str(row.get("level") or "").strip().upper()
+        rule["action"] = str(row.get("action") or "").strip().lower()
+        rule["category"] = rule["category"] or "*"
+        rule["patterns"] = _split(row.get("触发词·中文"))
+        rule["patterns_en"] = _split(row.get("触发词·英文"))
+        rule["exempt"] = _split(row.get("豁免情形"))
+        rule["unverified"] = ("待核实" in str(row.get("verified") or ""))
+        out.append(rule)
+    return out
+
 
 def _ensure():
     DATA.mkdir(exist_ok=True)
@@ -80,8 +151,9 @@ def validate(rows):
         if rid in seen:
             errors.append("第 %d 条：id 重复（%s）" % (i, rid))
             continue
-        if str(r["market"]).upper() not in ("CN", "EU", "US", "PH", "KR", "RU", "MN", "*"):
-            errors.append("第 %d 条：市场码 %s 不支持" % (i, r["market"]))
+        if str(r["market"]).upper() not in MARKETS:
+            errors.append("第 %d 条：市场码 %s 不支持（可用：%s）"
+                          % (i, r["market"], " / ".join(MARKETS)))
             continue
         if str(r["level"]) not in ("L1", "L2", "L3"):
             errors.append("第 %d 条：级别只能是 L1/L2/L3" % i)

@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-04 #129 · 换回原生主题切换（⋮ 里 System/Light/Dark），金色主色改由 CSS 上"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #130 · 规则库：日本/英国市场码补齐，表格可直接新增规则（触发词列）"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -2463,25 +2463,28 @@ def render_merchant():
                 st.error(f"文件解析失败：{type(e).__name__} - {e}")
 
         st.divider()
-        st.markdown("**当前规则（可直接编辑）**")
-        _rows = []
-        for _r0 in rules:
-            _r1 = {k: v for k, v in _r0.items() if k != "unverified"}
-            _r1["verified"] = "示例·待核实" if _r0.get("unverified") else "已核对"
-            _rows.append(_r1)
+        st.markdown("**当前规则（可直接编辑，也可以在表格底部新增一行）**")
+        st.caption("触发词用「、」或逗号分隔。新增一条至少要有：ID / 市场 / 级别 / 动作 / 条款出处 / 触发条件 / 一个触发词。")
         edited = st.data_editor(
-            _rows,
+            rules_store.to_editor_rows(rules),
             num_rows="dynamic",
             use_container_width=True,
             height=420,
+            column_order=["id", "market", "category", "level", "action", "clause", "trigger",
+                          "触发词·中文", "触发词·英文", "豁免情形", "verified"],
             column_config={
                 "id": st.column_config.TextColumn("ID", width="small"),
-                "market": st.column_config.TextColumn("市场", width="small"),
-                "category": st.column_config.TextColumn("品类", width="small"),
+                "market": st.column_config.TextColumn("市场", width="small",
+                                                      help="可用：" + " / ".join(rules_store.MARKETS)),
+                "category": st.column_config.TextColumn("品类", width="small",
+                                                        help="*=全部 / cosmetic / supplement / medical_device"),
                 "level": st.column_config.SelectboxColumn("级别", options=["L1", "L2", "L3"], width="small"),
                 "action": st.column_config.SelectboxColumn("动作", options=["block", "rewrite", "pass"], width="small"),
                 "clause": st.column_config.TextColumn("条款出处", width="large"),
                 "trigger": st.column_config.TextColumn("触发条件", width="medium"),
+                "触发词·中文": st.column_config.TextColumn("触发词（中文）", width="large"),
+                "触发词·英文": st.column_config.TextColumn("触发词（英文）", width="large"),
+                "豁免情形": st.column_config.TextColumn("豁免情形", width="medium"),
                 "verified": st.column_config.TextColumn("核对状态", width="small"),
             },
             key="rule_editor",
@@ -2489,12 +2492,9 @@ def render_merchant():
         b1, b2, b3 = st.columns([1, 1, 2])
         with b1:
             if st.button("保存修改", type="primary", use_container_width=True):
-                _clean = []
-                for _r in edited:
-                    _x = dict(_r)
-                    _v = _x.pop("verified", "")
-                    _x["unverified"] = ("待核实" in str(_v))
-                    _clean.append(_x)
+                # 表格里的列表字段是「、」拼的文本，这里换回列表；表里看不见的
+                # 字段（patterns_regex / requires）按 id 从旧规则里继承。
+                _clean = rules_store.from_editor_rows(edited, rules)
                 ok_rows, errs = rules_store.validate(_clean)
                 if errs:
                     st.error("校验未通过：\n- " + "\n- ".join(errs[:10]))
