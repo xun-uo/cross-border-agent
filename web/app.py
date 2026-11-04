@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-04 #126 · 页头区分 AI/人工状态"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #127 · 页头区分「等待客服接入」与「已接入」"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1694,15 +1694,20 @@ a.shop-link:hover { border-bottom-color: rgba(201,168,130,.85); }
 # ---------------- 品牌栏 ----------------
 STORE_NAME = "Niao Store"
 
-# 页头状态标签（#51）：AI 与人工必须一眼能分开。
-# 原来不管谁在服务都写 t("online")=「🟢 在线」，买家看不出人工有没有接手。
+# 页头状态标签（#51/#127）：AI、已转人工等待接入、人工已接管 —— 三种必须分得开。
+# 原来只有 AI/人工两态，刚转人工（商家还没回）也写「已接入」，买家会以为已经有人在。
 _STATUS_LABELS = {
-    "zh": ("🤖 AI 客服在线", "👤 人工客服已接入"),
-    "en": ("🤖 AI assistant online", "👤 Human agent has joined"),
-    "es": ("🤖 Asistente IA en línea", "👤 Agente humano conectado"),
-    "vi": ("🤖 Trợ lý AI trực tuyến", "👤 Nhân viên đã tham gia"),
-    "th": ("🤖 ผู้ช่วย AI ออนไลน์", "👤 เจ้าหน้าที่เข้าร่วมแล้ว"),
-    "id": ("🤖 Asisten AI online", "👤 Agen manusia bergabung"),
+    "zh": ("🤖 AI 客服在线", "👤 已转人工 · 等待客服接入", "👤 人工客服已接入"),
+    "en": ("🤖 AI assistant online", "👤 Handed to a human · waiting to be picked up",
+           "👤 Human agent has joined"),
+    "es": ("🤖 Asistente IA en línea", "👤 Derivado a un agente · en espera",
+           "👤 Agente humano conectado"),
+    "vi": ("🤖 Trợ lý AI trực tuyến", "👤 Đã chuyển nhân viên · đang chờ",
+           "👤 Nhân viên đã tham gia"),
+    "th": ("🤖 ผู้ช่วย AI ออนไลน์", "👤 ส่งต่อเจ้าหน้าที่ · กำลังรอ",
+           "👤 เจ้าหน้าที่เข้าร่วมแล้ว"),
+    "id": ("🤖 Asisten AI online", "👤 Dialihkan ke agen · menunggu",
+           "👤 Agen manusia bergabung"),
 }
 
 
@@ -1748,19 +1753,25 @@ def render_brand():
     else:
         _name = f'<span class="shop-name">🏪 {STORE_NAME}</span>'
 
-    # 页头状态按「谁在服务」区分（#51）：原来不管 AI 还是人工都写「🟢 在线」，
-    # 买家根本看不出人工有没有接手。
-    _mode, _owner = "ai", ""
+    # 页头状态按「谁在服务」区分（#51/#127）：原来不管 AI 还是人工都写「🟢 在线」，
+    # 买家根本看不出人工有没有接手；#127 再加一态——刚转人工但**还没人回**时不能写「已接入」。
+    _mode, _owner, _status = "ai", "", ""
     try:
         from app import handoff as _ho_st
         _s_st = _ho_st.get(st.session_state.get("sid")) or {}
         _mode = _s_st.get("mode") or "ai"
         _owner = _s_st.get("owner") or ""
+        _status = _s_st.get("status") or ""
     except Exception:
         pass
     _lab = _STATUS_LABELS.get(st.session_state.get("ui_lang", "zh"), _STATUS_LABELS["zh"])
     if _mode == "human":
-        _txt = _lab[1] + (f" · {_owner}" if _owner else "")
+        if _owner:
+            # 已经有人接管过（首次回复时记 owner）→ 这才是「已接入」
+            _txt = _lab[2] + f" · {_owner}"
+        else:
+            # 转过去了但商家一句都没回 → 只能说「等待客服接入」
+            _txt = _lab[1]
         _online_html = '<span class="shop-online is-human">%s</span>' % _txt
     else:
         _online_html = '<span class="shop-online">%s</span>' % _lab[0]
