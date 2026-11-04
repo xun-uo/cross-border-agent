@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-04 #124 · 长文本/图片/假订单号的转人工与追问判据"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #125 · 只保留一个处理中提示（去掉 spinner 重影）"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1872,26 +1872,27 @@ def _run_turn(text, image=None):
         st.markdown(f'<div class="busy-pill">⏳ {t("processing")}</div>',
                     unsafe_allow_html=True)
 
-    with st.spinner(t("processing")):
-        try:
-            # 传入上文（去掉刚追加的这条），让意图识别能看懂"就是那个订单"
-            # 回复语言 = 界面语言：选了中文就回中文，选了 English 就回英文
-            force_lang = st.session_state.get("ui_lang", "zh")
-            trace = agent.process(text, market=market, category=category,
-                                  history=st.session_state.history[:-1],
-                                  force_language=force_lang,
-                                  bound_order=st.session_state.get("bound_order"))
-        except Exception as e:
-            # 记下这条消息，界面给一个「重试上一条」的入口，而不是让用户自己重打一遍
-            st.session_state["last_failed"] = text
-            st.session_state.history.append({
-                "role": "assistant",
-                "content": _friendly_error(e),
-                "ts": _now(),
-                "error": True,
-            })
-            st.rerun()
-            return
+    # 只用上面那条固定小条做反馈：`st.spinner` 会在聊天流里再画一个「正在处理…」，
+    # 于是同一时刻出现两个提示（#46 复测时看得很明显），这里去掉 spinner。
+    try:
+        # 传入上文（去掉刚追加的这条），让意图识别能看懂"就是那个订单"
+        # 回复语言 = 界面语言：选了中文就回中文，选了 English 就回英文
+        force_lang = st.session_state.get("ui_lang", "zh")
+        trace = agent.process(text, market=market, category=category,
+                              history=st.session_state.history[:-1],
+                              force_language=force_lang,
+                              bound_order=st.session_state.get("bound_order"))
+    except Exception as e:
+        # 记下这条消息，界面给一个「重试上一条」的入口，而不是让用户自己重打一遍
+        st.session_state["last_failed"] = text
+        st.session_state.history.append({
+            "role": "assistant",
+            "content": _friendly_error(e),
+            "ts": _now(),
+            "error": True,
+        })
+        st.rerun()
+        return
 
     _tool = next((s for s in trace.get("steps", []) if s.get("step") == "tool"), {})
     _order = (_tool.get("order") or {})
