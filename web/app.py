@@ -797,7 +797,7 @@ def login_gate():
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-04 #127 · 页头区分「等待客服接入」与「已接入」"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-04 #128 · 页头配色：AI/等待=橙，真人已接入=绿"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
@@ -1649,10 +1649,13 @@ LAYOUT_CSS = """
     line-height: 1.4;
     white-space: nowrap;
 }
-/* 页头状态：AI 与人工要能一眼分开（#51）。
-   AI = 绿色；人工接入 = 暖橙并带 👤 */
+/* 页头状态（#51/#127/#128，配色按用户 2026-11-04 定）：
+   橙 = 非真人（🤖 AI 在线 / 👤 已转人工但还没人接）；
+   绿 = 真人在线（👤 人工客服已接入）。 */
 .shop-online { font-size: .82rem; white-space: nowrap; }
-.shop-online.is-human { color: #C9784A !important; font-weight: 600; }
+.shop-online.is-ai,
+.shop-online.is-waiting { color: #C9784A !important; font-weight: 600; }
+.shop-online.is-human { color: #2FA96A !important; font-weight: 700; }
 /* 店名即官网入口：点了直接跳店铺，不再单设「前往店铺官网」按钮 */
 a.shop-link {
     color: inherit !important;
@@ -1767,14 +1770,17 @@ def render_brand():
     _lab = _STATUS_LABELS.get(st.session_state.get("ui_lang", "zh"), _STATUS_LABELS["zh"])
     if _mode == "human":
         if _owner:
-            # 已经有人接管过（首次回复时记 owner）→ 这才是「已接入」
+            # 已经有人接管过（首次回复时记 owner）→ 这才是「已接入」，按用户要求用绿色
             _txt = _lab[2] + f" · {_owner}"
+            _cls = "shop-online is-human"
         else:
-            # 转过去了但商家一句都没回 → 只能说「等待客服接入」
+            # 转过去了但商家一句都没回 → 只能说「等待客服接入」，橙色
             _txt = _lab[1]
-        _online_html = '<span class="shop-online is-human">%s</span>' % _txt
+            _cls = "shop-online is-waiting"
     else:
-        _online_html = '<span class="shop-online">%s</span>' % _lab[0]
+        _txt = _lab[0]
+        _cls = "shop-online is-ai"
+    _online_html = '<span class="%s">%s</span>' % (_cls, _txt)
 
     st.markdown(
         f'<div class="shop-head-fixed">'
