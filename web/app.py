@@ -1562,7 +1562,9 @@ LAYOUT_CSS = """
         align-content: center !important;
         row-gap: 0 !important;
         column-gap: 8px !important;
-        background: rgba(252, 251, 249, .92) !important;
+        /* 背景不能用写死的浅色：手机端开了深色主题就是一块白条压在黑页面上（2026-11-06 实测）。
+           改成中性半透明 + 毛玻璃，深浅两套主题下都跟着背景走；桌面端本来就是 transparent。 */
+        background: rgba(128, 128, 128, .10) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
         border-bottom: 1px solid rgba(128,128,128,.12) !important;
