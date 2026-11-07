@@ -758,46 +758,50 @@ def login_gate():
 
     _ph = st.empty()
     st.session_state["_login_ph"] = _ph
-    _, mid, _ = st.columns([1, 1.2, 1])
-    with mid:
-        st.markdown(f"## {t('title')}")
-        st.caption(t("sub"))
+    # 登录界面必须画在这个占位符里面，_after_login() 里的 _ph.empty() 才能真的把它清掉。
+    # 之前 forms 是画在占位符外面的，所以那句 empty() 是空操作，登录成功那一下会
+    # 出现「登录页还在、聊天页在下面长出来」的叠帧（#待修-登录叠帧）。
+    with _ph.container():
+        _, mid, _ = st.columns([1, 1.2, 1])
+        with mid:
+            st.markdown(f"## {t('title')}")
+            st.caption(t("sub"))
 
-        tab_buyer, tab_shop = st.tabs([t("tab_buyer"), t("tab_shop")])
+            tab_buyer, tab_shop = st.tabs([t("tab_buyer"), t("tab_shop")])
 
-        with tab_buyer:
-            with st.form("buyer_login"):
-                _no = st.text_input(t("order_no"), placeholder=t("order_ph"))
-                _tail = st.text_input(t("phone_tail"), placeholder=t("tail_ph"),
-                                      max_chars=4)
-                _b_ok = st.form_submit_button(t("enter_btn"), use_container_width=True)
-            if _b_ok:
-                _o = _verify_buyer(_no, _tail)
-                if _o:
-                    _after_login("buyer", "buyer", _o["order_no"])
-                    st.rerun()
+            with tab_buyer:
+                with st.form("buyer_login"):
+                    _no = st.text_input(t("order_no"), placeholder=t("order_ph"))
+                    _tail = st.text_input(t("phone_tail"), placeholder=t("tail_ph"),
+                                          max_chars=4)
+                    _b_ok = st.form_submit_button(t("enter_btn"), use_container_width=True)
+                if _b_ok:
+                    _o = _verify_buyer(_no, _tail)
+                    if _o:
+                        _after_login("buyer", "buyer", _o["order_no"])
+                        st.rerun()
 
-        with tab_shop:
-            with st.form("login_form"):
-                acct = st.text_input(t("account"), placeholder=t("acct_ph"))
-                pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
-                ok = st.form_submit_button(t("login"), use_container_width=True)
-            if ok:
-                key = acct.strip().lower()
-                rec = ACCOUNTS.get(key)
-                if rec and rec[0] == pwd:
-                    _after_login(key, rec[1], None)
-                    st.rerun()
-                else:
-                    st.error(t("wrong"))
-            st.caption(t("cred_hint"))
+            with tab_shop:
+                with st.form("login_form"):
+                    acct = st.text_input(t("account"), placeholder=t("acct_ph"))
+                    pwd = st.text_input(t("password"), type="password", placeholder=t("pwd_ph"))
+                    ok = st.form_submit_button(t("login"), use_container_width=True)
+                if ok:
+                    key = acct.strip().lower()
+                    rec = ACCOUNTS.get(key)
+                    if rec and rec[0] == pwd:
+                        _after_login(key, rec[1], None)
+                        st.rerun()
+                    else:
+                        st.error(t("wrong"))
+                st.caption(t("cred_hint"))
 
-        st.caption("%s · build %s" % (t("wake_hint"), BUILD))
+            st.caption("%s · build %s" % (t("wake_hint"), BUILD))
     return False
 
 
 # ---------------- trace 面板 ----------------
-BUILD = "2026-11-06 #131 · 站点标题统一为「跨境智服 Agent」、手机端页头配色跟随主题"  # 改代码时顺手改这里，用来确认线上是否已生效
+BUILD = "2026-11-07 #132 · 登录页改画进占位符，消除登录瞬间的叠帧"  # 改代码时顺手改这里，用来确认线上是否已生效
 
 
 def _load_font(size):
